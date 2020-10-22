@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 2.6)
 #nom du projet
 project(game_text C)
 
+enable_testing()
+
 #positionne la variable
 set(CMAKE_C_FLAGS "-std=c99 -g -Wall")
 
@@ -13,9 +15,12 @@ set(CMAKE_C_COMPILER gcc)
 
 #définit le nom du programme ainsi que ses sources
 add_executable(game_text game_text.c)
+add_executable(game_test_marbeites game_test_marbeites.c)
 
 #créer la librairie
 add_library(game game.o game_aux.c)
 
 #définit les bibliothèques utilisées
 target_link_libraries(game_text game)
+
+add_test(test_marbeites_dummy ./game_test_marbeites dummy)
