@@ -16,6 +16,7 @@ set(CMAKE_C_COMPILER gcc)
 #définit le nom du programme ainsi que ses sources
 add_executable(game_text game_text.c)
 add_executable(game_test_marbeites game_test_marbeites.c)
+add_executable(game_test_khorvath game_test_khorvath.c)
 
 #créer la librairie
 add_library(game game.o game_aux.c)
@@ -24,3 +25,4 @@ add_library(game game.o game_aux.c)
 target_link_libraries(game_text game)
 
 add_test(test_marbeites_dummy ./game_test_marbeites dummy)
+add_test(test_khorvath_dummy ./game_test_khorvath dummy)
