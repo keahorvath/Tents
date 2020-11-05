@@ -18,7 +18,7 @@ add_executable(game_text game_text.c)
 add_executable(game_test_marbeites game_test_marbeites.c)
 add_executable(game_test_khorvath game_test_khorvath.c)
 add_executable(game_test_amastouri game_test_amastouri.c)
-add_axecutable(game_test_alleymarie game_test_alleymarie.c)
+add_executable(game_test_alleymarie game_test_alleymarie.c)
 
 #créer la librairie
 add_library(game game.o game_aux.c)
