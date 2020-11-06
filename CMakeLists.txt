@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 2.6)
 project(game_text C)
 
 enable_testing()
+include(CTest)
 
 #positionne la variable
 set(CMAKE_C_FLAGS "-std=c99 -g -Wall")
@@ -25,8 +26,16 @@ add_library(game game.o game_aux.c)
 
 #définit les bibliothèques utilisées
 target_link_libraries(game_text game)
+target_link_libraries(game_test_marbeites game)
 
-add_test(test_marbeites_dummy ./game_test_marbeites dummy)
+#tests marbeites
+add_test(test_marbeites_test_get_expected_nb_tents_row ./game_test_marbeites get_expected_nb_tents_row)
+add_test(test_marbeites_test_get_expected_nb_tents_col ./game_test_marbeites get_expected_nb_tents_col)
+add_test(test_marbeites_test_get_expected_nb_tents_all ./game_test_marbeites get_expected_nb_tents_all)
+add_test(test_marbeites_test_get_current_nb_tents_row ./game_test_marbeites get_current_nb_tents_row)
+add_test(test_marbeites_test_get_current_nb_tents_col ./game_test_marbeites get_current_nb_tents_col)
+add_test(test_marbeites_test_get_current_nb_tents_all ./game_test_marbeites get_current_nb_tents_all)
+
 add_test(test_khorvath_dummy ./game_test_khorvath dummy)
 add_test(test_amastouri_dummy ./game_test_amastouri dummy)
 add_test(test_alleymarie_dummy ./game_test_alleymarie dummy)
