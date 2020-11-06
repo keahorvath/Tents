@@ -50,6 +50,38 @@ bool test_game_set_square (){
     return true;
 }
 
+/*test_game_get_square*/
+
+bool test_game_equal (){
+    game g1 = game_default();
+    game g2 = game_default();
+    bool test = game_equal(g1,g2);
+    if (!test){
+        return false;
+    }
+    game_set_expected_nb_tents_row( g2 , 2 , 3);
+    test = game_equal(g1,g2);
+    if (test){
+        return false;
+    }
+    game_set_expected_nb_tents_row( g2 , 2 , 4 );
+    
+    game_set_expected_nb_tents_col( g2 , 2 , 3);
+    test = game_equal(g1,g2);
+    if (test){
+        return false;
+    }
+    game_set_expected_nb_tents_col( g2 , 2 , 1 );
+    
+    
+    game_set_square(g2,0 ,0, TREE);
+    test = game_equal(g1,g2);
+    if (test){
+        return false;
+    }
+    
+    return true;
+}
 
 
 
