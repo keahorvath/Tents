@@ -27,6 +27,8 @@ add_library(game game.o game_aux.c)
 #définit les bibliothèques utilisées
 target_link_libraries(game_text game)
 target_link_libraries(game_test_marbeites game)
+target_link_libraries(game_test_amastouri game)
+
 
 #tests marbeites
 add_test(test_marbeites_test_get_expected_nb_tents_row ./game_test_marbeites get_expected_nb_tents_row)

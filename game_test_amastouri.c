@@ -28,6 +28,9 @@ bool test_game_set_square (){
         if (game_get_square(test_game, i,j) != GRASS){
             return false;
         }   
+        i+=1;
+        j+=1;
+
     }
     return true;
 }
@@ -126,19 +129,19 @@ int main(int argc, char *argv[]){
     if (strcmp("game_set_square", argv[1]) == 0){
         testPassed = test_game_set_square();
     }
-    if (strcmp("game_get_square", argv[1]) == 0){
+    else if (strcmp("game_get_square", argv[1]) == 0){
         testPassed = test_game_get_square();
     }
-    if (strcmp("game_equal", argv[1]) == 0){
+    else if (strcmp("game_equal", argv[1]) == 0){
         testPassed = test_game_equal();
     }
-    if (strcmp("game_delete", argv[1]) == 0){
+    else if (strcmp("game_delete", argv[1]) == 0){
         testPassed = test_game_delete();
     }
-    if (strcmp("game_set_expected_nb_tents_row", argv[1]) == 0){
+    else if (strcmp("game_set_expected_nb_tents_row", argv[1]) == 0){
         testPassed = test_game_set_expected_nb_tents_row();
     }
-    if (strcmp("game_set_expected_nb_tents_col", argv[1]) == 0){
+    else if (strcmp("game_set_expected_nb_tents_col", argv[1]) == 0){
         testPassed = test_game_set_expected_nb_tents_col();
     }
     else {
