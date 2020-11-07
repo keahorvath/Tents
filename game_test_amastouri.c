@@ -79,10 +79,34 @@ bool test_game_equal (){
     if (test){
         return false;
     }
-    
+    game_set_square(g2,0 ,0, EMPTY);
+
+    game_set_square(g2, 7 ,7, TREE);
+    test = game_equal(g1,g2);
+    if (test){
+        return false;
+    }
+    game_set_square(g2, 7 ,7, EMPTY);
+
+
+    game_set_square(g2, 1 ,0, EMPTY);
+    test = game_equal(g1,g2);
+    if (test){
+        return false;
+    }
     return true;
 }
 
+bool test_game_delete (){
+    game game_test= game_default();
+    game_delete (game_test);
+    if (game_test){
+        return false;
+    }
+
+
+    return true ;
+}
 
 
 
