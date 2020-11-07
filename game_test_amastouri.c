@@ -33,7 +33,7 @@ bool test_game_set_square (){
 }
 
 /*test_game_get_square*/
-bool test_game_set_square (){
+bool test_game_get_square (){
     game test_game = game_default();
     if ( (game_get_square(test_game, 0,4) != TREE) 
        || (game_get_square(test_game, 0,0) != EMPTY) ) {
@@ -108,27 +108,39 @@ bool test_game_delete (){
     return true ;
 }
 
+bool test_game_set_expected_nb_tents_row(){
+    return true;
+}
+bool test_game_set_expected_nb_tents_col (){
+    return true;
+}
 
 
 
 int main(int argc, char *argv[]){
 
-    if (argc == 1) usage(argc, argv);
     // start test
     fprintf(stderr, "=> Start test \"%s\"\n", argv[1]);
     bool testPassed = false;
-    if (strcmp("game_set_square", argv[1]) == 0)
+
+    if (strcmp("game_set_square", argv[1]) == 0){
         testPassed = test_game_set_square();
-    else if (strcmp("game_get_square", argv[1]) == 0)
+    }
+    if (strcmp("game_get_square", argv[1]) == 0){
         testPassed = test_game_get_square();
-    else if (strcmp("game_equal", argv[1]) == 0)
+    }
+    if (strcmp("game_equal", argv[1]) == 0){
         testPassed = test_game_equal();
-    else if (strcmp("game_delete", argv[1]) == 0)
+    }
+    if (strcmp("game_delete", argv[1]) == 0){
         testPassed = test_game_delete();
-    else if (strcmp("game_set_expected_nb_tents_row", argv[1]) == 0)
+    }
+    if (strcmp("game_set_expected_nb_tents_row", argv[1]) == 0){
         testPassed = test_game_set_expected_nb_tents_row();
-    else if (strcmp("game_set_expected_nb_tents_col", argv[1]) == 0)
+    }
+    if (strcmp("game_set_expected_nb_tents_col", argv[1]) == 0){
         testPassed = test_game_set_expected_nb_tents_col();
+    }
     else {
         fprintf(stderr, "Error: test \"%s\" not found!\n", argv[1]);
         exit(EXIT_FAILURE);
