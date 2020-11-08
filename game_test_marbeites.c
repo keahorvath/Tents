@@ -161,21 +161,26 @@ int main(int argc, char *argv[]){
     if(strcmp("get_expected_nb_tents_row", argv[1])==0){
         ok = test_get_expected_nb_tents_row(0);
     }
-    if(strcmp("get_expected_nb_tents_col", argv[1])==0){
+    else if(strcmp("get_expected_nb_tents_col", argv[1])==0){
         ok = test_get_expected_nb_tents_col(0);
     }
-    if(strcmp("get_expected_nb_tents_all", argv[1])==0){
+    else if(strcmp("get_expected_nb_tents_all", argv[1])==0){
         ok = test_get_expected_nb_tents_all();
     }
-    if(strcmp("get_current_nb_tents_row", argv[1])==0){
+    else if(strcmp("get_current_nb_tents_row", argv[1])==0){
         ok = test_get_current_nb_tents_row(0);
     }
-    if(strcmp("get_current_nb_tents_col", argv[1])==0){
+    else if(strcmp("get_current_nb_tents_col", argv[1])==0){
         ok = test_get_current_nb_tents_col(0);
     }
-    if(strcmp("get_current_nb_tents_all", argv[1])==0){
+    else if(strcmp("get_current_nb_tents_all", argv[1])==0){
         ok = test_get_current_nb_tents_all();
     }
+    else{
+        fprintf(stderr, "Error: test \"%s\" not found!\n", argv[1]);
+        exit(EXIT_FAILURE);
+    }
+
 
     //print test result
     if(ok){
