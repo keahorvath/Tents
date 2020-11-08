@@ -43,8 +43,8 @@ add_test(test_amastouri_test_game_set_square ./game_test_amastouri game_set_squa
 add_test(test_amastouri_test_game_get_square ./game_test_amastouri game_get_square)
 add_test(test_amastouri_test_game_equal ./game_test_amastouri game_equal)
 add_test(test_amastouri_test_game_delete ./game_test_amastouri game_delete)
-#add_test(test_amastouri_test_game_set_expected_nb_tents_row ./game_test_amastouri game_set_expected_nb_tents_row)
-#add_test(test_amastouri_test_game_set_expected_nb_tents_col ./game_test_amastouri game_set_expected_nb_tents_col)
+add_test(test_amastouri_test_game_set_expected_nb_tents_row ./game_test_amastouri game_set_expected_nb_tents_row)
+add_test(test_amastouri_test_game_set_expected_nb_tents_col ./game_test_amastouri game_set_expected_nb_tents_col)
 
 
 add_test(test_khorvath_dummy ./game_test_khorvath dummy)
