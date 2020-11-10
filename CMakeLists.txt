@@ -22,7 +22,7 @@ add_executable(game_test_amastouri game_test_amastouri.c)
 add_executable(game_test_alleymarie game_test_alleymarie.c)
 
 #créer la librairie
-add_library(game game00.o game_aux.c)
+add_library(game game.o game_aux.c)
 
 #définit les bibliothèques utilisées
 target_link_libraries(game_text game)
