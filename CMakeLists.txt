@@ -54,4 +54,10 @@ add_test(test_khorvath_game_fill_grass_row ./game_test_khorvath game_fill_grass_
 add_test(test_khorvath_game_fill_grass_col ./game_test_khorvath game_fill_grass_col)
 add_test(test_khorvath_game_restart ./game_test_khorvath game_restart)
 
-add_test(test_alleymarie_dummy ./game_test_alleymarie dummy)
+#test alleymarie
+add_test(test_alleymarie_game_print ./game_test_alleymarie game_print)
+add_test(test_alleymarie_game_default ./game_test_alleymarie game_default)
+add_test(test_alleymarie_game_default_solution ./game_test_alleymarie game_default_solution)
+add_test(test_alleymarie_game_new ./game_test_alleymarie game_new)
+add_test(test_alleymarie_game_new_empty ./game_test_alleymarie game_new_empty)
+add_test(test_alleymarie_game_copy ./game_test_alleymarie game_copy)
