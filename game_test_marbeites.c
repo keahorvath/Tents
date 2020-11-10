@@ -7,6 +7,7 @@
 
 /*Tests*/
 
+//Test game_get_expected_nb_tents_row
 bool test_get_expected_nb_tents_row(int k){
     if((k<0)|(k>7)){
         fprintf(stderr, "Error : this row doesn't exist\n");
@@ -32,6 +33,7 @@ bool test_get_expected_nb_tents_row(int k){
     return true;
 };
 
+//Test game_get_expected_nb_tents_col
 bool test_get_expected_nb_tents_col(int k){
     if((k<0)|(k>7)){
         fprintf(stderr, "Error: this column doesn't exist\n");
@@ -57,6 +59,7 @@ bool test_get_expected_nb_tents_col(int k){
     return true;
 };
 
+//Test game_get_expected_nb_tents_all
 bool test_get_expected_nb_tents_all(void){
     game g = game_default_solution();
     if(g==NULL){
@@ -80,6 +83,7 @@ bool test_get_expected_nb_tents_all(void){
     return true;
 };
 
+//Test game_get_current_nb_tents_row
 bool test_get_current_nb_tents_row(int k){
     if((k<0)|(k>7)){
         fprintf(stderr, "Error: this row doesn't exist\n");
@@ -105,6 +109,7 @@ bool test_get_current_nb_tents_row(int k){
     return true;
 };
 
+//Test game_get_current_nb_tents_col
 bool test_get_current_nb_tents_col(int k){
     if((k<0)|(k>7)){
         fprintf(stderr, "Error: this column doesn't exist\n");
@@ -130,6 +135,7 @@ bool test_get_current_nb_tents_col(int k){
     return true;
 };
 
+//Test game_get_current_nb_tents_all
 bool test_get_current_nb_tents_all(void){
     game g = game_default();
     if(g==NULL){
