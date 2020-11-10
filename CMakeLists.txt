@@ -22,13 +22,13 @@ add_executable(game_test_amastouri game_test_amastouri.c)
 add_executable(game_test_alleymarie game_test_alleymarie.c)
 
 #créer la librairie
-add_library(game game.o game_aux.c)
+add_library(game game00.o game_aux.c)
 
 #définit les bibliothèques utilisées
 target_link_libraries(game_text game)
 target_link_libraries(game_test_marbeites game)
 target_link_libraries(game_test_amastouri game)
-
+target_link_libraries(game_test_khorvath game)
 
 #tests marbeites
 add_test(test_marbeites_test_get_expected_nb_tents_row ./game_test_marbeites get_expected_nb_tents_row)
@@ -46,6 +46,12 @@ add_test(test_amastouri_test_game_delete ./game_test_amastouri game_delete)
 add_test(test_amastouri_test_game_set_expected_nb_tents_row ./game_test_amastouri game_set_expected_nb_tents_row)
 add_test(test_amastouri_test_game_set_expected_nb_tents_col ./game_test_amastouri game_set_expected_nb_tents_col)
 
+#test khorvath
+add_test(test_khorvath_game_play_move ./game_test_khorvath game_play_move)
+add_test(test_khorvath_game_check_move ./game_test_khorvath game_check_move)
+add_test(test_khorvath_game_is_over ./game_test_khorvath game_is_over)
+add_test(test_khorvath_game_fill_grass_row ./game_test_khorvath game_fill_grass_row)
+add_test(test_khorvath_game_fill_grass_col ./game_test_khorvath game_fill_grass_col)
+add_test(test_khorvath_game_restart ./game_test_khorvath game_restart)
 
-add_test(test_khorvath_dummy ./game_test_khorvath dummy)
 add_test(test_alleymarie_dummy ./game_test_alleymarie dummy)
