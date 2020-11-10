@@ -156,6 +156,8 @@ bool test_game_is_over(void){
     if (game_is_over(g2)){
         return false;
     }
+    game_delete(g);
+    game_delete(g2);
     return true;
 }
 
@@ -210,6 +212,8 @@ bool test_game_restart(void){
             }
         }
     }
+    game_delete(g1);
+    game_delete(g2);
     return true;
 }
 
