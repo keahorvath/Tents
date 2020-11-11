@@ -212,7 +212,7 @@ bool test_game_restart(void){
 
 int main(int argc, char *argv[]){
 
-    fprintf(stderr, "=> Start test \"%s\"\n", argv[1]);
+    printf("=> Start test \"%s\"\n", argv[1]);
     bool testPassed = false;
 
     if (strcmp("game_play_move", argv[1]) == 0){
