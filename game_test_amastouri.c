@@ -54,7 +54,7 @@ bool test_game_get_square (){
         return true;
 }
 
-/*test_game_get_square*/
+/*test_game_equal*/
 
 bool test_game_equal (){
     game g1 = game_default();
@@ -100,15 +100,15 @@ bool test_game_equal (){
 
 }
 
+/*test_game_delete*/
+
 bool test_game_delete (){
     game game_test= game_default();
     game_delete (game_test);
-    //if (game_test){//
-    // return false;//
-    // }//
-
     return true ;
 }
+
+/*test_game_set_expected_nb_tents_row*/
 
 bool test_game_set_expected_nb_tents_row(){
     game game_test= game_default();
@@ -123,6 +123,8 @@ bool test_game_set_expected_nb_tents_row(){
     game_delete (game_test);
     return true;
 }
+
+/*test_game_set_expected_nb_tents_col*/
 
 bool test_game_set_expected_nb_tents_col (){
     game game_test= game_default();
