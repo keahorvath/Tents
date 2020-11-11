@@ -80,7 +80,7 @@ bool test_game_new_empty(void){
 /**test_game_copy **/
 bool test_game_copy(void){
 	game g1 = game_default();
-	game g2 = game_default();
+	game g2 = game_copy(g1);
 	bool test = game_equal(g1, g2);
 	if(!test){
 		return false;
