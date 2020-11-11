@@ -13,17 +13,18 @@ bool test_game_print(void){
 	return true;
 }
 /**test_game_default **/
-bool test_game_default(void);
+bool test_game_default(void){
 	game gm = game_default();
 	if(!gm){
 		return false;
 	}
 	game_delete(gm);
 	return true;
+}
 
 /**test_game_default_solution **/
 bool test_game_default_solution(void){
-	game gms = game_default_solution()
+	game gms = game_default_solution();
 	if(!gms){
 		return false;
 	}
@@ -33,10 +34,10 @@ bool test_game_default_solution(void){
 /**test_game_new **/
 bool test_game_new(void){
 	game gm = game_default();
-	squares[] = {0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0};
-	nb_tents_row[] = {3, 0, 4, 0, 4, 0, 1, 0};
-	nb_tents_col[] = {4, 0, 1, 2, 1, 1, 2, 1};
-	if(!game_new(squares, nb_tents_row, nb_tents_col){
+	unsigned int squares[] = {0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0};
+	unsigned int nb_tents_row[] = {3, 0, 4, 0, 4, 0, 1, 0};
+	unsigned int nb_tents_col[] = {4, 0, 1, 2, 1, 1, 2, 1};
+	if(!game_new(squares, nb_tents_row, nb_tents_col)){
 		return false;
 	}
 	game_delete(gm);
@@ -46,7 +47,7 @@ bool test_game_new(void){
 /**test_game_new_empty **/
 bool test_game_new_empty(void){
 	game gm = game_default();
-	if(!game_new_empty){
+	if(game_new_empty()!=EMPTY){
 		return false;
 	}
 	game_delete(gm);
@@ -75,19 +76,19 @@ int main(int argc, char *argv[]){
 	}else if (strcmp("game_new", argv[1]) == 0){
 		testPassed = test_game_new();
 	}else if (strcmp("game_new_empty", argv[1]) == 0){
-		testPassed = test_game_empty();
+		testPassed = test_game_new_empty();
 	}else if (strcmp("game_copy", argv[1]) == 0){
  		testPassed = test_game_copy();
 	}else {
 		fprintf(stderr, "Error: test \"%s\" not found!\n", argv[1]);
- 232         exit(EXIT_FAILURE);
- 233     }
- 234 
- 235     if (testPassed){
- 236         printf("Test \"%s\" finished: SUCCESS\n", argv[1]);
- 237         return EXIT_SUCCESS;
- 238     }else{
- 239         fprintf(stderr, "Test \"%s\" finished: FAILURE\n", argv[1]);
- 240         return EXIT_FAILURE;
- 241     }
- 242 }
+		exit(EXIT_FAILURE);
+	}
+
+	if (testPassed){
+		fprintf(stderr,"Test \"%s\" finished: SUCCESS\n", argv[1]);
+		return EXIT_SUCCESS;
+	}else{
+		fprintf(stderr, "Test \"%s\" finished: FAILURE\n", argv[1]);
+		return EXIT_FAILURE;
+	}
+}
