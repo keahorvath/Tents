@@ -94,6 +94,18 @@ bool test_game_equal (){
     if (test){
         return false;
     }
+    game_set_square(g2, 4 ,0, GRASS);
+    test = game_equal(g1,g2);
+    if (test){
+        return false;
+    }game_set_square(g2, 4 ,0, EMPTY);
+
+    game_set_square(g2, 4 ,0, TENT);
+    test = game_equal(g1,g2);
+    if (test){
+        return false;
+    }
+
     game_delete (g1);
     game_delete (g2);
     return true;
