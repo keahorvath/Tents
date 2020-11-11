@@ -1,0 +1,38 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+#include "game.h"
+#include "game_aux.h"
+
+
+int main(int argc, char *argv[]){
+ 214 
+ 215     fprintf(stderr, "=> Start test \"%s\"\n", argv[1]);
+ 216     bool testPassed = false;
+ 217 
+ 218     if (strcmp("game_print", argv[1]) == 0){
+ 219         testPassed = test_game_print();
+ 220     }else if (strcmp("game_default", argv[1]) == 0){
+ 221         testPassed = test_game_default();
+ 222     }else if (strcmp("game_default_solution", argv[1]) == 0){
+ 223         testPassed = test_game_default_solution();
+ 224     }else if (strcmp("game_new", argv[1]) == 0){
+ 225         testPassed = test_game_new();
+ 226     }else if (strcmp("game_new_empty", argv[1]) == 0){
+ 227         testPassed = test_game_empty();
+ 228     }else if (strcmp("game_copy", argv[1]) == 0){
+ 229         testPassed = test_game_copy();
+ 230     }else {
+ 231         fprintf(stderr, "Error: test \"%s\" not found!\n", argv[1]);
+ 232         exit(EXIT_FAILURE);
+ 233     }
+ 234 
+ 235     if (testPassed){
+ 236         printf("Test \"%s\" finished: SUCCESS\n", argv[1]);
+ 237         return EXIT_SUCCESS;
+ 238     }else{
+ 239         fprintf(stderr, "Test \"%s\" finished: FAILURE\n", argv[1]);
+ 240         return EXIT_FAILURE;
+ 241     }
+ 242 }
