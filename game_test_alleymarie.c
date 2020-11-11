@@ -7,9 +7,11 @@
 
 /**test_game_print **/
 bool test_game_print(void){
+	game gm = game_default();
 	game_print(gm);
-	game_delete
+	return true;
 }
+
 /**test_game_default **/
 bool test_game_default(void){
 	game gm = game_default();
@@ -46,8 +48,12 @@ bool test_game_new(void){
 /**test_game_new_empty **/
 bool test_game_new_empty(void){
 	game gm = game_default();
-	if(game_new_empty()!=EMPTY){
-		return false;
+	for(int i = 0; i<=8; i++){
+		for(int j = 0; j<=8; j++){
+			if(game_get_square(gm, i, j)!=EMPTY){
+				return false;
+			}
+		}
 	}
 	game_delete(gm);
 	return true;
@@ -55,11 +61,14 @@ bool test_game_new_empty(void){
 
 /**test_game_copy **/
 bool test_game_copy(void){
-	game gm = game_default();
-	if(gm == NULL || !game_copy(gm)){
+	game g1 = game_default();
+	game g2 = game_default();
+	bool test = game_equal(g1, g2);
+	if(!test){
 		return false;
 	}
-	game_delete(gm);
+	game_delete(g1);
+	game_delete(g2);
 	return true;
 }
 
