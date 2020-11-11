@@ -44,10 +44,28 @@ bool test_game_default_solution(void){
 
 /**test_game_new **/
 bool test_game_new(void){
-	game gm = game_default();
-	square squares[] = {0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0};
-	unsigned int nb_tents_row[] = {3, 0, 4, 0, 4, 0, 1, 0};
-	unsigned int nb_tents_col[] = {4, 0, 1, 2, 1, 1, 2, 1};
+	game gm = game_new_empty();
+	for(int i = 0; i<8; i++){
+		for(int j = 0; j<8; j++){
+			game_set_square(gm,i ,j, GRASS);
+		}
+	}
+	game_set_square(gm,0,1, TREE);
+	game_set_square(gm,0,2, TENT);
+	game_set_square(gm,8,0, EMPTY);
+	for(int j = 0; j<8; j++){
+		game_set_expected_nb_tents_row( gm , j , 4 );
+		game_set_expected_nb_tents_col( gm , j , 5 );
+
+		}
+
+	square squares[] = {3, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,  
+	                    3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 
+						3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 
+						3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 
+						3, 3, 3, 3, 3, 3, 3, 0};
+	unsigned int nb_tents_row[] = {4,4,4,4,4,4,4,4};
+	unsigned int nb_tents_col[] = {5,5,5,5,5,5,5,5};
 	game gm2 = game_new(squares, nb_tents_row, nb_tents_col);
 	if(!game_equal(gm, gm2)){
 		return false;
