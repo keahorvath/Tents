@@ -8,9 +8,7 @@
 /**test_game_print **/
 bool test_game_print(void){
 	game gm = game_default();
-	if(!game_print(gm)){
-		return false;
-	}
+	game_print(gm);
 	game_delete(gm);
 	return true;
 }
@@ -32,36 +30,38 @@ bool test_game_default_solution(void){
 	game_delete(gms);
 	return true;
 
-/**
- * @brief Creates a new game with default size and initializes it.
- * @param squares an array describing the initial square values (row-major
- * storage)
- * @param nb_tents_row an array with the expected number of tents in each row
- * @param nb_tents_col an array with the expected number of tents in each column
- * @pre @p squares must be an initialized array of default size squared.
- * @pre @p nb_tents_row must be an initialized array of default size.
- * @pre @p nb_tents_col must be an initialized array of default size.
- * @return the created game
- **/
-bool test_game_new(square *squares, uint *nb_tents_row, uint *nb_tents_col){
-	
+/**test_game_new **/
+bool test_game_new(void){
+	game gm = game_default();
+	squares[] = {0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0};
+	nb_tents_row[] = {3, 0, 4, 0, 4, 0, 1, 0};
+	nb_tents_col[] = {4, 0, 1, 2, 1, 1, 2, 1};
+	if(!game_new(squares, nb_tents_row, nb_tents_col){
+		return false;
+	}
+	game_delete(gm);
+	return true;
 }
 
-/**
- * @brief Creates a new empty game with defaut size.
- * @details All squares are initialized with empty squares, and the expected
- * numbers of tents for each row/column are set to zero.
- * @return the created game
- **/
-game game_new_empty(void);
+/**test_game_new_empty **/
+bool test_game_new_empty(void){
+	game gm = game_default();
+	if(!game_new_empty){
+		return false;
+	}
+	game_delete(gm);
+	return true;
+}
 
-/**
- * @brief Duplicates a game.
- * @param g the game to copy
- * @return the copy of the game
- * @pre @p g must be a valid pointer toward a game structure.
- **/
-game game_copy(cgame g);
+/**test_game_copy **/
+bool test_game_copy(void){
+	game gm = game_default();
+	if(gm == NULL || !game_copy(gm)){
+		return false;
+	}
+	game_delete(gm);
+	return true;
+}
 
 int main(int argc, char *argv[]){
 	fprintf(stderr, "=> Start test \"%s\"\n", argv[1]);
