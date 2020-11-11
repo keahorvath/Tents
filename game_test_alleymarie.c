@@ -7,10 +7,8 @@
 
 /**test_game_print **/
 bool test_game_print(void){
-	game gm = game_default();
 	game_print(gm);
-	game_delete(gm);
-	return true;
+	game_delete
 }
 /**test_game_default **/
 bool test_game_default(void){
