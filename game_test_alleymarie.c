@@ -15,28 +15,28 @@ bool test_game_print(void){
 /**test_game_default **/
 bool test_game_default(void){
 	game gm1 = game_default(); 
-	unsigned int squares[] = {0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0};
+	square square[] = {0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0};
 	unsigned int nb_tents_row[] = {3, 0, 4, 0, 4, 0, 1, 0};	
 	unsigned int nb_tents_col[] = {4, 0, 1, 2, 1, 1, 2, 1};
-	game gm2 = game_new(squares, nb_tents_row, nb_tents_col);
-	if(gm1 != gm2){
+	game gm2 = game_new(square, nb_tents_row, nb_tents_col);
+	if(!game_equal(gm1, gm2)){
 		return false;
 	}
 	game_delete(gm1);
-	game_delate(gm2);
+	game_delete(gm2);
 	return true;
 }
 
 /**test_game_default_solution **/
 bool test_game_default_solution(void){
 	game gms1 = game_default_solution(); 
-	unsigned int squares[] = {2, 0, 0, 2, 1, 1, 2, 0, 1, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 2, 1, 2, 0, 2, 1, 0, 0, 0, 0, 1, 0, 0, 2, 1, 2, 0, 2, 0, 2, 0, 1, 0, 0, 0, 1, 0, 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0};
-    	unsigned int nb_tents_row[] = {3, 0, 4, 0, 4, 0, 1, 0}; 
-    	unsigned int nb_tents_col[] = {4, 0, 1, 2, 1, 1, 2, 1};
-	game gms2 = game_new(squares, nb_tents_row, nb_tents_col);
-	if(gms1 != gms2){
+	square square[] = {2, 3, 3, 2, 1, 1, 2, 3, 1, 3, 3, 3, 3, 3, 3, 1, 2, 3, 3, 2, 1, 2, 3, 2, 1, 3, 3, 3, 3, 1, 3, 3, 2, 1, 2, 3, 2, 3, 2, 3, 1, 3, 3, 3, 1, 3, 1, 3, 2, 3, 3, 3, 3, 3, 3, 3, 1, 3, 3, 3, 3, 3, 3, 3};
+	uint nb_tents_row[] = {3, 0, 4, 0, 4, 0, 1, 0};
+	uint nb_tents_col[] = {4, 0, 1, 2, 1, 1, 2, 1};
+	game gms2 = game_new(square, nb_tents_row, nb_tents_col);
+	if(!game_equal(gms1, gms2)){
 		return false;
-}
+	}
 	game_delete(gms1);
 	game_delete(gms2);
 	return true;
@@ -45,19 +45,21 @@ bool test_game_default_solution(void){
 /**test_game_new **/
 bool test_game_new(void){
 	game gm = game_default();
-	unsigned int squares[] = {0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0};
+	square squares[] = {0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0};
 	unsigned int nb_tents_row[] = {3, 0, 4, 0, 4, 0, 1, 0};
 	unsigned int nb_tents_col[] = {4, 0, 1, 2, 1, 1, 2, 1};
-	if(game_new(squares, nb_tents_row, nb_tents_col) != gm){
+	game gm2 = game_new(squares, nb_tents_row, nb_tents_col);
+	if(!game_equal(gm, gm2)){
 		return false;
 	}
 	game_delete(gm);
+	game_delete(gm2);
 	return true;
 }
 
 /**test_game_new_empty **/
 bool test_game_new_empty(void){
-	game gm = game_default();
+	game gm = game_new_empty();
 	for(int i = 0; i<8; i++){
 		if(game_get_expected_nb_tents_row(gm, i) != 0){
 			return false;
