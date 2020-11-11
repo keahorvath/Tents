@@ -52,7 +52,7 @@ bool test_game_new(void){
 	}
 	game_set_square(gm,0,1, TREE);
 	game_set_square(gm,0,2, TENT);
-	game_set_square(gm,8,0, EMPTY);
+	game_set_square(gm,7,7, EMPTY);
 	for(int j = 0; j<8; j++){
 		game_set_expected_nb_tents_row( gm , j , 4 );
 		game_set_expected_nb_tents_col( gm , j , 5 );
