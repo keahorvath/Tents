@@ -30,6 +30,7 @@ bool test_game_default_solution(void){
 	}
 	game_delete(gms);
 	return true;
+}
 
 /**test_game_new **/
 bool test_game_new(void){
