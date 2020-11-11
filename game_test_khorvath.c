@@ -165,7 +165,6 @@ bool test_game_fill_grass_row(void){
     game_play_move(g2, 0, 3, GRASS);
     game_play_move(g2, 0, 7, GRASS);
     game_fill_grass_row(g, 0);
-    
     if (!game_equal(g, g2)){
         return false;
     }
