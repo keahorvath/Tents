@@ -29,6 +29,7 @@ target_link_libraries(game_text game)
 target_link_libraries(game_test_marbeites game)
 target_link_libraries(game_test_amastouri game)
 target_link_libraries(game_test_khorvath game)
+target_link_libraries(game_test_alleymarie game)
 
 #tests marbeites
 add_test(test_marbeites_test_get_expected_nb_tents_row ./game_test_marbeites get_expected_nb_tents_row)
