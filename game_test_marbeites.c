@@ -61,13 +61,15 @@ bool test_get_expected_nb_tents_col(int k){
 
 //Test game_get_expected_nb_tents_all
 bool test_get_expected_nb_tents_all(void){
-    game g = game_default_solution();
-    game g1 = game_default();
+    game g = game_default();
     if(g==NULL){
         fprintf(stderr, "Error : invalid game\n");
         return false;
     }
-    int tents=0;
+    if(game_get_expected_nb_tents_all(g)!=12){
+        return false;
+    }
+    /*int tents=0;
     for(int i=0; i<8; i++){
         for(int j=0; j<8; j++){
             square a=game_get_square(g,i,j);
@@ -79,16 +81,7 @@ bool test_get_expected_nb_tents_all(void){
     if(tents!=game_get_expected_nb_tents_all(g)){
         fprintf(stderr, "Error: unexpected amount of tents\n");
         return false;
-    }
-    game_restart(g);
-    for(int i = 0; i < DEFAULT_SIZE; i++){
-        for(int j = 0; j < DEFAULT_SIZE; j++){
-            if (game_get_square(g1, i, j) != game_get_square(g, i, j)){
-                return false;
-            }
-        }
-    }
-    game_delete(g1);
+    }*/
     game_delete(g);
     return true;
 };
