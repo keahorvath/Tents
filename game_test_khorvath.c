@@ -63,7 +63,7 @@ bool test_game_check_move(void){
     if (game_check_move(g, 6, 0, TENT) != LOSING){
         return false;
     }
-    /*
+    /*   
     //test if placing n+1 tents in column is losing
     game_play_move(g, 0, 3, TENT);
     game_play_move(g, 2, 3, TENT);
