@@ -131,25 +131,21 @@ bool test_game_check_move(void){
 
 bool test_game_is_over(void){
     game g = game_default_solution();
-    for (unsigned int i = 0; i < DEFAULT_SIZE; i++){
-        for (unsigned int j = 0; j < DEFAULT_SIZE; j++){
-            if (game_get_square(g, i, j) == GRASS){
-                game_set_square(g, i, j, EMPTY);
-                if (!game_is_over(g)){
-                    return false;
-                }
-            }
-        }
-    }
-
-    game g2 = game_default_solution();
-    game_set_square(g2, 2, 5, GRASS);
-    game_set_square(g2, 2, 6, GRASS);
-    if (game_is_over(g2)){
+    game_play_move(g, 0, 0, GRASS);
+    if (game_is_over(g)){
         return false;
     }
-    game_delete(g);
-    game_delete(g2);
+    game_play_move(g, 0, 0, TENT);
+    game_set_square(g, 7, 0, GRASS);
+    if (game_is_over(g)){
+        return false;
+    }
+    game_set_square(g, 7, 0, TREE);
+    game_play_move(g, 6, 0, GRASS);
+    game_play_move(g, 6, 5, TENT);
+    if(game_is_over(g)){
+        return false;
+    }
     return true;
 }
 
