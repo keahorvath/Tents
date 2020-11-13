@@ -79,59 +79,27 @@ bool test_game_check_move(void){
         return false;
     }
     
-    //test 8 if placing a regular move is regular
+    //test 8 if surronding tree by grass is losing
     game g1 = game_default();
-    game g2 = game_default_solution();
-    for (unsigned int i = 0; i < DEFAULT_SIZE; i++){
-        for (unsigned int j = 0; j < DEFAULT_SIZE; j++){
-            if (game_get_square(g2, i, j) == TENT && game_check_move(g1, i, j, TENT) != REGULAR){
-                return false;
-            }
-            if (game_get_square(g2, i, j) == GRASS && game_check_move(g1, i, j, GRASS) != REGULAR && game_check_move(g1, i, j, EMPTY) != REGULAR){
-                return false;
-            }
-        }
-    }
-    
-    //test 9 if surronding tree by grass is losing
-    game g3 = game_default();
-    game_play_move(g3, 5, 3, GRASS);
-    game_play_move(g3, 6, 4, GRASS);
-    game_play_move(g3, 5, 5, GRASS);
-    if (game_check_move(g3, 4, 4, GRASS) != LOSING){
+    game_play_move(g1, 5, 3, GRASS);
+    game_play_move(g1, 6, 4, GRASS);
+    game_play_move(g1, 5, 5, GRASS);
+    if (game_check_move(g1, 4, 4, GRASS) != LOSING){
         return false;
     }
     
-    //test if placing tent with no tree around is losing
+    //test 9 if placing tent with no tree around is losing
 	square squares[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	uint nb_tents_row[] = {0, 0, 1, 0, 0, 0, 0, 0};
 	uint nb_tents_col[] = {0, 0, 1, 0, 0, 0, 0, 0};
-    game g4 = game_new(squares, nb_tents_row, nb_tents_col);
-    if (game_check_move(g4, 2, 2, TENT) != LOSING){
+    game g2 = game_new(squares, nb_tents_row, nb_tents_col);
+    if (game_check_move(g2, 2, 2, TENT) != LOSING){
         return false;
     }
 
-    //test if having more tents than trees is losing
-    game_play_move(g3, 0, 0, TENT);
-    game_play_move(g3, 2, 0, TENT);
-    game_play_move(g3, 4, 0, TENT);
-    game_play_move(g3, 6, 0, TENT);
-    game_play_move(g3, 0, 1, TENT);
-    game_play_move(g3, 1, 1, TENT);
-    game_play_move(g3, 2, 1, TENT);
-    game_play_move(g3, 3, 1, TENT);
-    game_play_move(g3, 5, 1, TENT);
-    game_play_move(g3, 6, 1, TENT);
-    game_play_move(g3, 7, 1, TENT);
-    game_play_move(g3, 0, 3, TENT);
-    if (game_check_move(g3, 0, 6, TENT) != LOSING){
-        return false;
-    }
     game_delete(g);
     game_delete(g1);
-    game_delete(g2);
-    game_delete(g3);
-    
+    game_delete(g2);    
     return true;
 }
 
@@ -189,6 +157,10 @@ bool test_game_is_over(void){
     if(game_is_over(g)){
         return false;
     }
+    game_delete(g);
+    game_delete(g2);
+    game_delete(g3);
+    game_delete(g4);
     return true;
 }
 
