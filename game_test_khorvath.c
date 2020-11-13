@@ -131,16 +131,42 @@ bool test_game_check_move(void){
 
 bool test_game_is_over(void){
     game g = game_default_solution();
+    //test if the correct solution returns an error
+    if (!game_is_over(g)){
+        return false;
+    }
+    //test if all tents connected to tree and vice versa
+	square squares[] = {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	uint nb_tents_row[] = {0, 1, 1, 0, 0, 0, 0, 0};
+	uint nb_tents_col[] = {1, 0, 0, 0, 0, 1, 0, 0};
+    game g2 = game_new(squares, nb_tents_row, nb_tents_col);
+    game_play_move(g2, 2, 0, TENT);
+    game_play_move(g2, 1, 5, TENT);
+    if(game_is_over(g2)){
+        return false;
+    }
+    //test if nbtrees != nbtents
+	square squares2[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	uint nb_tents_row2[] = {0, 0, 0, 1, 0, 0, 0, 0};
+	uint nb_tents_col2[] = {0, 0, 0, 1, 0, 0, 0, 0};
+    game g3 = game_new(squares2, nb_tents_row2, nb_tents_col2);
+    game_play_move(g3, 3, 3, TENT);
+    if(game_is_over(g3)){
+        return false;
+    }
+    //test if not having the right nb of tents in row/column still returns true
     game_play_move(g, 0, 0, GRASS);
     if (game_is_over(g)){
         return false;
     }
     game_play_move(g, 0, 0, TENT);
+    //test if having nbTents!=nbTrees returns true
     game_set_square(g, 7, 0, GRASS);
     if (game_is_over(g)){
         return false;
     }
     game_set_square(g, 7, 0, TREE);
+    //test if placing tent not next to tree still returns true
     game_play_move(g, 6, 0, GRASS);
     game_play_move(g, 6, 5, TENT);
     if(game_is_over(g)){
