@@ -58,27 +58,17 @@ bool test_game_check_move(void){
         return false;
     }
     
-    //test 3 if placing n+1 tents in row is losing
-    game_play_move(g, 6, 4, TENT);
-    if (game_check_move(g, 6, 0, TENT) != LOSING){
-        return false;
-    }
-    
-    //test 4 if placing n+1 tents in column is losing
-    game_play_move(g, 0, 3, TENT);
-    game_play_move(g, 2, 3, TENT);
-    if (game_check_move(g, 5, 3, TENT) != LOSING){
+    //test 3/4 if placing n+1 tents in row or column is losing
+    if (game_check_move(g, 1, 1, TENT) != LOSING){
         return false;
     }
     
     //test 5 if placing tent adjacent to tent is losing
-    if (game_check_move(g, 1, 2, TENT) != LOSING || game_check_move(g, 1, 3, TENT) != LOSING ||
-    game_check_move(g, 1, 4, TENT) != LOSING || game_check_move(g, 3, 3, TENT) != LOSING ||
-    game_check_move(g, 3, 2, TENT) != LOSING || game_check_move(g, 2, 2, TENT) != LOSING ||
-    game_check_move(g, 3, 4, TENT) != LOSING){
+    game_play_move(g, 0, 6, TENT);
+    if(game_check_move(g, 0, 7, TENT) != LOSING){
         return false;
     }
-    
+
     //test 6 if placing tent in row and column with no tents required is losing
     if (game_check_move(g, 7, 1, TENT) != LOSING || game_check_move(g, 3, 7, TENT) != LOSING){
         return false;
