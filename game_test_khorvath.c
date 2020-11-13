@@ -102,8 +102,8 @@ bool test_game_check_move(void){
             }
         }
     }
-    /*
-    //test if surronding tree by grass is losing
+    
+    //test 9 if surronding tree by grass is losing
     game g3 = game_default();
     game_play_move(g3, 5, 3, GRASS);
     game_play_move(g3, 6, 4, GRASS);
@@ -111,6 +111,7 @@ bool test_game_check_move(void){
     if (game_check_move(g3, 4, 4, GRASS) != LOSING){
         return false;
     }
+    /*
     //test if placing tent with no tree around is losing
     if (game_check_move(g3, 6, 5, TENT) != LOSING){
         return false;
