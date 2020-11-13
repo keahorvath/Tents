@@ -111,11 +111,13 @@ bool test_game_check_move(void){
     if (game_check_move(g3, 4, 4, GRASS) != LOSING){
         return false;
     }
-    /*
+    
     //test if placing tent with no tree around is losing
-    if (game_check_move(g3, 6, 5, TENT) != LOSING){
+    game g4 = game_new_empty();
+    if (game_check_move(g4, 2, 2, TENT) != LOSING){
         return false;
     }
+
     //test if having more tents than trees is losing
     game_play_move(g3, 0, 0, TENT);
     game_play_move(g3, 2, 0, TENT);
@@ -136,7 +138,7 @@ bool test_game_check_move(void){
     game_delete(g1);
     game_delete(g2);
     game_delete(g3);
-    */
+    
     return true;
 }
 
