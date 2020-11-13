@@ -83,11 +83,12 @@ bool test_game_check_move(void){
     if (game_check_move(g, 7, 1, TENT) != LOSING || game_check_move(g, 3, 7, TENT) != LOSING){
         return false;
     }
-    /*
-    //test if placing grass and not enough empty squares for tents is losing
+    
+    //test 7 if placing grass and not enough empty squares for tents is losing
     if (game_check_move(g, 0, 0, GRASS) != LOSING){
         return false;
     }
+    /*
     //test if placing a regular move is regular
     game g1 = game_default();
     game g2 = game_default_solution();
