@@ -154,6 +154,17 @@ bool test_game_is_over(void){
     if(game_is_over(g3)){
         return false;
     }
+    //test if tents are adjacent
+	square squares3[] = {0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	uint nb_tents_row3[] = {2, 0, 1, 0, 0, 0, 0, 0};
+	uint nb_tents_col3[] = {0, 0, 0, 1, 1, 0, 1, 0};
+    game g4 = game_new(squares3, nb_tents_row3, nb_tents_col3);
+    game_play_move(g4, 0, 3, TENT);
+    game_play_move(g4, 0, 4, TENT);
+    game_play_move(g4, 2, 6, TENT);
+    if(game_is_over(g4)){
+        return false;
+    }
     //test if not having the right nb of tents in row/column still returns true
     game_play_move(g, 0, 0, GRASS);
     if (game_is_over(g)){
