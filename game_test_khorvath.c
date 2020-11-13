@@ -78,11 +78,12 @@ bool test_game_check_move(void){
     game_check_move(g, 3, 4, TENT) != LOSING){
         return false;
     }
-    /*
-    //test if placing tent in row and column with no tents required is losing
+    
+    //test 6 if placing tent in row and column with no tents required is losing
     if (game_check_move(g, 7, 1, TENT) != LOSING || game_check_move(g, 3, 7, TENT) != LOSING){
         return false;
     }
+    /*
     //test if placing grass and not enough empty squares for tents is losing
     if (game_check_move(g, 0, 0, GRASS) != LOSING){
         return false;
