@@ -48,36 +48,37 @@ bool test_game_play_move(void){
 bool test_game_check_move(void){
     game g = game_default();
     
-    //test if replacing tree is illegal
+    //test 1 if replacing tree is illegal
     if (game_check_move(g, 0, 4, TENT) != ILLEGAL || game_check_move(g, 0, 4, GRASS) != ILLEGAL || game_check_move(g, 0, 4, EMPTY) != ILLEGAL){
         return false;
     }
     
-    //test if placing new tree is illegal
+    //test 2 if placing new tree is illegal
     if (game_check_move(g, 1, 1, TREE) != ILLEGAL){
         return false;
     }
     
-    //test if placing n+1 tents in row is losing
+    //test 3 if placing n+1 tents in row is losing
     game_play_move(g, 6, 4, TENT);
     if (game_check_move(g, 6, 0, TENT) != LOSING){
         return false;
     }
     
-    //test if placing n+1 tents in column is losing
+    //test 4 if placing n+1 tents in column is losing
     game_play_move(g, 0, 3, TENT);
     game_play_move(g, 2, 3, TENT);
     if (game_check_move(g, 5, 3, TENT) != LOSING){
         return false;
     }
-    /*
-    //test if placing tent adjacent to tent is losing
+    
+    //test 5 if placing tent adjacent to tent is losing
     if (game_check_move(g, 1, 2, TENT) != LOSING || game_check_move(g, 1, 3, TENT) != LOSING ||
     game_check_move(g, 1, 4, TENT) != LOSING || game_check_move(g, 3, 3, TENT) != LOSING ||
     game_check_move(g, 3, 2, TENT) != LOSING || game_check_move(g, 2, 2, TENT) != LOSING ||
     game_check_move(g, 3, 4, TENT) != LOSING){
         return false;
     }
+    /*
     //test if placing tent in row and column with no tents required is losing
     if (game_check_move(g, 7, 1, TENT) != LOSING || game_check_move(g, 3, 7, TENT) != LOSING){
         return false;
