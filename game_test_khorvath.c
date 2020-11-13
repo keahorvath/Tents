@@ -88,8 +88,8 @@ bool test_game_check_move(void){
     if (game_check_move(g, 0, 0, GRASS) != LOSING){
         return false;
     }
-    /*
-    //test if placing a regular move is regular
+    
+    //test 8 if placing a regular move is regular
     game g1 = game_default();
     game g2 = game_default_solution();
     for (unsigned int i = 0; i < DEFAULT_SIZE; i++){
@@ -102,6 +102,7 @@ bool test_game_check_move(void){
             }
         }
     }
+    /*
     //test if surronding tree by grass is losing
     game g3 = game_default();
     game_play_move(g3, 5, 3, GRASS);
