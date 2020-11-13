@@ -113,7 +113,10 @@ bool test_game_check_move(void){
     }
     
     //test if placing tent with no tree around is losing
-    game g4 = game_new_empty();
+	square squares[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	uint nb_tents_row[] = {0, 0, 1, 0, 0, 0, 0, 0};
+	uint nb_tents_col[] = {0, 0, 1, 0, 0, 0, 0, 0};
+    game g4 = game_new(squares, nb_tents_row, nb_tents_col);
     if (game_check_move(g4, 2, 2, TENT) != LOSING){
         return false;
     }
