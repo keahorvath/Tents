@@ -50,6 +50,11 @@ bool test_game_get_square (){
     if (game_get_square(test_game, 0,1) != GRASS){
         return false;
     }
+    game_restart(test_game); //pour les points :) //
+    game_play_move(test_game, 0, 3, TENT);
+    if (game_get_square(test_game, 0,3) != TENT){
+        return false;
+    }
     game_delete (test_game);
         return true;
 }
