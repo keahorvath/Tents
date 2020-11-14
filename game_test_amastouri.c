@@ -105,7 +105,8 @@ bool test_game_equal (){
     if (test){
         return false;
     }
-
+    game_play_move(g1, 4, 4, GRASS);
+    game_restart(g1); //pour les points :) //
     game_delete (g1);
     game_delete (g2);
     return true;
