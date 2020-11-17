@@ -22,6 +22,7 @@ bool test_game_default(void){
 	if(!game_equal(gm1, gm2)){
 		return false;
 	}
+	game_play_move(g1, 4, 4, GRASS);
 	game_delete(gm1);
 	game_delete(gm2);
 	return true;
