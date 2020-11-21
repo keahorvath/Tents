@@ -16,20 +16,21 @@ set(CMAKE_C_COMPILER gcc)
 
 #définit le nom du programme ainsi que ses sources
 add_executable(game_text game_text.c)
-add_executable(game_test_marbeites game_test_marbeites.c)
-add_executable(game_test_khorvath game_test_khorvath.c)
-add_executable(game_test_amastouri game_test_amastouri.c)
-add_executable(game_test_alleymarie game_test_alleymarie.c)
+add_executable(game game.c)
+#add_executable(game_test_marbeites game_test_marbeites.c)
+#add_executable(game_test_khorvath game_test_khorvath.c)
+#add_executable(game_test_amastouri game_test_amastouri.c)
+#add_executable(game_test_alleymarie game_test_alleymarie.c)
 
 #créer la librairie
-add_library(game game.o game_aux.c)
+add_library(game game.c game_aux.c)
 
 #définit les bibliothèques utilisées
 target_link_libraries(game_text game)
-target_link_libraries(game_test_marbeites game)
-target_link_libraries(game_test_amastouri game)
-target_link_libraries(game_test_khorvath game)
-target_link_libraries(game_test_alleymarie game)
+#target_link_libraries(game_test_marbeites game)
+#target_link_libraries(game_test_amastouri game)
+#target_link_libraries(game_test_khorvath game)
+#target_link_libraries(game_test_alleymarie game)
 
 #tests marbeites
 add_test(test_marbeites_test_get_expected_nb_tents_row ./game_test_marbeites get_expected_nb_tents_row)
