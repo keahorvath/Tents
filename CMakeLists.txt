@@ -18,7 +18,7 @@ set(CMAKE_C_COMPILER gcc)
 add_executable(game_text game_text.c)
 
 #créer la librairie
-add_library(libgame.a game.c game_aux.c)
+add_library(game game.c game_aux.c)
 
 #définit les bibliothèques utilisées
-target_link_libraries(game_text libgame.a)
+target_link_libraries(game_text game)
