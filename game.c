@@ -6,8 +6,8 @@
 
 struct game_s{
     square squares[DEFAULT_SIZE * DEFAULT_SIZE];
-    uint nb_tents_row;
-    uint nb_tents_col;
+    uint nb_tents_row[DEFAULT_SIZE];
+    uint nb_tents_col[DEFAULT_SIZE];
 };
 
 typedef struct game_s *game;
@@ -31,7 +31,7 @@ typedef const struct game_s *cgame;
  * @return the created game
  **/
 game game_new(square *squares, uint *nb_tents_row, uint *nb_tents_col){
-    return game_default;
+    return 0;
 }
 
 /**
@@ -41,7 +41,7 @@ game game_new(square *squares, uint *nb_tents_row, uint *nb_tents_col){
  * @return the created game
  **/
 game game_new_empty(void){
-    return game_default;
+    return 0;
 }
 
 /**
@@ -51,7 +51,7 @@ game game_new_empty(void){
  * @pre @p g must be a valid pointer toward a game structure.
  **/
 game game_copy(cgame g){
-    return game_default;
+    return 0;
 }
 
 /**

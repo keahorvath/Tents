@@ -16,50 +16,9 @@ set(CMAKE_C_COMPILER gcc)
 
 #définit le nom du programme ainsi que ses sources
 add_executable(game_text game_text.c)
-add_executable(game game.c)
-#add_executable(game_test_marbeites game_test_marbeites.c)
-#add_executable(game_test_khorvath game_test_khorvath.c)
-#add_executable(game_test_amastouri game_test_amastouri.c)
-#add_executable(game_test_alleymarie game_test_alleymarie.c)
 
 #créer la librairie
-add_library(game game.c game_aux.c)
+add_library(libgame.a game.c game_aux.c)
 
 #définit les bibliothèques utilisées
-target_link_libraries(game_text game)
-#target_link_libraries(game_test_marbeites game)
-#target_link_libraries(game_test_amastouri game)
-#target_link_libraries(game_test_khorvath game)
-#target_link_libraries(game_test_alleymarie game)
-
-#tests marbeites
-add_test(test_marbeites_test_get_expected_nb_tents_row ./game_test_marbeites get_expected_nb_tents_row)
-add_test(test_marbeites_test_get_expected_nb_tents_col ./game_test_marbeites get_expected_nb_tents_col)
-add_test(test_marbeites_test_get_expected_nb_tents_all ./game_test_marbeites get_expected_nb_tents_all)
-add_test(test_marbeites_test_get_current_nb_tents_row ./game_test_marbeites get_current_nb_tents_row)
-add_test(test_marbeites_test_get_current_nb_tents_col ./game_test_marbeites get_current_nb_tents_col)
-add_test(test_marbeites_test_get_current_nb_tents_all ./game_test_marbeites get_current_nb_tents_all)
-
-#tests amastouri
-add_test(test_amastouri_test_game_set_square ./game_test_amastouri game_set_square)
-add_test(test_amastouri_test_game_get_square ./game_test_amastouri game_get_square)
-add_test(test_amastouri_test_game_equal ./game_test_amastouri game_equal)
-add_test(test_amastouri_test_game_delete ./game_test_amastouri game_delete)
-add_test(test_amastouri_test_game_set_expected_nb_tents_row ./game_test_amastouri game_set_expected_nb_tents_row)
-add_test(test_amastouri_test_game_set_expected_nb_tents_col ./game_test_amastouri game_set_expected_nb_tents_col)
-
-#test khorvath
-add_test(test_khorvath_game_play_move ./game_test_khorvath game_play_move)
-add_test(test_khorvath_game_check_move ./game_test_khorvath game_check_move)
-add_test(test_khorvath_game_is_over ./game_test_khorvath game_is_over)
-add_test(test_khorvath_game_fill_grass_row ./game_test_khorvath game_fill_grass_row)
-add_test(test_khorvath_game_fill_grass_col ./game_test_khorvath game_fill_grass_col)
-add_test(test_khorvath_game_restart ./game_test_khorvath game_restart)
-
-#test alleymarie
-add_test(test_alleymarie_game_print ./game_test_alleymarie game_print)
-add_test(test_alleymarie_game_default ./game_test_alleymarie game_default)
-add_test(test_alleymarie_game_default_solution ./game_test_alleymarie game_default_solution)
-add_test(test_alleymarie_game_new ./game_test_alleymarie game_new)
-add_test(test_alleymarie_game_new_empty ./game_test_alleymarie game_new_empty)
-add_test(test_alleymarie_game_copy ./game_test_alleymarie game_copy)
+target_link_libraries(game_text libgame.a)
