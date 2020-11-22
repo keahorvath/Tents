@@ -122,7 +122,7 @@ void game_set_expected_nb_tents_col(game g, uint j, uint nb_tents) {}
  * @pre @p g must be a valid pointer toward a game structure.
  * @pre @p i < game width
  **/
-uint game_get_expected_nb_tents_row(cgame g, uint i) { return 0; }
+uint game_get_expected_nb_tents_row(cgame g, uint i) { return g->nb_tents_row[i]; }
 
 /**
  * @brief Gets the expected number of tents in a given column.
@@ -132,7 +132,7 @@ uint game_get_expected_nb_tents_row(cgame g, uint i) { return 0; }
  * @pre @p g must be a valid pointer toward a game structure.
  * @pre @p j < game height
  **/
-uint game_get_expected_nb_tents_col(cgame g, uint j) { return 0; }
+uint game_get_expected_nb_tents_col(cgame g, uint j) { return g->nb_tents_col[j]; }
 
 /**
  * @brief Gets the expected number of tents on the whole grid.
@@ -140,7 +140,16 @@ uint game_get_expected_nb_tents_col(cgame g, uint j) { return 0; }
  * @return the expected number of tents on this game
  * @pre @p g must be a valid pointer toward a game structure.
  **/
-uint game_get_expected_nb_tents_all(cgame g) { return 0; }
+uint game_get_expected_nb_tents_all(cgame g) {
+  //set counter for the amount of tents.
+  int tents=0;
+  //checking array for expected number of tents for each row.
+  //it could also be done by checking the array of expected number of tents for each column instead.
+  for(int i=0; i<DEFAULT_SIZE; i++){
+    tents+=g->nb_tents_row[i];
+    }
+  return tents;
+  }
 
 /**
  * @brief Gets the current number of tents in a given row.
@@ -150,7 +159,18 @@ uint game_get_expected_nb_tents_all(cgame g) { return 0; }
  * @pre @p g must be a valid pointer toward a game structure.
  * @pre @p i < game width
  **/
-uint game_get_current_nb_tents_row(cgame g, uint i) { return 0; }
+uint game_get_current_nb_tents_row(cgame g, uint i) {
+  //setting a counter for the amount of tents.
+  int tents=0;
+  //checking each square of the row.
+  for(int j=0; j<DEFAULT_SIZE; j++){
+    //if the square is a tent then increase the counter by 1, otherwise the counter is unchanged.
+    if(game_get_square(g,i,j)==2){
+      tents++;
+    }
+    }
+    return tents;
+}
 
 /**
  * @brief Gets the current number of tents in a given column.
@@ -160,7 +180,18 @@ uint game_get_current_nb_tents_row(cgame g, uint i) { return 0; }
  * @pre @p g must be a valid pointer toward a game structure.
  * @pre @p j < game height
  **/
-uint game_get_current_nb_tents_col(cgame g, uint j) { return 0; }
+uint game_get_current_nb_tents_col(cgame g, uint j) {
+  //setting a counter for the amount of tents.
+  int tents=0;
+  //checking each square of the row.
+  for(int i=0; i<DEFAULT_SIZE; i++){
+    //if the square is a tent then increase the counter by 1, otherwise the counter is unchanged.
+    if(game_get_square(g,i,j)==2){
+      tents++;
+      }
+      }
+      return tents;
+ }
 
 /**
  * @brief Gets the current number of tents on the whole grid.
@@ -168,7 +199,16 @@ uint game_get_current_nb_tents_col(cgame g, uint j) { return 0; }
  * @return the current number of tents on this game
  * @pre @p g must be a valid pointer toward a game structure.
  **/
-uint game_get_current_nb_tents_all(cgame g) { return 0; }
+uint game_get_current_nb_tents_all(cgame g) {
+  //setting a counter for the amount of tents.
+  int tents=0;
+  //checking each arrow to retrieve the amount of tents for all of them.
+  //it could also be done by checking the columns instead.
+  for(int i=0; i<DEFAULT_SIZE; i++){
+    tents+=game_get_current_nb_tents_row(g,i);
+  }
+  return tents;
+}
 
 /**
  * @brief Plays a move in a given square.
