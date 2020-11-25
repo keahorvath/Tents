@@ -31,7 +31,15 @@ typedef const struct game_s *cgame;
  * @return the created game
  **/
 game game_new(square *squares, uint *nb_tents_row, uint *nb_tents_col) {
-  return 0;
+	cgame g = game_default();
+	for(int i = 0; i<DEFAULT_SIZE; i++){
+		for(int j = 0; j<DEFAULT_SIZE; j++){
+			if(game_get_expected_nb_tents_row(cgame g, i) == game_get_current_nb_tents_row(cgame g, i) && game_get_expected_nb_tents_col(cgame g, j) == game_get_current_nb_tents_col(cgame g, j) && game_get_expected_nb_tents_all(cgame g) == game_get_current_nb_tents_all(cgame g){
+				return cgame g;
+			}
+		}
+	}
+	return 0;
 }
 
 /**
@@ -40,15 +48,27 @@ game game_new(square *squares, uint *nb_tents_row, uint *nb_tents_col) {
  * numbers of tents for each row/column are set to zero.
  * @return the created game
  **/
-game game_new_empty(void) { return 0; }
-
+game game_new_empty(void) {
+	cgame g = game_default;
+	for(int i = 0; i<DEFAULT_SIZE; i++){
+		for(int i = 0; j<DEFAULT_SIZE; j++){
+			get_set_square(cgame g, i, j, EMPTY);
+			return cgame g;
+		}
+	}
+}
 /**
  * @brief Duplicates a game.
  * @param g the game to copy
  * @return the copy of the game
  * @pre @p g must be a valid pointer toward a game structure.
  **/
-game game_copy(cgame g) { return 0; }
+game game_copy(cgame g) {
+	if(g == NULL){
+		fprintf(stderr,"Function called on NULL pointer\n");
+	}
+	return game_default();
+}
 
 /**
  * @brief Tests if two games are equal.
@@ -58,14 +78,27 @@ game game_copy(cgame g) { return 0; }
  * @pre @p g1 must be a valid pointer toward a game structure.
  * @pre @p g2 must be a valid pointer toward a game structure.
  **/
-bool game_equal(cgame g1, cgame g2) { return true; }
+bool game_equal(cgame g1, cgame g2) {
+	if(g1 == NULL || g2 == NULL){
+		fprintf(stderr,"Function call on NULL pointer\n");
+	}
+	if(game_copy(g1) != game_copy(g2)){
+		return false;
+	}
+	return true;
+}
 
 /**
  * @brief Deletes the game and frees the allocated memory.
  * @param g the game to delete
  * @pre @p g must be a valid pointer toward a game structure.
  **/
-void game_delete(game g) {}
+void game_delete(game g) {
+	if(g == NULL){
+		fprintf(stderr;"Function called on NULL pointer\n");
+	}
+	free(g);
+}
 
 /**
  * @brief Sets the value of a given square.
