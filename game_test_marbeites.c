@@ -8,7 +8,7 @@
 /*Tests*/
 
 // Test game_get_expected_nb_tents_row
-bool test_get_expected_nb_tents_row(int k) {
+bool test_game_get_expected_nb_tents_row(int k) {
   if ((k < 0) | (k > 7)) {
     fprintf(stderr, "Error : this row doesn't exist\n");
     return false;
@@ -47,7 +47,7 @@ bool test_get_expected_nb_tents_row(int k) {
 };
 
 // Test game_get_expected_nb_tents_col
-bool test_get_expected_nb_tents_col(int k) {
+bool test_game_get_expected_nb_tents_col(int k) {
   if ((k < 0) | (k > 7)) {
     fprintf(stderr, "Error: this column doesn't exist\n");
     return false;
@@ -86,7 +86,7 @@ bool test_get_expected_nb_tents_col(int k) {
 };
 
 // Test game_get_expected_nb_tents_all
-bool test_get_expected_nb_tents_all(void) {
+bool test_game_get_expected_nb_tents_all(void) {
   game g = game_default();
   if (g == NULL) {
     fprintf(stderr, "Error : invalid game\n");
@@ -100,7 +100,7 @@ bool test_get_expected_nb_tents_all(void) {
 };
 
 // Test game_get_current_nb_tents_row
-bool test_get_current_nb_tents_row(int k) {
+bool test_game_get_current_nb_tents_row(int k) {
   if ((k < 0) | (k > 7)) {
     fprintf(stderr, "Error: this row doesn't exist\n");
     return false;
@@ -139,7 +139,7 @@ bool test_get_current_nb_tents_row(int k) {
 };
 
 // Test game_get_current_nb_tents_col
-bool test_get_current_nb_tents_col(int k) {
+bool test_game_get_current_nb_tents_col(int k) {
   if ((k < 0) | (k > 7)) {
     fprintf(stderr, "Error: this column doesn't exist\n");
     return false;
@@ -178,7 +178,7 @@ bool test_get_current_nb_tents_col(int k) {
 };
 
 // Test game_get_current_nb_tents_all
-bool test_get_current_nb_tents_all(void) {
+bool test_game_get_current_nb_tents_all(void) {
   game g = game_default();
   if (g == NULL) {
     fprintf(stderr, "Error : invalid game\n");
@@ -207,17 +207,17 @@ int main(int argc, char *argv[]) {
   fprintf(stderr, "=> Start test \"%s\"\n", argv[1]);
   bool ok = false;
   if (strcmp("get_expected_nb_tents_row", argv[1]) == 0) {
-    ok = test_get_expected_nb_tents_row(0);
+    ok = test_game_get_expected_nb_tents_row(0);
   } else if (strcmp("get_expected_nb_tents_col", argv[1]) == 0) {
-    ok = test_get_expected_nb_tents_col(0);
+    ok = test_game_get_expected_nb_tents_col(0);
   } else if (strcmp("get_expected_nb_tents_all", argv[1]) == 0) {
-    ok = test_get_expected_nb_tents_all();
+    ok = test_game_get_expected_nb_tents_all();
   } else if (strcmp("get_current_nb_tents_row", argv[1]) == 0) {
-    ok = test_get_current_nb_tents_row(0);
+    ok = test_game_get_current_nb_tents_row(0);
   } else if (strcmp("get_current_nb_tents_col", argv[1]) == 0) {
-    ok = test_get_current_nb_tents_col(0);
+    ok = test_game_get_current_nb_tents_col(0);
   } else if (strcmp("get_current_nb_tents_all", argv[1]) == 0) {
-    ok = test_get_current_nb_tents_all();
+    ok = test_game_get_current_nb_tents_all();
   } else {
     fprintf(stderr, "Error: test \"%s\" not found!\n", argv[1]);
     exit(EXIT_FAILURE);

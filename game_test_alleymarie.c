@@ -25,7 +25,7 @@ bool test_game_default(void) {
   if (!game_equal(gm1, gm2)) {
     return false;
   }
-  game_play_move(g1, 4, 4, GRASS);
+  game_play_move(gm1, 4, 4, GRASS);
   game_delete(gm1);
   game_delete(gm2);
   return true;
@@ -84,13 +84,10 @@ bool test_game_new(void) {
 bool test_game_new_empty(void) {
   game gm = game_new_empty();
   for (int i = 0; i < 8; i++) {
-    if (game_get_expected_nb_tents_row(gm, i) != 0) {
+    if (game_get_expected_nb_tents_row(gm, i) != 0  || game_get_expected_nb_tents_col(gm, i) != 0) {
       return false;
     }
     for (int j = 0; j < 8; j++) {
-      if (game_get_expected_nb_tents_col(gm, j) != 0) {
-        return false;
-      }
       if (game_get_square(gm, i, j) != EMPTY) {
         return false;
       }

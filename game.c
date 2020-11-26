@@ -5,11 +5,14 @@
 #include "game_aux.c"
 
 struct game_s {
-  square squares[DEFAULT_SIZE * DEFAULT_SIZE];
-  uint nb_tents_row[DEFAULT_SIZE];
-  uint nb_tents_col[DEFAULT_SIZE];
+  square *squares;
+  uint *nb_tents_row;
+  uint *nb_tents_col;
 };
 
+/**
+ * @brief The structure pointer that stores the game state.
+ **/
 typedef struct game_s *game;
 
 /**
@@ -31,15 +34,15 @@ typedef const struct game_s *cgame;
  * @return the created game
  **/
 game game_new(square *squares, uint *nb_tents_row, uint *nb_tents_col) {
-	cgame g = game_default();
-	for(int i = 0; i<DEFAULT_SIZE; i++){
-		for(int j = 0; j<DEFAULT_SIZE; j++){
-			if(game_get_expected_nb_tents_row(cgame g, i) == game_get_current_nb_tents_row(cgame g, i) && game_get_expected_nb_tents_col(cgame g, j) == game_get_current_nb_tents_col(cgame g, j) && game_get_expected_nb_tents_all(cgame g) == game_get_current_nb_tents_all(cgame g){
-				return cgame g;
-			}
-		}
-	}
-	return 0;
+  if (squares == NULL || nb_tents_row == NULL || nb_tents_col == NULL) {
+    fprintf(stderr, "Function called on NULL pointer!\n");
+    exit(EXIT_FAILURE);
+  }
+  game g = game_new_empty();
+  g->squares = squares;
+  g->nb_tents_col = nb_tents_col;
+  g->nb_tents_row = nb_tents_row;
+  return g;
 }
 
 /**
@@ -49,14 +52,37 @@ game game_new(square *squares, uint *nb_tents_row, uint *nb_tents_col) {
  * @return the created game
  **/
 game game_new_empty(void) {
-	cgame g = game_default;
-	for(int i = 0; i<DEFAULT_SIZE; i++){
-		for(int i = 0; j<DEFAULT_SIZE; j++){
-			get_set_square(cgame g, i, j, EMPTY);
-			return cgame g;
-		}
-	}
+  game g;
+  g = (game)malloc(sizeof(struct game_s));
+  if (g == NULL) {
+    fprintf(stderr, "Not enough memory!\n");
+    exit(EXIT_FAILURE);
+  }
+  g->squares = (square *)malloc(sizeof(square) * DEFAULT_SIZE * DEFAULT_SIZE);
+  if (g->squares == NULL) {
+    fprintf(stderr, "Not enough memory!\n");
+    exit(EXIT_FAILURE);
+  }
+  g->nb_tents_col = (uint *)malloc(sizeof(uint) * DEFAULT_SIZE);
+  if (g->nb_tents_col == NULL) {
+    fprintf(stderr, "Not enough memory!\n");
+    exit(EXIT_FAILURE);
+  }
+  g->nb_tents_row = (uint *)malloc(sizeof(uint) * DEFAULT_SIZE);
+  if (g->nb_tents_row == NULL) {
+    fprintf(stderr, "Not enough memory!\n");
+    exit(EXIT_FAILURE);
+  }
+  for (int i = 0; i < DEFAULT_SIZE; i++) {
+    game_set_expected_nb_tents_row(g, i, 0);
+    game_set_expected_nb_tents_col(g, i, 0);
+    for (int j = 0; j < DEFAULT_SIZE; j++) {
+      game_set_square(g, i, j, EMPTY);
+    }
+  }
+  return g;
 }
+
 /**
  * @brief Duplicates a game.
  * @param g the game to copy
@@ -64,10 +90,22 @@ game game_new_empty(void) {
  * @pre @p g must be a valid pointer toward a game structure.
  **/
 game game_copy(cgame g) {
-	if(g == NULL){
-		fprintf(stderr,"Function called on NULL pointer\n");
-	}
-	return game_default();
+  if (g == NULL) {
+    fprintf(stderr, "Function called on NULL pointer\n");
+    exit(EXIT_FAILURE);
+  }
+  game g_copy = game_new_empty();
+  for (uint i = 0; i < DEFAULT_SIZE; i++) {
+    uint nb_c = game_get_expected_nb_tents_col(g, i);
+    uint nb_r = game_get_expected_nb_tents_row(g, i);
+    game_set_expected_nb_tents_col(g_copy, i, nb_c);
+    game_set_expected_nb_tents_row(g_copy, i, nb_r);
+    for (uint j = 0; j < DEFAULT_SIZE; j++) {
+      square s = game_get_square(g, i, j);
+      game_set_square(g_copy, i, j, s);
+    }
+  }
+  return g_copy;
 }
 
 /**
@@ -79,13 +117,23 @@ game game_copy(cgame g) {
  * @pre @p g2 must be a valid pointer toward a game structure.
  **/
 bool game_equal(cgame g1, cgame g2) {
-	if(g1 == NULL || g2 == NULL){
-		fprintf(stderr,"Function call on NULL pointer\n");
-	}
-	if(game_copy(g1) != game_copy(g2)){
-		return false;
-	}
-	return true;
+  if (g1 == NULL || g2 == NULL) {
+    fprintf(stderr, "Function call on NULL pointer\n");
+  }
+  for (uint i = 0; i < DEFAULT_SIZE; i++) {
+    if (game_get_expected_nb_tents_col(g1, i) !=
+            game_get_expected_nb_tents_col(g2, i) ||
+        game_get_expected_nb_tents_row(g1, i) !=
+            game_get_expected_nb_tents_row(g2, i)) {
+      return false;
+    }
+    for (uint j = 0; j < DEFAULT_SIZE; j++) {
+      if (game_get_square(g1, i, j) != game_get_square(g2, i, j)) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 /**
@@ -94,10 +142,12 @@ bool game_equal(cgame g1, cgame g2) {
  * @pre @p g must be a valid pointer toward a game structure.
  **/
 void game_delete(game g) {
-	if(g == NULL){
-		fprintf(stderr;"Function called on NULL pointer\n");
-	}
-	free(g);
+  if (g != NULL) {
+    free(g->nb_tents_col);
+    free(g->nb_tents_row);
+    free(g->squares);
+  }
+  free(g);
 }
 
 /**
@@ -155,7 +205,9 @@ void game_set_expected_nb_tents_col(game g, uint j, uint nb_tents) {}
  * @pre @p g must be a valid pointer toward a game structure.
  * @pre @p i < game width
  **/
-uint game_get_expected_nb_tents_row(cgame g, uint i) { return g->nb_tents_row[i]; }
+uint game_get_expected_nb_tents_row(cgame g, uint i) {
+  return g->nb_tents_row[i];
+}
 
 /**
  * @brief Gets the expected number of tents in a given column.
@@ -165,7 +217,9 @@ uint game_get_expected_nb_tents_row(cgame g, uint i) { return g->nb_tents_row[i]
  * @pre @p g must be a valid pointer toward a game structure.
  * @pre @p j < game height
  **/
-uint game_get_expected_nb_tents_col(cgame g, uint j) { return g->nb_tents_col[j]; }
+uint game_get_expected_nb_tents_col(cgame g, uint j) {
+  return g->nb_tents_col[j];
+}
 
 /**
  * @brief Gets the expected number of tents on the whole grid.
@@ -174,15 +228,16 @@ uint game_get_expected_nb_tents_col(cgame g, uint j) { return g->nb_tents_col[j]
  * @pre @p g must be a valid pointer toward a game structure.
  **/
 uint game_get_expected_nb_tents_all(cgame g) {
-  //set counter for the amount of tents.
-  int tents=0;
-  //checking array for expected number of tents for each row.
-  //it could also be done by checking the array of expected number of tents for each column instead.
-  for(int i=0; i<DEFAULT_SIZE; i++){
-    tents+=g->nb_tents_row[i];
-    }
-  return tents;
+  // set counter for the amount of tents.
+  int tents = 0;
+  // checking array for expected number of tents for each row.
+  // it could also be done by checking the array of expected number of tents for
+  // each column instead.
+  for (int i = 0; i < DEFAULT_SIZE; i++) {
+    tents += g->nb_tents_row[i];
   }
+  return tents;
+}
 
 /**
  * @brief Gets the current number of tents in a given row.
@@ -193,16 +248,17 @@ uint game_get_expected_nb_tents_all(cgame g) {
  * @pre @p i < game width
  **/
 uint game_get_current_nb_tents_row(cgame g, uint i) {
-  //setting a counter for the amount of tents.
-  int tents=0;
-  //checking each square of the row.
-  for(int j=0; j<DEFAULT_SIZE; j++){
-    //if the square is a tent then increase the counter by 1, otherwise the counter is unchanged.
-    if(game_get_square(g,i,j)==2){
+  // setting a counter for the amount of tents.
+  int tents = 0;
+  // checking each square of the row.
+  for (int j = 0; j < DEFAULT_SIZE; j++) {
+    // if the square is a tent then increase the counter by 1, otherwise the
+    // counter is unchanged.
+    if (game_get_square(g, i, j) == 2) {
       tents++;
     }
-    }
-    return tents;
+  }
+  return tents;
 }
 
 /**
@@ -214,17 +270,18 @@ uint game_get_current_nb_tents_row(cgame g, uint i) {
  * @pre @p j < game height
  **/
 uint game_get_current_nb_tents_col(cgame g, uint j) {
-  //setting a counter for the amount of tents.
-  int tents=0;
-  //checking each square of the row.
-  for(int i=0; i<DEFAULT_SIZE; i++){
-    //if the square is a tent then increase the counter by 1, otherwise the counter is unchanged.
-    if(game_get_square(g,i,j)==2){
+  // setting a counter for the amount of tents.
+  int tents = 0;
+  // checking each square of the row.
+  for (int i = 0; i < DEFAULT_SIZE; i++) {
+    // if the square is a tent then increase the counter by 1, otherwise the
+    // counter is unchanged.
+    if (game_get_square(g, i, j) == 2) {
       tents++;
-      }
-      }
-      return tents;
- }
+    }
+  }
+  return tents;
+}
 
 /**
  * @brief Gets the current number of tents on the whole grid.
@@ -233,12 +290,12 @@ uint game_get_current_nb_tents_col(cgame g, uint j) {
  * @pre @p g must be a valid pointer toward a game structure.
  **/
 uint game_get_current_nb_tents_all(cgame g) {
-  //setting a counter for the amount of tents.
-  int tents=0;
-  //checking each arrow to retrieve the amount of tents for all of them.
-  //it could also be done by checking the columns instead.
-  for(int i=0; i<DEFAULT_SIZE; i++){
-    tents+=game_get_current_nb_tents_row(g,i);
+  // setting a counter for the amount of tents.
+  int tents = 0;
+  // checking each arrow to retrieve the amount of tents for all of them.
+  // it could also be done by checking the columns instead.
+  for (int i = 0; i < DEFAULT_SIZE; i++) {
+    tents += game_get_current_nb_tents_row(g, i);
   }
   return tents;
 }
