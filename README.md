@@ -51,6 +51,8 @@
 
     game_play_move
     game_check_move
+    game_get_current_nb_empty_spaces_col
+    game_get_current_nb_empty_spaces_row
     game_fill_grass_row
     game_fill_grass_col
     game_restart
