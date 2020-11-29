@@ -163,7 +163,13 @@ void game_delete(game g) {
  * @pre @p j < game height
  * @pre @p s must be either EMPTY, GRASS, TENT or TREE.
  **/
-void game_set_square(game g, uint i, uint j, square s) {}
+void game_set_square(game g, uint i, uint j, square s) {
+  if ((g==NULL)|| (g->squares==NULL)){
+    printf("game doesn't exist");
+    exit(EXIT_FAILURE);
+  }
+  g->squares[j+i*DEFAULT_SIZE]=s;
+}
 
 /**
  * @brief Gets the value of a given square.
@@ -175,7 +181,13 @@ void game_set_square(game g, uint i, uint j, square s) {}
  * @pre @p j < game height
  * @return the square value
  **/
-square game_get_square(cgame g, uint i, uint j) { return TREE; }
+square game_get_square(cgame g, uint i, uint j) {
+  if ((g==NULL)|| (g->squares==NULL)){
+    printf("not enough memory");
+    exit(EXIT_FAILURE); 
+  }
+  return g->squares[j+i*DEFAULT_SIZE]; 
+}
 
 /**
  * @brief Sets the expected number of tents in a given row.
@@ -185,7 +197,15 @@ square game_get_square(cgame g, uint i, uint j) { return TREE; }
  * @pre @p g must be a valid pointer toward a game structure.
  * @pre @p i < game width
  **/
-void game_set_expected_nb_tents_row(game g, uint i, uint nb_tents) {}
+void game_set_expected_nb_tents_row(game g, uint i, uint nb_tents) {
+  if ((g==NULL)|| (g->nb_tents_row==NULL)){
+    printf("not enough memory");
+    exit(EXIT_FAILURE); 
+  }
+  g->nb_tents_row[i]=nb_tents; 
+
+
+}
 
 /**
  * @brief Sets the expected number of tents in a given column.
@@ -195,7 +215,13 @@ void game_set_expected_nb_tents_row(game g, uint i, uint nb_tents) {}
  * @pre @p g must be a valid pointer toward a game structure.
  * @pre @p j < game height
  **/
-void game_set_expected_nb_tents_col(game g, uint j, uint nb_tents) {}
+void game_set_expected_nb_tents_col(game g, uint j, uint nb_tents) {
+  if ((g==NULL)|| (g->nb_tents_col==NULL)){
+    printf("not enough memory");
+    exit(EXIT_FAILURE); 
+  }
+  g->nb_tents_col[j]=nb_tents; 
+}
 
 /**
  * @brief Gets the expected number of tents in a given row.
