@@ -573,6 +573,9 @@ bool game_is_over(cgame g) {
       }
     }
   }
+  if(game_get_current_nb_tents_all(g)!= game_get_expected_nb_tents_all(g)){
+    return false;
+  }
   return true;
 }
 
