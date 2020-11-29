@@ -435,7 +435,26 @@ int game_check_move(cgame g, uint i, uint j, square s) {
  * @return true if the game ended successfully, false otherwise
  * @pre @p g must be a valid pointer toward a game structure.
  **/
-bool game_is_over(cgame g) { return true; }
+bool game_is_over(cgame g) { 
+  for (uint i=0; i<DEFAULT_SIZE; i++){
+    if (game_get_current_nb_tents_row(g,i)!=
+        game_get_expected_nb_tents_row(g,i)){
+          return false;
+        }
+    if (game_get_current_nb_tents_col(g,i)!=
+        game_get_expected_nb_tents_col(g,i)){
+          return false;
+        }
+    for (uint j = 0 ; j<DEFAULT_SIZE ; j++){
+      if (game_get_square(g,i,j)!=TREE){
+        if (game_check_move(g,i,j,game_get_square(g,i,j))!= REGULAR){
+          return false ;
+        }
+      }
+    }
+  }
+  return true; 
+  }
 
 /**
  * @brief Fills a row with grass.
