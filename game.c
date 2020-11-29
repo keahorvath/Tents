@@ -39,9 +39,13 @@ game game_new(square *squares, uint *nb_tents_row, uint *nb_tents_col) {
     exit(EXIT_FAILURE);
   }
   game g = game_new_empty();
-  g->squares = squares;
-  g->nb_tents_col = nb_tents_col;
-  g->nb_tents_row = nb_tents_row;
+  for (uint i = 0; i < DEFAULT_SIZE*DEFAULT_SIZE; i++){
+    g->squares[i] = squares[i];
+  }
+  for (uint i = 0; i < DEFAULT_SIZE; i++){
+    g->nb_tents_col[i] = nb_tents_col[i];
+    g->nb_tents_row[i] = nb_tents_row[i];
+  }
   return g;
 }
 
@@ -52,8 +56,7 @@ game game_new(square *squares, uint *nb_tents_row, uint *nb_tents_col) {
  * @return the created game
  **/
 game game_new_empty(void) {
-  game g;
-  g = (game)malloc(sizeof(struct game_s));
+  game g = (game)malloc(sizeof(struct game_s));
   if (g == NULL) {
     fprintf(stderr, "Not enough memory!\n");
     exit(EXIT_FAILURE);
@@ -203,8 +206,6 @@ void game_set_expected_nb_tents_row(game g, uint i, uint nb_tents) {
     exit(EXIT_FAILURE); 
   }
   g->nb_tents_row[i]=nb_tents; 
-
-
 }
 
 /**
