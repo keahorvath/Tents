@@ -232,6 +232,26 @@ void game_play_move(game g, uint i, uint j, square s);
 int game_check_move(cgame g, uint i, uint j, square s);
 
 /**
+ * @brief Gets the current number of empty spaces in a given row.
+ * @param g the game
+ * @param i row index
+ * @return the current number of tents on this row
+ * @pre @p g must be a valid pointer toward a game structure.
+ * @pre @p i < game width
+ **/
+uint game_get_current_nb_empty_spaces_row(cgame g, uint i);
+
+/**
+ * @brief Gets the current number of empty spaces in a given column.
+ * @param g the game
+ * @param j column index
+ * @return the expected number of tents on this column
+ * @pre @p g must be a valid pointer toward a game structure.
+ * @pre @p j < game height
+ **/
+uint game_get_current_nb_empty_spaces_col(cgame g, uint j);
+
+/**
  * @brief Checks if the game is won.
  * @param g the game
  * @details This function checks that all the game rules (decribed on @ref
