@@ -206,17 +206,17 @@ int main(int argc, char *argv[]) {
   // start tests
   fprintf(stderr, "=> Start test \"%s\"\n", argv[1]);
   bool ok = false;
-  if (strcmp("get_expected_nb_tents_row", argv[1]) == 0) {
+  if (strcmp("game_get_expected_nb_tents_row", argv[1]) == 0) {
     ok = test_game_get_expected_nb_tents_row(0);
-  } else if (strcmp("get_expected_nb_tents_col", argv[1]) == 0) {
+  } else if (strcmp("game_get_expected_nb_tents_col", argv[1]) == 0) {
     ok = test_game_get_expected_nb_tents_col(0);
-  } else if (strcmp("get_expected_nb_tents_all", argv[1]) == 0) {
+  } else if (strcmp("game_get_expected_nb_tents_all", argv[1]) == 0) {
     ok = test_game_get_expected_nb_tents_all();
-  } else if (strcmp("get_current_nb_tents_row", argv[1]) == 0) {
+  } else if (strcmp("game_get_current_nb_tents_row", argv[1]) == 0) {
     ok = test_game_get_current_nb_tents_row(0);
-  } else if (strcmp("get_current_nb_tents_col", argv[1]) == 0) {
+  } else if (strcmp("game_get_current_nb_tents_col", argv[1]) == 0) {
     ok = test_game_get_current_nb_tents_col(0);
-  } else if (strcmp("get_current_nb_tents_all", argv[1]) == 0) {
+  } else if (strcmp("game_get_current_nb_tents_all", argv[1]) == 0) {
     ok = test_game_get_current_nb_tents_all();
   } else {
     fprintf(stderr, "Error: test \"%s\" not found!\n", argv[1]);

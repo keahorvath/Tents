@@ -34,7 +34,7 @@ target_link_libraries(game_test_alleymarie game)
 
 #Tests alleymarie
 add_test(test_alleymarie_game_print ./game_test_alleymarie game_print)
-add_test(test_alleymarie_game_default ./game_test_alleymarie game_game_default)
+add_test(test_alleymarie_game_default ./game_test_alleymarie game_default)
 add_test(test_alleymarie_game_default_solution ./game_test_alleymarie game_default_solution)
 add_test(test_alleymarie_game_new ./game_test_alleymarie game_new)
 add_test(test_alleymarie_game_new_empty ./game_test_alleymarie game_new_empty)

@@ -123,17 +123,14 @@ bool game_equal(cgame g1, cgame g2) {
   if (g1 == NULL || g2 == NULL) {
     fprintf(stderr, "Function call on NULL pointer\n");
   }
-  for (uint i = 0; i < DEFAULT_SIZE; i++) {
-    if (game_get_expected_nb_tents_col(g1, i) !=
-            game_get_expected_nb_tents_col(g2, i) ||
-        game_get_expected_nb_tents_row(g1, i) !=
-            game_get_expected_nb_tents_row(g2, i)) {
+  for (uint i = 0; i < DEFAULT_SIZE; i++){
+    if (g1->nb_tents_row[i] != g2->nb_tents_row[i] || g1->nb_tents_col[i] != g2->nb_tents_col[i]){
       return false;
     }
-    for (uint j = 0; j < DEFAULT_SIZE; j++) {
-      if (game_get_square(g1, i, j) != game_get_square(g2, i, j)) {
-        return false;
-      }
+  }
+  for (uint i = 0; i < DEFAULT_SIZE*DEFAULT_SIZE; i++){
+    if (g1->squares[i] != g2->squares[i]){
+      return false;
     }
   }
   return true;
