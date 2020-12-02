@@ -116,7 +116,6 @@ bool test_game_is_over(void) {
   game g = game_default_solution();
   // test if the correct solution returns an error
   if (!game_is_over(g)) {
-    printf("yep1\n");
     return false;
   }
   // test if all tents connected to tree and vice versa
@@ -130,22 +129,9 @@ bool test_game_is_over(void) {
   game_play_move(g2, 2, 0, TENT);
   game_play_move(g2, 1, 5, TENT);
   if (game_is_over(g2)) {
-    printf("yep2\n");
     return false;
   }
-  // test if nbtrees != nbtents
-  square squares2[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-                       0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  uint nb_tents_row2[] = {0, 0, 0, 1, 0, 0, 0, 0};
-  uint nb_tents_col2[] = {0, 0, 0, 1, 0, 0, 0, 0};
-  game g3 = game_new(squares2, nb_tents_row2, nb_tents_col2);
-  game_play_move(g3, 3, 3, TENT);
-  if (game_is_over(g3)) {
-    printf("yep3\n");
-    return false;
-  }
+
   // test if tents are adjacent
   square squares3[] = {0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                        0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -158,33 +144,23 @@ bool test_game_is_over(void) {
   game_play_move(g4, 0, 4, TENT);
   game_play_move(g4, 2, 6, TENT);
   if (game_is_over(g4)) {
-    printf("yep4\n");
     return false;
   }
   // test if not having the right nb of tents in row/column still returns true
   game_play_move(g, 0, 0, GRASS);
   if (game_is_over(g)) {
-    printf("yep5\n");
     return false;
   }
-  game_play_move(g, 0, 0, TENT);
-  // test if having nbTents!=nbTrees returns true
-  game_set_square(g, 7, 0, GRASS);
-  if (game_is_over(g)) {
-    printf("yep6\n");
-    return false;
-  }
+
   game_set_square(g, 7, 0, TREE);
   // test if placing tent not next to tree still returns true
   game_play_move(g, 6, 0, GRASS);
   game_play_move(g, 6, 5, TENT);
   if (game_is_over(g)) {
-    printf("yep7\n");
     return false;
   }
   game_delete(g);
   game_delete(g2);
-  game_delete(g3);
   game_delete(g4);
   return true;
 }

@@ -123,13 +123,14 @@ bool game_equal(cgame g1, cgame g2) {
   if (g1 == NULL || g2 == NULL) {
     fprintf(stderr, "Function call on NULL pointer\n");
   }
-  for (uint i = 0; i < DEFAULT_SIZE; i++){
-    if (g1->nb_tents_row[i] != g2->nb_tents_row[i] || g1->nb_tents_col[i] != g2->nb_tents_col[i]){
+  for (uint i = 0; i < DEFAULT_SIZE; i++) {
+    if (g1->nb_tents_row[i] != g2->nb_tents_row[i] ||
+        g1->nb_tents_col[i] != g2->nb_tents_col[i]) {
       return false;
     }
   }
-  for (uint i = 0; i < DEFAULT_SIZE*DEFAULT_SIZE; i++){
-    if (g1->squares[i] != g2->squares[i]){
+  for (uint i = 0; i < DEFAULT_SIZE * DEFAULT_SIZE; i++) {
+    if (g1->squares[i] != g2->squares[i]) {
       return false;
     }
   }
@@ -426,17 +427,20 @@ int game_check_move(cgame g, uint i, uint j, square s) {
     exit(EXIT_FAILURE);
   }
   // placing or replacing TREE is illegal
-  if (s == TREE || game_get_square(g, i, j) == TREE) {
+  if ((s == TREE && game_get_square(g, i, j) != TREE) ||
+      (s != TREE && game_get_square(g, i, j) == TREE)) {
     return ILLEGAL;
   }
   if (s == TENT) {
     // placing n+1 tents in column or row is losing
     if (game_get_current_nb_tents_col(g, j) >=
-        game_get_expected_nb_tents_col(g, j)) {
+            game_get_expected_nb_tents_col(g, j) &&
+        game_get_square(g, i, j) != TENT) {
       return LOSING;
     }
     if (game_get_current_nb_tents_row(g, i) >=
-        game_get_expected_nb_tents_row(g, i)) {
+            game_get_expected_nb_tents_row(g, i) &&
+        game_get_square(g, i, j) != TENT) {
       return LOSING;
     }
     // placing tent adjacent to another tent is losing
@@ -468,15 +472,49 @@ int game_check_move(cgame g, uint i, uint j, square s) {
       return LOSING;
     }
     // placing tent with no tree around is losing
+
     if ((i > 0 && game_get_square(g, i - 1, j) != TREE) &&
         (j > 0 && game_get_square(g, i, j - 1) != TREE) &&
         (i < DEFAULT_SIZE - 1 && game_get_square(g, i + 1, j) != TREE) &&
         (j < DEFAULT_SIZE - 1 && game_get_square(g, i, j + 1) != TREE)) {
       return LOSING;
     }
+    // placing more tents than trees is losing
+    if (game_get_square(g, i, j) == TENT &&
+        game_get_current_nb_tents_all(g) > game_get_expected_nb_tents_all(g)) {
+      return LOSING;
+    }
+    if (game_get_square(g, i, j) != TENT &&
+        game_get_current_nb_tents_all(g) + 1 >
+            game_get_expected_nb_tents_all(g)) {
+      return LOSING;
+    }
+    // having less tents than trees when board is full is losing
+    uint nb_empty = 0;
+    for (uint a = 0; a < DEFAULT_SIZE; a++) {
+      for (uint b = 0; b < DEFAULT_SIZE; b++) {
+        if (game_get_square(g, a, b) == EMPTY) {
+          nb_empty++;
+        }
+      }
+    }
+    if (game_get_square(g, i, j) == EMPTY && nb_empty == 1 &&
+        game_get_current_nb_tents_all(g) + 1 <
+            game_get_expected_nb_tents_all(g)) {
+      return LOSING;
+    }
+    if (game_get_square(g, i, j) == TENT && nb_empty == 0 &&
+        game_get_current_nb_tents_all(g) < game_get_expected_nb_tents_all(g)) {
+      return LOSING;
+    }
+    if (game_get_square(g, i, j) == GRASS && nb_empty == 0 &&
+        game_get_current_nb_tents_all(g) + 1 <
+            game_get_expected_nb_tents_all(g)) {
+      return LOSING;
+    }
   }
 
-  if (s == GRASS) {
+  if (s == GRASS && game_get_square(g, i, j) != GRASS) {
     // placing grass and not enough empty spaces for tents is losing
     if (game_get_square(g, i, j) == EMPTY &&
         game_get_current_nb_empty_spaces_col(g, j) <=
@@ -556,6 +594,10 @@ uint game_get_current_nb_empty_spaces_col(cgame g, uint j) {
  * @pre @p g must be a valid pointer toward a game structure.
  **/
 bool game_is_over(cgame g) {
+  if (g == NULL) {
+    fprintf(stderr, "function called on NULL pointer!\n");
+    exit(EXIT_FAILURE);
+  }
   for (uint i = 0; i < DEFAULT_SIZE; i++) {
     if (game_get_current_nb_tents_row(g, i) !=
         game_get_expected_nb_tents_row(g, i)) {
@@ -573,7 +615,7 @@ bool game_is_over(cgame g) {
       }
     }
   }
-  if(game_get_current_nb_tents_all(g)!= game_get_expected_nb_tents_all(g)){
+  if (game_get_current_nb_tents_all(g) != game_get_expected_nb_tents_all(g)) {
     return false;
   }
   return true;
