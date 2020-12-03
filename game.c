@@ -516,72 +516,30 @@ int game_check_move(cgame g, uint i, uint j, square s) {
 
   if (s == GRASS && game_get_square(g, i, j) != GRASS) {
     // placing grass and not enough empty spaces for tents is losing
+    uint nb_empty_row = 0;
+    uint nb_empty_col = 0;
+    for (int j = 0; j < DEFAULT_SIZE; j++) {
+      if (game_get_square(g, i, j) == GRASS) {
+        nb_empty_row++;
+      }
+    }
+    for (int i = 0; i < DEFAULT_SIZE; i++) {
+      if (game_get_square(g, i, j) == GRASS) {
+        nb_empty_col++;
+      }
+    }
     if (game_get_square(g, i, j) == EMPTY &&
-        game_get_current_nb_empty_spaces_col(g, j) <=
-            (game_get_expected_nb_tents_col(g, j) -
-             game_get_current_nb_tents_col(g, j))) {
+        nb_empty_col <= (game_get_expected_nb_tents_col(g, j) -
+                         game_get_current_nb_tents_col(g, j))) {
       return LOSING;
     }
     if (game_get_square(g, i, j) == EMPTY &&
-        game_get_current_nb_empty_spaces_row(g, i) <=
-            (game_get_expected_nb_tents_row(g, i) -
-             game_get_current_nb_tents_row(g, i))) {
+        nb_empty_row <= (game_get_expected_nb_tents_row(g, i) -
+                         game_get_current_nb_tents_row(g, i))) {
       return LOSING;
     }
   }
   return REGULAR;
-}
-
-/**
- * @brief Gets the current number of empty spaces in a given row.
- * @param g the game
- * @param i row index
- * @return the current number of tents on this row
- * @pre @p g must be a valid pointer toward a game structure.
- * @pre @p i < game width
- **/
-uint game_get_current_nb_empty_spaces_row(cgame g, uint i) {
-  if (g == NULL) {
-    fprintf(stderr, "Function called on NULL pointer\n");
-    exit(EXIT_FAILURE);
-  }
-  if (i >= DEFAULT_SIZE) {
-    fprintf(stderr, "row number is invalid\n");
-    exit(EXIT_FAILURE);
-  }
-  uint n = 0;
-  for (int j = 0; j < DEFAULT_SIZE; j++) {
-    if (game_get_square(g, i, j) == GRASS) {
-      n++;
-    }
-  }
-  return n;
-}
-
-/**
- * @brief Gets the current number of empty spaces in a given column.
- * @param g the game
- * @param j column index
- * @return the expected number of tents on this column
- * @pre @p g must be a valid pointer toward a game structure.
- * @pre @p j < game height
- **/
-uint game_get_current_nb_empty_spaces_col(cgame g, uint j) {
-  if (g == NULL) {
-    fprintf(stderr, "Function called on NULL pointer\n");
-    exit(EXIT_FAILURE);
-  }
-  if (j >= DEFAULT_SIZE) {
-    fprintf(stderr, "column number is invalid\n");
-    exit(EXIT_FAILURE);
-  }
-  uint n = 0;
-  for (int i = 0; i < DEFAULT_SIZE; i++) {
-    if (game_get_square(g, i, j) == GRASS) {
-      n++;
-    }
-  }
-  return n;
 }
 
 /**
