@@ -9,6 +9,7 @@
 bool test_game_print(void) {
   game gm = game_default();
   game_print(gm);
+  game_delete(gm);
   return true;
 }
 
