@@ -519,8 +519,7 @@ int game_check_move(cgame g, uint i, uint j, square s) {
        return LOSING;
      }
      */
-   return REGULAR;
- }
+
     // placing tent with no tree around is losing
     /*
     uint nb_trees_around = 0;
@@ -574,7 +573,7 @@ int game_check_move(cgame g, uint i, uint j, square s) {
       return LOSING;
     }
   }
-
+*/
   if (s == GRASS) {
     // placing grass and not enough empty spaces for tents is losing
     uint nb_empty_row = 0;
@@ -717,8 +716,9 @@ int game_check_move(cgame g, uint i, uint j, square s) {
         return LOSING;
       }
     }
-    */
-
+    return REGULAR;
+  }
+}
 
 /**
  * @brief Checks if the game is won.
