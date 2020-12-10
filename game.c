@@ -563,10 +563,9 @@ int game_check_move(cgame g, uint i, uint j, square s) {
       nb_tents_to_place_row++;
     }
     if (nb_tents_to_place_row > nb_empty_row || nb_tents_to_place_col > nb_empty_col){
-      printf("1!\n");
       return LOSING;
     }
-    /*
+
     // surrounding tree by grass is losing
     if (i < DEFAULT_SIZE - 1 && game_get_square(g, i + 1, j) == TREE) {
       uint i_tree = i + 1;
@@ -596,6 +595,7 @@ int game_check_move(cgame g, uint i, uint j, square s) {
         return LOSING;
       }
     }
+    /*
     if (j < DEFAULT_SIZE - 1 && game_get_square(g, i, j + 1) == TREE) {
       uint i_tree = i;
       uint j_tree = j + 1;
