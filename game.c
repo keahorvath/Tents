@@ -537,7 +537,7 @@ int game_check_move(cgame g, uint i, uint j, square s) {
       return LOSING;
     }
   }
-  /*
+
   if (s == GRASS) {
     // placing grass and not enough empty spaces for tents is losing
     uint nb_empty_row = 0;
@@ -566,7 +566,7 @@ int game_check_move(cgame g, uint i, uint j, square s) {
       printf("1!\n");
       return LOSING;
     }
-
+    /*
     // surrounding tree by grass is losing
     if (i < DEFAULT_SIZE - 1 && game_get_square(g, i + 1, j) == TREE) {
       uint i_tree = i + 1;
@@ -680,8 +680,8 @@ int game_check_move(cgame g, uint i, uint j, square s) {
         return LOSING;
       }
     }
+    */
   }
-  */
   return REGULAR;
 }
 
