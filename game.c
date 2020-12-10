@@ -427,14 +427,11 @@ int game_check_move(cgame g, uint i, uint j, square s) {
     exit(EXIT_FAILURE);
   }
   // placing or replacing TREE is illegal
-  if ((s == TREE && game_get_square(g, i, j) != TREE) ||
-      (s != TREE && game_get_square(g, i, j) == TREE)) {
+  if (s == TREE ||
+      game_get_square(g, i, j) == TREE) {
     return ILLEGAL;
   }
-  // placing an empty space is regular
-  if (s == EMPTY) {
-    return REGULAR;
-  }
+
   if (s == TENT) {
     // placing n+1 tents in column or row is losing
     if (game_get_current_nb_tents_col(g, j) >=
