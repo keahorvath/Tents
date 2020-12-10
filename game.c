@@ -552,17 +552,20 @@ int game_check_move(cgame g, uint i, uint j, square s) {
         nb_empty_col++;
       }
     }
-    if (game_get_square(g, i, j) == EMPTY){
+    if (game_get_square(g, i, j) == EMPTY) {
       nb_empty_col--;
       nb_empty_row--;
     }
-    uint nb_tents_to_place_col = game_get_expected_nb_tents_col(g, j) - game_get_current_nb_tents_col(g, j);
-    uint nb_tents_to_place_row = game_get_expected_nb_tents_row(g, i) - game_get_current_nb_tents_row(g, i);
-    if (game_get_square(g, i, j) == TENT){
+    uint nb_tents_to_place_col = game_get_expected_nb_tents_col(g, j) -
+                                 game_get_current_nb_tents_col(g, j);
+    uint nb_tents_to_place_row = game_get_expected_nb_tents_row(g, i) -
+                                 game_get_current_nb_tents_row(g, i);
+    if (game_get_square(g, i, j) == TENT) {
       nb_tents_to_place_col++;
       nb_tents_to_place_row++;
     }
-    if (nb_tents_to_place_row > nb_empty_row || nb_tents_to_place_col > nb_empty_col){
+    if (nb_tents_to_place_row > nb_empty_row ||
+        nb_tents_to_place_col > nb_empty_col) {
       return LOSING;
     }
 
@@ -591,11 +594,10 @@ int game_check_move(cgame g, uint i, uint j, square s) {
         }
       }
       if (nb_grass_around_tree == nb_space_around) {
-        printf("3!\n");
         return LOSING;
       }
     }
-    
+
     if (j < DEFAULT_SIZE - 1 && game_get_square(g, i, j + 1) == TREE) {
       uint i_tree = i;
       uint j_tree = j + 1;
@@ -620,11 +622,10 @@ int game_check_move(cgame g, uint i, uint j, square s) {
         }
       }
       if (nb_grass_around_tree == nb_space_around) {
-        printf("4!\n");
         return LOSING;
       }
     }
-    
+
     if (i > 0 && game_get_square(g, i - 1, j) == TREE) {
       uint i_tree = i - 1;
       uint j_tree = j;
@@ -649,11 +650,10 @@ int game_check_move(cgame g, uint i, uint j, square s) {
         }
       }
       if (nb_grass_around_tree == nb_space_around) {
-        printf("5!\n");
         return LOSING;
       }
     }
-  
+
     if (j > 0 && game_get_square(g, i, j - 1) == TREE) {
       uint i_tree = i;
       uint j_tree = j - 1;
@@ -678,7 +678,6 @@ int game_check_move(cgame g, uint i, uint j, square s) {
         }
       }
       if (nb_grass_around_tree == nb_space_around) {
-        printf("6!\n");
         return LOSING;
       }
     }
@@ -718,17 +717,16 @@ bool game_is_over(cgame g) {
     }
   }
   uint nb_trees = 0;
-  for (uint i = 0; i < DEFAULT_SIZE; i++){
-    for (uint j = 0; j < DEFAULT_SIZE; j++){
-      if (game_get_square(g, i, j) == TREE){
+  for (uint i = 0; i < DEFAULT_SIZE; i++) {
+    for (uint j = 0; j < DEFAULT_SIZE; j++) {
+      if (game_get_square(g, i, j) == TREE) {
         nb_trees++;
       }
     }
   }
-  if (game_get_current_nb_tents_all(g) != nb_trees){
+  if (game_get_current_nb_tents_all(g) != nb_trees) {
     return false;
   }
-
   return true;
 }
 
