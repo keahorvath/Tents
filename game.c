@@ -717,9 +717,18 @@ bool game_is_over(cgame g) {
       }
     }
   }
-  if (game_get_current_nb_tents_all(g) != game_get_expected_nb_tents_all(g)) {
+  uint nb_trees = 0;
+  for (uint i = 0; i < DEFAULT_SIZE; i++){
+    for (uint j = 0; j < DEFAULT_SIZE; j++){
+      if (game_get_square(g, i, j) == TREE){
+        nb_trees++;
+      }
+    }
+  }
+  if (game_get_current_nb_tents_all(g) != nb_trees){
     return false;
   }
+
   return true;
 }
 

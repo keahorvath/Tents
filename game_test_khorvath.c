@@ -133,9 +133,30 @@ bool test_game_check_move(void) {
     return false;
   }
 
+  //test 10 if reverse game_default_solution is regular
+  game g3 = game_default_solution();
+  for (uint i = 0; i < DEFAULT_SIZE; i++){
+    for (uint j = 0; j < DEFAULT_SIZE; j++){
+      if (game_get_square(g3, i, j) == TENT){
+        if (game_check_move(g3, i, j, GRASS) == REGULAR){
+          printf("over test 6\n");
+          printf("i = %u, j = %u\n", i, j);
+          return false;
+        }
+      }
+      if (game_get_square(g3, i, j) == GRASS){
+        if (game_check_move(g3, i, j, TENT) == REGULAR){
+          printf("over test 7\n");
+          printf("i = %u, j = %u\n", i, j);
+          return false;
+        }
+      }
+    }
+  }
   game_delete(g);
   game_delete(g1);
   game_delete(g2);
+  game_delete(g3);
   return true;
 }
 
@@ -147,6 +168,7 @@ bool test_game_is_over(void) {
 
     return false;
   }
+  printf("not 1\n");
   // test 2 if all tents connected to tree and vice versa
   square squares[] = {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
@@ -155,12 +177,14 @@ bool test_game_is_over(void) {
   uint nb_tents_row[] = {0, 1, 1, 0, 0, 0, 0, 0};
   uint nb_tents_col[] = {1, 0, 0, 0, 0, 1, 0, 0};
   game g2 = game_new(squares, nb_tents_row, nb_tents_col);
-  game_play_move(g2, 2, 0, TENT);
-  game_play_move(g2, 1, 5, TENT);
+  game_set_square(g2, 2, 0, TENT);
+  game_set_square(g2, 1, 5, TENT);
   if (game_is_over(g2)) {
     printf("over test 2\n");
     return false;
   }
+  printf("not 2\n");
+
 
   // test 3 if tents are adjacent
   square squares3[] = {0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -169,34 +193,60 @@ bool test_game_is_over(void) {
                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   uint nb_tents_row3[] = {2, 0, 1, 0, 0, 0, 0, 0};
   uint nb_tents_col3[] = {0, 0, 0, 1, 1, 0, 1, 0};
-  game g4 = game_new(squares3, nb_tents_row3, nb_tents_col3);
-  game_play_move(g4, 0, 3, TENT);
-  game_play_move(g4, 0, 4, TENT);
-  game_play_move(g4, 2, 6, TENT);
-  if (game_is_over(g4)) {
+  game g3 = game_new(squares3, nb_tents_row3, nb_tents_col3);
+  game_set_square(g3, 0, 3, TENT);
+  game_set_square(g3, 0, 4, TENT);
+  game_set_square(g3, 2, 6, TENT);
+  if (game_is_over(g3)) {
     printf("over test 3\n");
     return false;
   }
+  printf("not 3\n");
 
   // test 4 if not having the right nb of tents in row/column still returns true
-  game_play_move(g, 0, 0, GRASS);
+  game_set_square(g, 0, 0, GRASS);
   if (game_is_over(g)) {
     printf("over test 4\n");
     return false;
   }
+    printf("not 4\n");
 
-  game_set_square(g, 7, 0, TREE);
+  game_set_square(g, 0, 0, TENT);
 
-  // test 5 if placing tent not next to tree still returns true
-  game_play_move(g, 6, 0, GRASS);
-  game_play_move(g, 6, 5, TENT);
-  if (game_is_over(g)) {
+  // test 5 if having tent not next to tree still returns true
+  square squares4[] = {0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1, 0, 0, 0, 0, 0,
+                       0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  uint nb_tents_row4[] = {0, 1, 1, 0, 0, 0, 0, 0};
+  uint nb_tents_col4[] = {1, 0, 1, 0, 0, 0, 0, 0};
+  game g4 = game_new(squares4, nb_tents_row4, nb_tents_col4);
+  if (game_is_over(g3)) {
     printf("over test 5\n");
     return false;
   }
+  printf("not 5\n");
+
+
+  //test 7 if nb tents = nb trees
+  square squares5[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0,
+                      0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  uint nb_tents_row5[] = {0, 1, 0, 0, 0, 0, 0, 0};
+  uint nb_tents_col5[] = {0, 0, 1, 0, 0, 0, 0, 0};
+  game g5 = game_new(squares5, nb_tents_row5, nb_tents_col5);
+  if (game_is_over(g5)){
+    printf("over test6\n");
+    return false;
+  }
+  printf("not 6\n");
+
   game_delete(g);
   game_delete(g2);
+  game_delete(g3);
   game_delete(g4);
+  game_delete(g5);
   return true;
 }
 
