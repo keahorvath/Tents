@@ -426,10 +426,15 @@ int game_check_move(cgame g, uint i, uint j, square s) {
     fprintf(stderr, "You can't place this kind of square\n");
     exit(EXIT_FAILURE);
   }
+
   // placing or replacing TREE is illegal
-  if (s == TREE ||
-      game_get_square(g, i, j) == TREE) {
+  if (s == TREE || game_get_square(g, i, j) == TREE) {
     return ILLEGAL;
+  }
+
+  //placing empty is regular
+  if (s == EMPTY){
+    return REGULAR;
   }
 
   if (s == TENT) {
@@ -482,7 +487,42 @@ int game_check_move(cgame g, uint i, uint j, square s) {
         game_get_square(g, i - 1, j + 1) == TENT) {
       return LOSING;
     }
+  }
+    /*
+     // placing tent with no tree around is losing
+     uint nb_trees_around = 0;
+  if (i > 0 && game_get_square(g, i - 1, j) == TREE) {
+       nb_trees_around++;
+     }
+    if (j > 0 && game_get_square(g, i, j - 1) == TREE) {
+       nb_trees_around++;
+     }
+    if (i < DEFAULT_SIZE - 1 && game_get_square(g, i + 1, j) == TREE) {
+       nb_trees_around++;
+     }
+    if (j < DEFAULT_SIZE - 1 && game_get_square(g, i, j + 1) == TREE) {
+       nb_trees_around++;
+     }
+    for (int i = 0; i < DEFAULT_SIZE; i++) {
+     if (game_get_square(g, i, j) == GRASS) {
+         nb_empty_col++;
+       }
+     }
+    if (game_get_square(g, i, j) == EMPTY &&
+       nb_empty_col <= (game_get_expected_nb_tents_col(g, j) -
+                        game_get_current_nb_tents_col(g, j))) {
+    return LOSING;
+}
+  if (game_get_square(g, i, j) == EMPTY &&
+        nb_empty_row <= (game_get_expected_nb_tents_row(g, i) -
+                         game_get_current_nb_tents_row(g, i))) {
+       return LOSING;
+     }
+     */
+   return REGULAR;
+ }
     // placing tent with no tree around is losing
+    /*
     uint nb_trees_around = 0;
     if (i > 0 && game_get_square(g, i - 1, j) == TREE) {
       nb_trees_around++;
@@ -677,9 +717,8 @@ int game_check_move(cgame g, uint i, uint j, square s) {
         return LOSING;
       }
     }
-  }
-  return REGULAR;
-}
+    */
+
 
 /**
  * @brief Checks if the game is won.
@@ -707,8 +746,6 @@ bool game_is_over(cgame g) {
     for (uint j = 0; j < DEFAULT_SIZE; j++) {
       if (game_get_square(g, i, j) != TREE) {
         if (game_check_move(g, i, j, game_get_square(g, i, j)) != REGULAR) {
-          printf("in over: %u %u move: %u\n", i, j, game_get_square(g, i, j));
-          printf("check:%u\n", game_check_move(g, i, j, GRASS));
           return false;
         }
       }
@@ -725,7 +762,6 @@ bool game_is_over(cgame g) {
   if (game_get_current_nb_tents_all(g) != nb_trees){
     return false;
   }
-
   return true;
 }
 
