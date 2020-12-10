@@ -67,6 +67,7 @@ bool test_game_check_move(void) {
   }
 
   // test 3/4 if placing n+1 tents in row or column is losing
+  printf("check : %d\n", game_check_move(g, 1, 1, TENT));
   if (game_check_move(g, 1, 1, TENT) != LOSING) {
     printf("test 3/4\n");
     return false;
@@ -127,6 +128,9 @@ bool test_game_check_move(void) {
 
     return false;
   }
+  if (game_check_move(g, 0, 2, TENT) != LOSING){
+    return false;
+  }
 
   game_delete(g);
   game_delete(g1);
@@ -136,7 +140,7 @@ bool test_game_check_move(void) {
 
 bool test_game_is_over(void) {
   game g = game_default_solution();
-  // test 1 if the correct solution returns an error
+  // test 1 if the correct default solution returns an error
   if (!game_is_over(g)) {
     printf("over test 1\n");
 

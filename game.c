@@ -443,6 +443,16 @@ int game_check_move(cgame g, uint i, uint j, square s) {
         game_get_square(g, i, j) != TENT) {
       return LOSING;
     }
+    if (game_get_current_nb_tents_row(g, i) >
+            game_get_expected_nb_tents_row(g, i) &&
+        game_get_square(g, i, j) == TENT) {
+      return LOSING;
+    }
+    if (game_get_current_nb_tents_col(g, j) >
+            game_get_expected_nb_tents_col(g, j) &&
+        game_get_square(g, i, j) == TENT) {
+      return LOSING;
+    }
     // placing tent adjacent to another tent is losing
     if (i > 0 && game_get_square(g, i - 1, j) == TENT) {
       return LOSING;
@@ -472,13 +482,23 @@ int game_check_move(cgame g, uint i, uint j, square s) {
       return LOSING;
     }
     // placing tent with no tree around is losing
-
-    if ((i > 0 && game_get_square(g, i - 1, j) != TREE) &&
-        (j > 0 && game_get_square(g, i, j - 1) != TREE) &&
-        (i < DEFAULT_SIZE - 1 && game_get_square(g, i + 1, j) != TREE) &&
-        (j < DEFAULT_SIZE - 1 && game_get_square(g, i, j + 1) != TREE)) {
+    uint nb_trees_around = 0;
+    if (i > 0 && game_get_square(g, i - 1, j) == TREE){
+      nb_trees_around++;
+    }
+    if (j > 0 && game_get_square(g, i, j - 1) == TREE){
+      nb_trees_around++;
+    }
+    if (i < DEFAULT_SIZE - 1 && game_get_square(g, i + 1, j) == TREE){
+      nb_trees_around++;
+    }
+    if (j < DEFAULT_SIZE - 1 && game_get_square(g, i, j + 1) == TREE){
+      nb_trees_around++;
+    }
+    if (nb_trees_around == 0){
       return LOSING;
     }
+
     // placing more tents than trees is losing
     if (game_get_square(g, i, j) == TENT &&
         game_get_current_nb_tents_all(g) > game_get_expected_nb_tents_all(g)) {
