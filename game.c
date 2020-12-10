@@ -431,6 +431,10 @@ int game_check_move(cgame g, uint i, uint j, square s) {
       (s != TREE && game_get_square(g, i, j) == TREE)) {
     return ILLEGAL;
   }
+  // placing an empty space is regular
+  if (s == EMPTY) {
+    return REGULAR;
+  }
   if (s == TENT) {
     // placing n+1 tents in column or row is losing
     if (game_get_current_nb_tents_col(g, j) >=
@@ -483,19 +487,19 @@ int game_check_move(cgame g, uint i, uint j, square s) {
     }
     // placing tent with no tree around is losing
     uint nb_trees_around = 0;
-    if (i > 0 && game_get_square(g, i - 1, j) == TREE){
+    if (i > 0 && game_get_square(g, i - 1, j) == TREE) {
       nb_trees_around++;
     }
-    if (j > 0 && game_get_square(g, i, j - 1) == TREE){
+    if (j > 0 && game_get_square(g, i, j - 1) == TREE) {
       nb_trees_around++;
     }
-    if (i < DEFAULT_SIZE - 1 && game_get_square(g, i + 1, j) == TREE){
+    if (i < DEFAULT_SIZE - 1 && game_get_square(g, i + 1, j) == TREE) {
       nb_trees_around++;
     }
-    if (j < DEFAULT_SIZE - 1 && game_get_square(g, i, j + 1) == TREE){
+    if (j < DEFAULT_SIZE - 1 && game_get_square(g, i, j + 1) == TREE) {
       nb_trees_around++;
     }
-    if (nb_trees_around == 0){
+    if (nb_trees_around == 0) {
       return LOSING;
     }
 
@@ -534,29 +538,147 @@ int game_check_move(cgame g, uint i, uint j, square s) {
     }
   }
 
-  if (s == GRASS && game_get_square(g, i, j) != GRASS) {
+  if (s == GRASS) {
     // placing grass and not enough empty spaces for tents is losing
     uint nb_empty_row = 0;
     uint nb_empty_col = 0;
-    for (int j = 0; j < DEFAULT_SIZE; j++) {
-      if (game_get_square(g, i, j) == GRASS) {
+    for (uint b = 0; b < DEFAULT_SIZE; b++) {
+      if (game_get_square(g, i, b) == EMPTY) {
         nb_empty_row++;
       }
     }
-    for (int i = 0; i < DEFAULT_SIZE; i++) {
-      if (game_get_square(g, i, j) == GRASS) {
+    for (uint a = 0; a < DEFAULT_SIZE; a++) {
+      if (game_get_square(g, a, j) == EMPTY) {
         nb_empty_col++;
       }
     }
-    if (game_get_square(g, i, j) == EMPTY &&
-        nb_empty_col <= (game_get_expected_nb_tents_col(g, j) -
-                         game_get_current_nb_tents_col(g, j))) {
+    if (game_get_square(g, i, j) == EMPTY){
+      nb_empty_col--;
+      nb_empty_row--;
+    }
+    uint nb_tents_to_place_col = game_get_expected_nb_tents_col(g, j) - game_get_current_nb_tents_col(g, j);
+    uint nb_tents_to_place_row = game_get_expected_nb_tents_row(g, i) - game_get_current_nb_tents_row(g, i);
+    if (game_get_square(g, i, j) == TENT){
+      nb_tents_to_place_col++;
+      nb_tents_to_place_row++;
+    }
+    if (nb_tents_to_place_row > nb_empty_row || nb_tents_to_place_col > nb_empty_col){
+      printf("1!\n");
       return LOSING;
     }
-    if (game_get_square(g, i, j) == EMPTY &&
-        nb_empty_row <= (game_get_expected_nb_tents_row(g, i) -
-                         game_get_current_nb_tents_row(g, i))) {
-      return LOSING;
+
+    // surrounding tree by grass is losing
+    if (i < DEFAULT_SIZE - 1 && game_get_square(g, i + 1, j) == TREE) {
+      uint i_tree = i + 1;
+      uint j_tree = j;
+      uint nb_grass_around_tree = 0;
+      uint nb_space_around = 0;
+      if (i_tree < DEFAULT_SIZE - 1) {
+        nb_space_around++;
+        if (game_get_square(g, i_tree + 1, j_tree) == GRASS) {
+          nb_grass_around_tree++;
+        }
+      }
+      if (j_tree < DEFAULT_SIZE - 1) {
+        nb_space_around++;
+        if (game_get_square(g, i_tree, j_tree + 1) == GRASS) {
+          nb_grass_around_tree++;
+        }
+      }
+      if (j_tree > 0) {
+        nb_space_around++;
+        if (game_get_square(g, i_tree, j_tree - 1) == GRASS) {
+          nb_grass_around_tree++;
+        }
+      }
+      if (nb_grass_around_tree == nb_space_around) {
+        printf("3!\n");
+        return LOSING;
+      }
+    }
+    if (j < DEFAULT_SIZE - 1 && game_get_square(g, i, j + 1) == TREE) {
+      uint i_tree = i;
+      uint j_tree = j + 1;
+      uint nb_grass_around_tree = 0;
+      uint nb_space_around = 0;
+      if (i_tree < DEFAULT_SIZE - 1) {
+        nb_space_around++;
+        if (game_get_square(g, i_tree + 1, j_tree) == GRASS) {
+          nb_grass_around_tree++;
+        }
+      }
+      if (j_tree < DEFAULT_SIZE - 1) {
+        nb_space_around++;
+        if (game_get_square(g, i_tree, j_tree + 1) == GRASS) {
+          nb_grass_around_tree++;
+        }
+      }
+      if (i_tree > 0) {
+        nb_space_around++;
+        if (game_get_square(g, i_tree - 1, j_tree) == GRASS) {
+          nb_grass_around_tree++;
+        }
+      }
+      if (nb_grass_around_tree == nb_space_around) {
+        printf("4!\n");
+        return LOSING;
+      }
+    }
+    if (i > 0 && game_get_square(g, i - 1, j) == TREE) {
+      uint i_tree = i - 1;
+      uint j_tree = j;
+      uint nb_grass_around_tree = 0;
+      uint nb_space_around = 0;
+      if (j_tree > 0) {
+        nb_space_around++;
+        if (game_get_square(g, i_tree, j_tree - 1) == GRASS) {
+          nb_grass_around_tree++;
+        }
+      }
+      if (j_tree < DEFAULT_SIZE - 1) {
+        nb_space_around++;
+        if (game_get_square(g, i_tree, j_tree + 1) == GRASS) {
+          nb_grass_around_tree++;
+        }
+      }
+      if (i_tree > 0) {
+        nb_space_around++;
+        if (game_get_square(g, i_tree - 1, j_tree) == GRASS) {
+          nb_grass_around_tree++;
+        }
+      }
+      if (nb_grass_around_tree == nb_space_around) {
+        printf("5!\n");
+        return LOSING;
+      }
+    }
+    if (i > 0 && game_get_square(g, i - 1, j) == TREE) {
+      uint i_tree = i - 1;
+      uint j_tree = j;
+      uint nb_grass_around_tree = 0;
+      uint nb_space_around = 0;
+      if (j_tree > 0) {
+        nb_space_around++;
+        if (game_get_square(g, i_tree, j_tree - 1) == GRASS) {
+          nb_grass_around_tree++;
+        }
+      }
+      if (i_tree < DEFAULT_SIZE - 1) {
+        nb_space_around++;
+        if (game_get_square(g, i_tree + 1, j_tree) == GRASS) {
+          nb_grass_around_tree++;
+        }
+      }
+      if (i_tree > 0) {
+        nb_space_around++;
+        if (game_get_square(g, i_tree - 1, j_tree) == GRASS) {
+          nb_grass_around_tree++;
+        }
+      }
+      if (nb_grass_around_tree == nb_space_around) {
+        printf("6!\n");
+        return LOSING;
+      }
     }
   }
   return REGULAR;
@@ -588,6 +710,8 @@ bool game_is_over(cgame g) {
     for (uint j = 0; j < DEFAULT_SIZE; j++) {
       if (game_get_square(g, i, j) != TREE) {
         if (game_check_move(g, i, j, game_get_square(g, i, j)) != REGULAR) {
+          printf("in over: %u %u move: %u\n", i, j, game_get_square(g, i, j));
+          printf("check:%u\n", game_check_move(g, i, j, GRASS));
           return false;
         }
       }
