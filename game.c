@@ -624,7 +624,7 @@ int game_check_move(cgame g, uint i, uint j, square s) {
         return LOSING;
       }
     }
-    /*
+    
     if (i > 0 && game_get_square(g, i - 1, j) == TREE) {
       uint i_tree = i - 1;
       uint j_tree = j;
@@ -653,6 +653,7 @@ int game_check_move(cgame g, uint i, uint j, square s) {
         return LOSING;
       }
     }
+    /*
     if (i > 0 && game_get_square(g, i - 1, j) == TREE) {
       uint i_tree = i - 1;
       uint j_tree = j;
