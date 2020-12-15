@@ -1,4 +1,4 @@
-# TEST
+# TESTS
 
 ## **Alex Leymarie**
 
@@ -8,6 +8,8 @@
     game_new
     game_new_empty
     game_copy
+    game_new_ext
+    game_new_empty_ext
 
 ## **Kea Horvath**
 
@@ -17,6 +19,7 @@
     game_fill_grass_row
     game_fill_grass_col
     game_restart
+    game_undo
 
 ## **Marvin Beites**
 
@@ -26,6 +29,10 @@
     game_get_current_nb_tents_row
     game_get_current_nb_tents_col
     game_get_current_nb_tents_all
+    game_nb_rows
+    game_nb_cols
+    game_is_wrapping
+    game_is_diagadj
 
 ## **Amira Mastouri**
 
@@ -35,6 +42,7 @@
     game_get_square
     game_set_expected_nb_tents_row
     game_set_expected_nb_tents_col
+    game_redo
 
 
 # FONCTIONS DE GAME.C
@@ -46,6 +54,8 @@
     game_copy
     game_equal
     game_delete
+    game_new_ext
+    game_new_empty_ext
 
 ## **Kea Horvath**
 
@@ -54,6 +64,7 @@
     game_fill_grass_row
     game_fill_grass_col
     game_restart
+    game_undo
 
 ## **Marvin Beites**
 
@@ -63,6 +74,10 @@
     game_get_current_nb_tents_row
     game_get_current_nb_tents_col
     game_get_current_nb_tents_all
+    game_nb_rows
+    game_nb_cols
+    game_is_wrapping
+    game_is_diagadj
 
 ## **Amira Mastouri**
 
@@ -71,3 +86,4 @@
     game_set_expected_nb_tents_row
     game_set_expected_nb_tents_col
     game_is_over
+    game_redo
