@@ -6,9 +6,13 @@
 #include "game_ext.h"
 
 struct game_s {
+  uint nb_rows;
+  uint nb_cols;
   square *squares;
   uint *nb_tents_row;
   uint *nb_tents_col;
+  bool wrapping;
+  bool diagadj;
 };
 
 /**
