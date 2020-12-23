@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "game.h"
 #include "game_aux.h"
+#include "game_ext.h"
 
 int main(void) {
   game current_game = game_default();
@@ -21,7 +22,13 @@ int main(void) {
     } else if (c == 'q') {
       printf("shame\n");
       return EXIT_SUCCESS;
-    } else if (ret1 == EOF) {
+    } else if (c == 'z'){
+      game_undo(current_game);
+      game_print(current_game);
+    } else if (c == 'y'){
+      game_redo(current_game);
+      game_print(current_game);
+    }else if (ret1 == EOF) {
       printf("End of file\n");
       exit(EXIT_SUCCESS);
     }

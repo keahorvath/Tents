@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "game.h"
+#include "game_ext.h"
 
 void game_print(cgame g) {
   if (g == NULL) {
@@ -9,15 +10,15 @@ void game_print(cgame g) {
     exit(EXIT_FAILURE);
   }
   printf("   ");
-  for (uint i = 0; i < 8; i++) {
+  for (uint i = 0; i < game_nb_rows(g); i++) {
     printf("%u", i);
   }
   printf("   ");
   printf("\n");
   printf("   --------   \n");
-  for (uint i = 0; i < 8; i++) {
+  for (uint i = 0; i < game_nb_rows(g); i++) {
     printf("%u |", i);
-    for (uint j = 0; j < 8; j++) {
+    for (uint j = 0; j < game_nb_cols(g); j++) {
       if (game_get_square(g, i, j) == EMPTY) {
         printf(" ");
       }
@@ -35,7 +36,7 @@ void game_print(cgame g) {
   }
   printf("   --------   \n");
   printf("   ");
-  for (uint i = 0; i < 8; i++) {
+  for (uint i = 0; i < game_nb_rows(g); i++) {
     printf("%u", game_get_expected_nb_tents_col(g, i));
   }
   printf("   \n");

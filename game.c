@@ -51,6 +51,10 @@ game game_new(square *squares, uint *nb_tents_row, uint *nb_tents_col) {
     g->nb_tents_col[i] = nb_tents_col[i];
     g->nb_tents_row[i] = nb_tents_row[i];
   }
+  g->nb_rows = DEFAULT_SIZE;
+  g->nb_cols = DEFAULT_SIZE;
+  g->wrapping = false;
+  g->diagadj = false;
   return g;
 }
 
@@ -88,6 +92,10 @@ game game_new_empty(void) {
       game_set_square(g, i, j, EMPTY);
     }
   }
+  g->nb_rows = DEFAULT_SIZE;
+  g->nb_cols = DEFAULT_SIZE;
+  g->wrapping = false;
+  g->diagadj = false;
   return g;
 }
 
@@ -102,13 +110,17 @@ game game_copy(cgame g) {
     fprintf(stderr, "Function called on NULL pointer\n");
     exit(EXIT_FAILURE);
   }
-  game g_copy = game_new_empty();
-  for (uint i = 0; i < DEFAULT_SIZE; i++) {
-    uint nb_c = game_get_expected_nb_tents_col(g, i);
+  game g_copy = game_new_empty_ext(game_nb_rows(g), game_nb_cols(g), game_is_wrapping(g), game_is_diagadj(g));
+  for (uint i = 0; i < game_nb_rows(g); i++) {
     uint nb_r = game_get_expected_nb_tents_row(g, i);
-    game_set_expected_nb_tents_col(g_copy, i, nb_c);
     game_set_expected_nb_tents_row(g_copy, i, nb_r);
-    for (uint j = 0; j < DEFAULT_SIZE; j++) {
+  }
+  for (uint j = 0; j < game_nb_cols(g); j++) {
+    uint nb_c = game_get_expected_nb_tents_col(g, j);
+    game_set_expected_nb_tents_col(g_copy, j, nb_c);
+  }
+  for (uint i = 0; i < game_nb_rows(g); i++){
+    for (uint j = 0; j < game_nb_cols(g); j++) {
       square s = game_get_square(g, i, j);
       game_set_square(g_copy, i, j, s);
     }
@@ -128,13 +140,23 @@ bool game_equal(cgame g1, cgame g2) {
   if (g1 == NULL || g2 == NULL) {
     fprintf(stderr, "Function call on NULL pointer\n");
   }
-  for (uint i = 0; i < DEFAULT_SIZE; i++) {
-    if (g1->nb_tents_row[i] != g2->nb_tents_row[i] ||
-        g1->nb_tents_col[i] != g2->nb_tents_col[i]) {
+  if (game_nb_cols(g1) != game_nb_cols(g2) || game_nb_rows(g1) != game_nb_rows(g2)){
+    return false;
+  }
+  if (game_is_diagadj(g1) != game_is_diagadj(g2) || game_is_wrapping(g1) != game_is_wrapping(g2)){
+    return false;
+  }
+  for (uint i = 0; i < game_nb_rows(g1); i++) {
+    if (g1->nb_tents_row[i] != g2->nb_tents_row[i]) {
       return false;
     }
   }
-  for (uint i = 0; i < DEFAULT_SIZE * DEFAULT_SIZE; i++) {
+  for (uint j = 0; j < game_nb_cols(g1); j++) {
+    if (g1->nb_tents_col[j] != g2->nb_tents_col[j]) {
+      return false;
+    }
+  }
+  for (uint i = 0; i < game_nb_rows(g1) * game_nb_cols(g2); i++) {
     if (g1->squares[i] != g2->squares[i]) {
       return false;
     }
@@ -174,7 +196,7 @@ void game_set_square(game g, uint i, uint j, square s) {
     printf("game doesn't exist");
     exit(EXIT_FAILURE);
   }
-  g->squares[j + i * DEFAULT_SIZE] = s;
+  g->squares[j + i * game_nb_cols(g)] = s;
 }
 
 /**
@@ -192,7 +214,7 @@ square game_get_square(cgame g, uint i, uint j) {
     printf("not enough memory");
     exit(EXIT_FAILURE);
   }
-  return g->squares[j + i * DEFAULT_SIZE];
+  return g->squares[j + i * game_nb_cols(g)];
 }
 
 /**
