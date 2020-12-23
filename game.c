@@ -51,10 +51,6 @@ game game_new(square *squares, uint *nb_tents_row, uint *nb_tents_col) {
     g->nb_tents_col[i] = nb_tents_col[i];
     g->nb_tents_row[i] = nb_tents_row[i];
   }
-  g->nb_rows = DEFAULT_SIZE;
-  g->nb_cols = DEFAULT_SIZE;
-  g->wrapping = false;
-  g->diagadj = false;
   return g;
 }
 
@@ -85,6 +81,10 @@ game game_new_empty(void) {
     fprintf(stderr, "Not enough memory!\n");
     exit(EXIT_FAILURE);
   }
+  g->nb_rows = DEFAULT_SIZE;
+  g->nb_cols = DEFAULT_SIZE;
+  g->wrapping = false;
+  g->diagadj = false;
   for (int i = 0; i < DEFAULT_SIZE; i++) {
     game_set_expected_nb_tents_row(g, i, 0);
     game_set_expected_nb_tents_col(g, i, 0);
@@ -92,10 +92,6 @@ game game_new_empty(void) {
       game_set_square(g, i, j, EMPTY);
     }
   }
-  g->nb_rows = DEFAULT_SIZE;
-  g->nb_cols = DEFAULT_SIZE;
-  g->wrapping = false;
-  g->diagadj = false;
   return g;
 }
 
@@ -201,6 +197,7 @@ void game_set_square(game g, uint i, uint j, square s) {
     exit(EXIT_FAILURE);
   }
   if (i >= game_nb_rows(g) || j >= game_nb_cols(g)) {
+    printf("here\n");
     fprintf(stderr, "row or column number is invalid\n");
     exit(EXIT_FAILURE);
   }
@@ -219,7 +216,7 @@ void game_set_square(game g, uint i, uint j, square s) {
  **/
 square game_get_square(cgame g, uint i, uint j) {
   if ((g == NULL) || (g->squares == NULL)) {
-    printf("not enough memory");
+    fprintf(stderr, "not enough memory\n");
     exit(EXIT_FAILURE);
   }
   if (i >= game_nb_rows(g) || j >= game_nb_cols(g)) {
@@ -239,7 +236,11 @@ square game_get_square(cgame g, uint i, uint j) {
  **/
 void game_set_expected_nb_tents_row(game g, uint i, uint nb_tents) {
   if ((g == NULL) || (g->nb_tents_row == NULL)) {
-    printf("not enough memory");
+    fprintf(stderr, "not enough memory\n");
+    exit(EXIT_FAILURE);
+  }
+  if (i >= game_nb_rows(g)) {
+    fprintf(stderr, "row number is invalid\n");
     exit(EXIT_FAILURE);
   }
   g->nb_tents_row[i] = nb_tents;
@@ -256,6 +257,10 @@ void game_set_expected_nb_tents_row(game g, uint i, uint nb_tents) {
 void game_set_expected_nb_tents_col(game g, uint j, uint nb_tents) {
   if ((g == NULL) || (g->nb_tents_col == NULL)) {
     printf("not enough memory");
+    exit(EXIT_FAILURE);
+  }
+  if (j >= game_nb_cols(g)) {
+    fprintf(stderr, "invalid column number\n");
     exit(EXIT_FAILURE);
   }
   g->nb_tents_col[j] = nb_tents;
