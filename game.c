@@ -196,6 +196,14 @@ void game_set_square(game g, uint i, uint j, square s) {
     printf("game doesn't exist");
     exit(EXIT_FAILURE);
   }
+  if (s != EMPTY && s != GRASS && s != TENT) {
+    fprintf(stderr, "You can't place this kind of square\n");
+    exit(EXIT_FAILURE);
+  }
+  if (i >= game_nb_rows(g) || j >= game_nb_cols(g)) {
+    fprintf(stderr, "row or column number is invalid\n");
+    exit(EXIT_FAILURE);
+  }
   g->squares[j + i * game_nb_cols(g)] = s;
 }
 
@@ -212,6 +220,10 @@ void game_set_square(game g, uint i, uint j, square s) {
 square game_get_square(cgame g, uint i, uint j) {
   if ((g == NULL) || (g->squares == NULL)) {
     printf("not enough memory");
+    exit(EXIT_FAILURE);
+  }
+  if (i >= game_nb_rows(g) || j >= game_nb_cols(g)) {
+    fprintf(stderr, "row or column number is invalid\n");
     exit(EXIT_FAILURE);
   }
   return g->squares[j + i * game_nb_cols(g)];
@@ -262,7 +274,7 @@ uint game_get_expected_nb_tents_row(cgame g, uint i) {
     fprintf(stderr, "function called on NULL pointer\n");
     exit(EXIT_FAILURE);
   }
-  if (i >= DEFAULT_SIZE) {
+  if (i >= game_nb_rows(g)) {
     fprintf(stderr, "invalid row number\n");
     exit(EXIT_FAILURE);
   }
@@ -282,8 +294,8 @@ uint game_get_expected_nb_tents_col(cgame g, uint j) {
     fprintf(stderr, "function called on NULL pointer\n");
     exit(EXIT_FAILURE);
   }
-  if (j >= DEFAULT_SIZE) {
-    fprintf(stderr, "invalid row number\n");
+  if (j >= game_nb_cols(g)) {
+    fprintf(stderr, "invalid column number\n");
     exit(EXIT_FAILURE);
   }
   return g->nb_tents_col[j];
@@ -324,14 +336,14 @@ uint game_get_current_nb_tents_row(cgame g, uint i) {
     fprintf(stderr, "function called on NULL pointer\n");
     exit(EXIT_FAILURE);
   }
-  if (i >= DEFAULT_SIZE) {
+  if (i >= game_nb_rows(g)) {
     fprintf(stderr, "invalid row number\n");
     exit(EXIT_FAILURE);
   }
   // setting a counter for the amount of tents.
   uint tents = 0;
   // checking each square of the row.
-  for (int j = 0; j < DEFAULT_SIZE; j++) {
+  for (int j = 0; j < game_nb_cols(g); j++) {
     // if the square is a tent then increase the counter by 1, otherwise the
     // counter is unchanged.
     if (game_get_square(g, i, j) == TENT) {
@@ -354,14 +366,14 @@ uint game_get_current_nb_tents_col(cgame g, uint j) {
     fprintf(stderr, "function called on NULL pointer\n");
     exit(EXIT_FAILURE);
   }
-  if (j >= DEFAULT_SIZE) {
-    fprintf(stderr, "invalid row number\n");
+  if (j >= game_nb_cols(g)) {
+    fprintf(stderr, "invalid column number\n");
     exit(EXIT_FAILURE);
   }
   // setting a counter for the amount of tents.
   uint tents = 0;
   // checking each square of the row.
-  for (int i = 0; i < DEFAULT_SIZE; i++) {
+  for (int i = 0; i < game_nb_rows(g); i++) {
     // if the square is a tent then increase the counter by 1, otherwise the
     // counter is unchanged.
     if (game_get_square(g, i, j) == TENT) {
@@ -386,7 +398,7 @@ uint game_get_current_nb_tents_all(cgame g) {
   uint tents = 0;
   // checking each arrow to retrieve the amount of tents for all of them.
   // it could also be done by checking the columns instead.
-  for (int i = 0; i < DEFAULT_SIZE; i++) {
+  for (int i = 0; i < game_nb_rows(g); i++) {
     tents += game_get_current_nb_tents_row(g, i);
   }
   return tents;
@@ -411,7 +423,7 @@ void game_play_move(game g, uint i, uint j, square s) {
     fprintf(stderr, "function called on NULL pointer\n");
     exit(EXIT_FAILURE);
   }
-  if (i >= DEFAULT_SIZE || j >= DEFAULT_SIZE) {
+  if (i >= game_nb_rows(g) || j >= game_nb_cols(g)) {
     fprintf(stderr, "row or column number is invalid\n");
     exit(EXIT_FAILURE);
   }
@@ -445,7 +457,7 @@ int game_check_move(cgame g, uint i, uint j, square s) {
     fprintf(stderr, "function called on NULL pointer\n");
     exit(EXIT_FAILURE);
   }
-  if (i >= DEFAULT_SIZE || j >= DEFAULT_SIZE) {
+  if (i >= game_nb_rows(g) || j >= game_nb_cols(g)) {
     fprintf(stderr, "row or column number is invalid\n");
     exit(EXIT_FAILURE);
   }
@@ -726,15 +738,19 @@ bool game_is_over(cgame g) {
     fprintf(stderr, "function called on NULL pointer!\n");
     exit(EXIT_FAILURE);
   }
-  for (uint i = 0; i < DEFAULT_SIZE; i++) {
+  for (uint i = 0; i < game_nb_rows(g); i++) {
     if (game_get_current_nb_tents_row(g, i) !=
         game_get_expected_nb_tents_row(g, i)) {
       return false;
     }
-    if (game_get_current_nb_tents_col(g, i) !=
-        game_get_expected_nb_tents_col(g, i)) {
+  }
+  for (uint j = 0; j < game_nb_cols(g); j++){
+    if (game_get_current_nb_tents_col(g, j) !=
+        game_get_expected_nb_tents_col(g, j)) {
       return false;
     }
+  }
+  for (uint i = 0; i < game_nb_rows(g); i++){
     for (uint j = 0; j < DEFAULT_SIZE; j++) {
       if (game_get_square(g, i, j) != TREE) {
         if (game_check_move(g, i, j, game_get_square(g, i, j)) != REGULAR) {
@@ -744,8 +760,8 @@ bool game_is_over(cgame g) {
     }
   }
   uint nb_trees = 0;
-  for (uint i = 0; i < DEFAULT_SIZE; i++) {
-    for (uint j = 0; j < DEFAULT_SIZE; j++) {
+  for (uint i = 0; i < game_nb_rows(g); i++) {
+    for (uint j = 0; j < game_nb_cols(g); j++) {
       if (game_get_square(g, i, j) == TREE) {
         nb_trees++;
       }
@@ -771,11 +787,11 @@ void game_fill_grass_row(game g, uint i) {
     fprintf(stderr, "function called on NULL pointer\n");
     exit(EXIT_FAILURE);
   }
-  if (i >= DEFAULT_SIZE) {
+  if (i >= game_nb_rows(g)) {
     fprintf(stderr, "row number is invalid\n");
     exit(EXIT_FAILURE);
   }
-  for (uint j = 0; j < DEFAULT_SIZE; j++) {
+  for (uint j = 0; j < game_nb_cols(g); j++) {
     if (game_get_square(g, i, j) == EMPTY) {
       game_set_square(g, i, j, GRASS);
     }
@@ -796,11 +812,11 @@ void game_fill_grass_col(game g, uint j) {
     fprintf(stderr, "function called on NULL pointer\n");
     exit(EXIT_FAILURE);
   }
-  if (j >= DEFAULT_SIZE) {
+  if (j >= game_nb_cols(g)) {
     fprintf(stderr, "column number is invalid\n");
     exit(EXIT_FAILURE);
   }
-  for (uint i = 0; i < DEFAULT_SIZE; i++) {
+  for (uint i = 0; i < game_nb_rows(g); i++) {
     if (game_get_square(g, i, j) == EMPTY) {
       game_set_square(g, i, j, GRASS);
     }
