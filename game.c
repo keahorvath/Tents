@@ -833,7 +833,11 @@ game game_new_empty_ext(uint nb_rows, uint nb_cols, bool wrapping, bool diagadj)
  * @pre @p g is a valid pointer toward a cgame structure
  **/
 uint game_nb_rows(cgame g){
-  return 0;
+  if (g == NULL) {
+    fprintf(stderr, "function called on NULL pointer\n");
+    exit(EXIT_FAILURE);
+  }
+  return g->nb_rows;
 }
 
 /**
@@ -843,7 +847,11 @@ uint game_nb_rows(cgame g){
  * @pre @p g is a valid pointer toward a cgame structure
  **/
 uint game_nb_cols(cgame g){
-  return 0;
+  if (g == NULL) {
+    fprintf(stderr, "function called on NULL pointer\n");
+    exit(EXIT_FAILURE);
+  }
+  return g->nb_cols;
 }
 
 /**
@@ -852,7 +860,11 @@ uint game_nb_cols(cgame g){
  * @pre @p g is a valid pointer toward a cgame structure
  **/
 bool game_is_wrapping(cgame g){
-  return 0;
+  if (g == NULL) {
+    fprintf(stderr, "function called on NULL pointer\n");
+    exit(EXIT_FAILURE);
+  }
+  return g->wrapping;
 }
 
 /**
@@ -861,7 +873,11 @@ bool game_is_wrapping(cgame g){
  * @pre @p g is a valid pointer toward a cgame structure
  **/
 bool game_is_diagadj(cgame g){
-  return 0;
+  if (g == NULL) {
+    fprintf(stderr, "function called on NULL pointer\n");
+    exit(EXIT_FAILURE);
+  }
+  return g->diagadj;
 }
 
 /**
