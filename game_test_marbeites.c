@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "game.h"
+#include "game_ext.h"
 #include "game_aux.h"
 
 /*Tests*/
@@ -201,6 +202,74 @@ bool test_game_get_current_nb_tents_all(void) {
   return true;
 };
 
+// Test game_nb_rows
+bool test_game_nb_rows() {
+  game g = game_new_empty_ext(4, 5, true, true);
+  if (g == NULL) {
+    fprintf(stderr, "Error: invalid game\n");
+    return false;
+  }
+  if (game_nb_rows(g) != 4) {
+    return false;
+  }
+  return true;
+};
+
+// Test game_nb_cols
+bool test_game_nb_cols() {
+  game g = game_new_empty_ext(4, 5, true, true);
+  if (g == NULL) {
+    fprintf(stderr, "Error: invalid game\n");
+    return false;
+  }
+  if (game_nb_cols(g) != 5) {
+    return false;
+  }
+  return true;
+};
+
+// Test game_is_wrapping
+bool test_game_is_wrapping() {
+  game g1 = game_new_empty_ext(4, 5, true, true);
+  game g2 = game_new_empty_ext(4, 5, false, false); 
+  if (g1 == NULL) {
+    fprintf(stderr, "Error: invalid game\n");
+    return false;
+  }
+  if (g2 == NULL) {
+    fprintf(stderr, "Error :invalid game\n");
+    return false;
+  }
+  if (!game_is_wrapping(g1)) {
+    return false;
+  }
+  if(game_is_wrapping(g2)){
+    return false;
+  }
+  return true;
+};
+
+// Test game_is_diagadj
+bool test_game_is_diagadj() {
+  game g1 = game_new_empty_ext(4, 5, true, true);
+  game g2 = game_new_empty_ext(4, 5, false, false);
+  if (g1 == NULL) {
+    fprintf(stderr, "Error: invalid game\n");
+    return false;
+  }
+  if (g2 == NULL) {
+    fprintf(stderr, "Error :invalid game\n");
+    return false;
+  }
+  if (!game_is_diagadj(g1)) {
+    return false;
+  }
+  if(game_is_diagadj(g2)){
+    return false;
+  }
+  return true;
+};
+
 // Main routine
 int main(int argc, char *argv[]) {
   // start tests
@@ -218,6 +287,14 @@ int main(int argc, char *argv[]) {
     ok = test_game_get_current_nb_tents_col(0);
   } else if (strcmp("game_get_current_nb_tents_all", argv[1]) == 0) {
     ok = test_game_get_current_nb_tents_all();
+  } else if (strcmp("game_nb_rows", argv[1]) == 0) {
+    ok = test_game_nb_rows();
+  } else if (strcmp("game_nb_cols", argv[1]) == 0) {
+    ok = test_game_nb_cols();
+  } else if (strcmp("game_is_wrapping", argv[1]) == 0) {
+    ok = test_game_is_wrapping();
+  } else if (strcmp("game_is_diagadj", argv[1]) == 0) {
+    ok = test_game_is_diagadj();
   } else {
     fprintf(stderr, "Error: test \"%s\" not found!\n", argv[1]);
     exit(EXIT_FAILURE);

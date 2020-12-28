@@ -55,6 +55,10 @@ add_test(test_marbeites_game_get_expected_nb_tents_all ./game_test_marbeites gam
 add_test(test_marbeites_game_get_current_nb_tents_row ./game_test_marbeites game_get_current_nb_tents_row)
 add_test(test_marbeites_game_get_current_nb_tents_col ./game_test_marbeites game_get_current_nb_tents_col)
 add_test(test_marbeites_game_get_current_nb_tents_all ./game_test_marbeites game_get_current_nb_tents_all)
+add_test(test_marbeites_game_nb_rows ./game_test_marbeites game_nb_rows)
+add_test(test_marbeites_game_nb_cols ./game_test_marbeites game_nb_cols)
+add_test(test_marbeites_game_is_wrapping ./game_test_marbeites game_is_wrapping)
+add_test(test_marbeites_game_is_diagadj ./game_test_marbeites game_is_diagadj)
 
 #Tests khorvath
 add_test(test_khorvath_game_play_move ./game_test_khorvath game_play_move)
