@@ -4,6 +4,7 @@
 #include "game.h"
 #include "game_aux.h"
 #include "game_ext.h"
+#include "queue.h"
 
 struct game_s {
   uint nb_rows;
@@ -13,7 +14,8 @@ struct game_s {
   uint *nb_tents_col;
   bool wrapping;
   bool diagadj;
-
+  //queue *undo_hist;
+  //queue *redo_hist;
 };
 
 /**
@@ -442,6 +444,7 @@ void game_play_move(game g, uint i, uint j, square s) {
     exit(EXIT_FAILURE);
   }
   game_set_square(g, i, j, s);
+
 }
 
 /**
@@ -587,7 +590,7 @@ int game_check_move(cgame g, uint i, uint j, square s) {
       }
     }
     if (game_is_wrapping(g)){
-      if (game_get_square(g, i_over, j) != TREE && game_get_square(g, i, j_right) != TREE && game_get_square(g, i_under, j) != TREE || game_get_square(g, i, j_left) != TREE){
+      if (game_get_square(g, i_over, j) != TREE && game_get_square(g, i, j_right) != TREE && game_get_square(g, i_under, j) != TREE && game_get_square(g, i, j_left) != TREE){
         return LOSING;
       }
     }

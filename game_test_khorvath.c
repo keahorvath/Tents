@@ -4,6 +4,7 @@
 #include <string.h>
 #include "game.h"
 #include "game_aux.h"
+#include "game_ext.h"
 
 bool test_game_play_move(void) {
   game g0 = game_default();
@@ -134,10 +135,49 @@ bool test_game_check_move(void) {
       }
     }
   }
+
+  //test 11 if wrapping works
+  square squares4[] = {1, 0, 0, 0, 0, 0, 0, 0, 0};
+  uint nb_tents_row4[] = {1, 0, 0};
+  uint nb_tents_col4[] = {0, 0, 1};
+  game g4 = game_new_ext(3, 3, squares4, nb_tents_row4, nb_tents_col4, true, false);
+  if (game_check_move(g4, 0, 2, TENT) == LOSING){
+    return false;
+  }
+  square squares5[] = {TREE, TENT, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, TREE, 0, 0, 0};
+  uint nb_tents_row5[] = {1, 0, 0, 1};
+  uint nb_tents_col5[] = {0, 2, 0, 0};
+  game g5 = game_new_ext(4, 4, squares5, nb_tents_row5, nb_tents_col5, true, false);
+  if (game_check_move(g5, 3, 1, TENT) != LOSING){
+    return false;
+  }
+  game g6 = game_new_ext(4, 4, squares5, nb_tents_row5, nb_tents_col5, false, false);
+  if (game_check_move(g6, 3, 1, TENT) == LOSING){
+    return false;
+  }
+
+  //test 12 if diagajd works
+  square squares7[] = {TREE, TENT, 0, 0, TREE, 0, 0, 0, 0};
+  uint nb_tents_row7[] = {1, 1, 0};
+  uint nb_tents_col7[] = {1, 1, 0};
+  game g7 = game_new_ext(3, 3, squares7, nb_tents_row7, nb_tents_col7, false, true);
+  if (game_check_move(g7, 1, 0, TENT) == LOSING){
+    return false;
+  }
+  game g8 = game_new_ext(3, 3, squares7, nb_tents_row7, nb_tents_col7, false, false);
+  if (game_check_move(g8, 1, 0, TENT) != LOSING){
+    return false;
+  }
+
   game_delete(g);
   game_delete(g1);
   game_delete(g2);
   game_delete(g3);
+  game_delete(g4);
+  game_delete(g5);
+  game_delete(g6);
+  game_delete(g7);
+  game_delete(g8);
   return true;
 }
 
