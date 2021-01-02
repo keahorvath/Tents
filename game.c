@@ -14,8 +14,8 @@ struct game_s {
   uint *nb_tents_col;
   bool wrapping;
   bool diagadj;
-  //queue *undo_hist;
-  //queue *redo_hist;
+  queue *undo_hist;
+  queue *redo_hist;
 };
 
 /**
@@ -29,6 +29,36 @@ typedef struct game_s *game;
  * pointer.
  **/
 typedef const struct game_s *cgame;
+
+struct move{
+  square s;
+  uint i;
+  uint j;
+};
+/**
+ * @brief The structure that stores the move.
+ **/
+typedef struct move move;
+
+move * create_move(square s, uint i, uint j){
+  move * move = malloc(sizeof(move));
+  if (move == NULL) exit(EXIT_FAILURE);
+  move->s = s;
+  move->i = i;
+  move->j = j;
+  return move;
+}
+
+void free_Moves(queue * queue){
+  if (queue !=NULL){
+    while(!queue_is_empty(queue)){
+      move * move = queue_pop_tail(queue);
+      free(move);
+      move = NULL;
+    }
+    queue_clear(queue);
+  }
+}
 
 /**
  * @brief Creates a new game with default size and initializes it.
@@ -88,6 +118,9 @@ game game_new_empty(void) {
   g->nb_cols = DEFAULT_SIZE;
   g->wrapping = false;
   g->diagadj = false;
+  g->undo_hist = queue_new();
+  g->redo_hist = queue_new();
+
   for (int i = 0; i < DEFAULT_SIZE; i++) {
     game_set_expected_nb_tents_row(g, i, 0);
     game_set_expected_nb_tents_col(g, i, 0);
@@ -173,6 +206,10 @@ void game_delete(game g) {
     free(g->nb_tents_col);
     free(g->nb_tents_row);
     free(g->squares);
+    free_Moves(g->undo_hist);
+    free(g->undo_hist);
+    free_Moves(g->redo_hist);
+    free(g->redo_hist);
   }
   free(g);
 }
@@ -443,7 +480,11 @@ void game_play_move(game g, uint i, uint j, square s) {
     fprintf(stderr, "You can't replace a tree with something else\n");
     exit(EXIT_FAILURE);
   }
+  move * move = create_move(game_get_square(g,i,j), i,j);
+  queue_push_head(g->undo_hist,move);
+
   game_set_square(g, i, j, s);
+  free_Moves(g->redo_hist);
 
 }
 
@@ -1067,6 +1108,14 @@ game game_new_empty_ext(uint nb_rows, uint nb_cols, bool wrapping, bool diagadj)
   g->nb_cols = nb_cols;
   g->wrapping = wrapping;
   g->diagadj = diagadj;
+  g->undo_hist = queue_new();
+  g->redo_hist = queue_new();
+
+  if ((g->undo_hist == NULL) || (g->redo_hist == NULL)) {
+    fprintf(stderr, "Not enough memory!\n");
+    exit(EXIT_FAILURE);
+  }
+
   for (uint i = 0; i < nb_rows; i++) {
     game_set_expected_nb_tents_row(g, i, 0);
   }
@@ -1145,6 +1194,19 @@ bool game_is_diagadj(cgame g){
  * @pre @p g is a valid pointer toward a cgame structure
  */
 void game_undo(game g){
+
+  if ((g == NULL) || ((g->undo_hist)==NULL) || (g->redo_hist == NULL)) exit(EXIT_FAILURE);
+
+  if(!queue_is_empty(g->undo_hist)){
+    move * UndoMove = queue_pop_head(g->undo_hist);
+    move * RedoMove= create_move( game_get_square(g , UndoMove->i , UndoMove->j) ,  UndoMove->i , UndoMove->j);
+
+    queue_push_head(g->redo_hist, RedoMove);
+    game_set_square(g , UndoMove->i , UndoMove->j , UndoMove->s);
+    free(UndoMove);
+    UndoMove=NULL;
+
+  }
   return;
 }
 
@@ -1158,5 +1220,16 @@ void game_undo(game g){
  * @pre @p g is a valid pointer toward a cgame structure
  */
 void game_redo(game g){
+  if ((g == NULL) || ((g->redo_hist)==NULL) || (g->undo_hist == NULL)) exit(EXIT_FAILURE);
+
+  if (!queue_is_empty(g->redo_hist)){
+    move * RedoMove = queue_pop_head(g->redo_hist);
+    move * UndoMove= create_move( game_get_square(g , RedoMove->i , RedoMove->j) ,  RedoMove->i , RedoMove->j);
+
+    queue_push_head(g->undo_hist, UndoMove);
+    game_set_square(g , RedoMove->i , RedoMove->j , RedoMove->s);
+    free(RedoMove);
+    RedoMove= NULL;
+  }
   return;
 }
