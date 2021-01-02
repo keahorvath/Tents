@@ -4,6 +4,7 @@
 #include <string.h>
 #include "game.h"
 #include "game_aux.h"
+#include "game_ext.h"
 
 /*test_game_set_square*/
 bool test_game_set_square() {
@@ -157,6 +158,105 @@ bool test_game_set_expected_nb_tents_col() {
   return true;
 }
 
+/**test_game_undo **/
+bool test_game_undo(void) {
+  game game_test = game_default();
+  game game_test2 = game_default();
+  game_undo(game_test);
+  bool test = game_equal(game_test, game_test2);
+  if (!test) {
+    return false;
+  }
+  game_play_move(game_test2, 0, 0, GRASS);
+  game_undo(game_test2);
+  test = game_equal(game_test, game_test2);
+  if (!test) {
+    return false;
+  }
+  game_play_move(game_test2, 0, 1, TENT);
+  game_play_move(game_test, 0, 1, TENT);
+
+  game_play_move(game_test2, 0, 1, GRASS);
+  game_undo(game_test2);
+  test = game_equal(game_test, game_test2);
+  if (!test) {
+    return false;
+  }
+  game_delete(game_test);
+  game_delete(game_test2);
+  return true;
+}
+
+/**test_game_undo **/
+bool test_game_redo(void) {
+  game game_test = game_default();
+  game game_test2 = game_default();
+  game_redo(game_test);
+  bool test = game_equal(game_test, game_test2);
+  if (!test) {
+    return false;
+  }
+  
+  game_play_move(game_test2, 0, 1, TENT);
+
+  game_play_move(game_test2, 0, 2, GRASS);
+
+  game_play_move(game_test2, 0, 3, GRASS);
+  
+  game_undo(game_test2);
+  game_undo(game_test2);
+  game_undo(game_test2);
+
+  game_redo(game_test2);
+  game_play_move(game_test, 0, 1, TENT);
+  test = game_equal(game_test, game_test2);
+  if (!test) {
+    return false;
+  }
+  
+  game_redo(game_test2);
+  game_play_move(game_test, 0, 2, GRASS);
+  test = game_equal(game_test, game_test2);
+  if (!test) {
+    return false;
+  }
+  
+  game_redo(game_test2);
+  game_play_move(game_test, 0, 3, GRASS);
+  test = game_equal(game_test, game_test2);
+  if (!test) {
+    return false;
+  }
+  game_redo(game_test2);
+  test = game_equal(game_test, game_test2);
+  if (!test) {
+    return false;
+  }
+
+  game_undo(game_test2);
+  game_undo(game_test2);
+  game_undo(game_test2);
+
+  game_delete(game_test);
+  game_test = game_default();
+
+  game_redo(game_test2);
+  game_play_move(game_test, 0, 1, TENT);
+
+  game_play_move(game_test2, 2, 0, TENT);
+  game_play_move(game_test, 2, 0, TENT);
+  game_redo(game_test2);
+
+  test = game_equal(game_test, game_test2);
+  if (!test) {
+    return false;
+  }
+
+  game_delete(game_test);
+  game_delete(game_test2);
+  return true;
+}
+
 int main(int argc, char *argv[]) {
   // start test
   fprintf(stderr, "=> Start test \"%s\"\n", argv[1]);
@@ -174,6 +274,10 @@ int main(int argc, char *argv[]) {
     testPassed = test_game_set_expected_nb_tents_row();
   } else if (strcmp("game_set_expected_nb_tents_col", argv[1]) == 0) {
     testPassed = test_game_set_expected_nb_tents_col();
+  } else if (strcmp("game_undo", argv[1]) == 0) {
+    testPassed = test_game_undo();
+  } else if (strcmp("game_redo", argv[1]) == 0) {
+    testPassed = test_game_redo();
   } else {
     fprintf(stderr, "Error: test \"%s\" not found!\n", argv[1]);
     exit(EXIT_FAILURE);

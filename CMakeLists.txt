@@ -47,6 +47,9 @@ add_test(test_amastouri_game_equal ./game_test_amastouri game_equal)
 add_test(test_amastouri_game_delete ./game_test_amastouri game_delete)
 add_test(test_amastouri_game_set_expected_nb_tents_row ./game_test_amastouri game_set_expected_nb_tents_row)
 add_test(test_amastouri_game_set_expected_nb_tents_col ./game_test_amastouri game_set_expected_nb_tents_col)
+add_test(test_amastouri_game_undo ./game_test_amastouri game_undo)
+add_test(test_amastouri_game_redo ./game_test_amastouri game_redo)
+
 
 #Tests marbeites
 add_test(test_marbeites_game_get_expected_nb_tents_row ./game_test_marbeites game_get_expected_nb_tents_row)
