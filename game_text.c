@@ -22,13 +22,13 @@ int main(void) {
     } else if (c == 'q') {
       printf("shame\n");
       return EXIT_SUCCESS;
-    } else if (c == 'z'){
+    } else if (c == 'z') {
       game_undo(current_game);
       game_print(current_game);
-    } else if (c == 'y'){
+    } else if (c == 'y') {
       game_redo(current_game);
       game_print(current_game);
-    }else if (ret1 == EOF) {
+    } else if (ret1 == EOF) {
       printf("End of file\n");
       exit(EXIT_SUCCESS);
     }
