@@ -196,13 +196,13 @@ bool test_game_redo(void) {
   if (!test) {
     return false;
   }
-  
+
   game_play_move(game_test2, 0, 1, TENT);
 
   game_play_move(game_test2, 0, 2, GRASS);
 
   game_play_move(game_test2, 0, 3, GRASS);
-  
+
   game_undo(game_test2);
   game_undo(game_test2);
   game_undo(game_test2);
@@ -213,14 +213,14 @@ bool test_game_redo(void) {
   if (!test) {
     return false;
   }
-  
+
   game_redo(game_test2);
   game_play_move(game_test, 0, 2, GRASS);
   test = game_equal(game_test, game_test2);
   if (!test) {
     return false;
   }
-  
+
   game_redo(game_test2);
   game_play_move(game_test, 0, 3, GRASS);
   test = game_equal(game_test, game_test2);

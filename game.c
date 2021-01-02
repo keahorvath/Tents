@@ -1023,9 +1023,12 @@ void game_fill_grass_row(game g, uint i) {
   }
   for (uint j = 0; j < game_nb_cols(g); j++) {
     if (game_get_square(g, i, j) == EMPTY) {
+      move *move = create_move(game_get_square(g, i, j), i, j);
+      queue_push_head(g->undo_hist, move);
       game_set_square(g, i, j, GRASS);
     }
   }
+  free_Moves(g->redo_hist);
 }
 
 /**
@@ -1048,6 +1051,8 @@ void game_fill_grass_col(game g, uint j) {
   }
   for (uint i = 0; i < game_nb_rows(g); i++) {
     if (game_get_square(g, i, j) == EMPTY) {
+      move *move = create_move(game_get_square(g, i, j), i, j);
+      queue_push_head(g->undo_hist, move);
       game_set_square(g, i, j, GRASS);
     }
   }
