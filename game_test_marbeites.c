@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "game.h"
-#include "game_ext.h"
 #include "game_aux.h"
+#include "game_ext.h"
 
 /*Tests*/
 
@@ -212,6 +212,7 @@ bool test_game_nb_rows() {
   if (game_nb_rows(g) != 4) {
     return false;
   }
+  game_delete(g);
   return true;
 };
 
@@ -225,13 +226,14 @@ bool test_game_nb_cols() {
   if (game_nb_cols(g) != 5) {
     return false;
   }
+  game_delete(g);
   return true;
 };
 
 // Test game_is_wrapping
 bool test_game_is_wrapping() {
   game g1 = game_new_empty_ext(4, 5, true, true);
-  game g2 = game_new_empty_ext(4, 5, false, false); 
+  game g2 = game_new_empty_ext(4, 5, false, false);
   if (g1 == NULL) {
     fprintf(stderr, "Error: invalid game\n");
     return false;
@@ -243,9 +245,11 @@ bool test_game_is_wrapping() {
   if (!game_is_wrapping(g1)) {
     return false;
   }
-  if(game_is_wrapping(g2)){
+  if (game_is_wrapping(g2)) {
     return false;
   }
+  game_delete(g1);
+  game_delete(g2);
   return true;
 };
 
@@ -264,9 +268,11 @@ bool test_game_is_diagadj() {
   if (!game_is_diagadj(g1)) {
     return false;
   }
-  if(game_is_diagadj(g2)){
+  if (game_is_diagadj(g2)) {
     return false;
   }
+  game_delete(g1);
+  game_delete(g2);
   return true;
 };
 

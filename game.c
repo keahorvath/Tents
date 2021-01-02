@@ -1,7 +1,7 @@
+#include "game.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "game.h"
 #include "game_aux.h"
 #include "game_ext.h"
 #include "queue.h"
@@ -30,7 +30,7 @@ typedef struct game_s *game;
  **/
 typedef const struct game_s *cgame;
 
-struct move{
+struct move {
   square s;
   uint i;
   uint j;
@@ -40,8 +40,8 @@ struct move{
  **/
 typedef struct move move;
 
-move * create_move(square s, uint i, uint j){
-  move * move = malloc(sizeof(move));
+move *create_move(square s, uint i, uint j) {
+  move *move = malloc(sizeof(move));
   if (move == NULL) exit(EXIT_FAILURE);
   move->s = s;
   move->i = i;
@@ -49,10 +49,10 @@ move * create_move(square s, uint i, uint j){
   return move;
 }
 
-void free_Moves(queue * queue){
-  if (queue !=NULL){
-    while(!queue_is_empty(queue)){
-      move * move = queue_pop_tail(queue);
+void free_Moves(queue *queue) {
+  if (queue != NULL) {
+    while (!queue_is_empty(queue)) {
+      move *move = queue_pop_tail(queue);
       free(move);
       move = NULL;
     }
@@ -142,7 +142,8 @@ game game_copy(cgame g) {
     fprintf(stderr, "Function called on NULL pointer\n");
     exit(EXIT_FAILURE);
   }
-  game g_copy = game_new_empty_ext(game_nb_rows(g), game_nb_cols(g), game_is_wrapping(g), game_is_diagadj(g));
+  game g_copy = game_new_empty_ext(game_nb_rows(g), game_nb_cols(g),
+                                   game_is_wrapping(g), game_is_diagadj(g));
   for (uint i = 0; i < game_nb_rows(g); i++) {
     uint nb_r = game_get_expected_nb_tents_row(g, i);
     game_set_expected_nb_tents_row(g_copy, i, nb_r);
@@ -151,7 +152,7 @@ game game_copy(cgame g) {
     uint nb_c = game_get_expected_nb_tents_col(g, j);
     game_set_expected_nb_tents_col(g_copy, j, nb_c);
   }
-  for (uint i = 0; i < game_nb_rows(g); i++){
+  for (uint i = 0; i < game_nb_rows(g); i++) {
     for (uint j = 0; j < game_nb_cols(g); j++) {
       square s = game_get_square(g, i, j);
       game_set_square(g_copy, i, j, s);
@@ -172,10 +173,12 @@ bool game_equal(cgame g1, cgame g2) {
   if (g1 == NULL || g2 == NULL) {
     fprintf(stderr, "Function call on NULL pointer\n");
   }
-  if (game_nb_cols(g1) != game_nb_cols(g2) || game_nb_rows(g1) != game_nb_rows(g2)){
+  if (game_nb_cols(g1) != game_nb_cols(g2) ||
+      game_nb_rows(g1) != game_nb_rows(g2)) {
     return false;
   }
-  if (game_is_diagadj(g1) != game_is_diagadj(g2) || game_is_wrapping(g1) != game_is_wrapping(g2)){
+  if (game_is_diagadj(g1) != game_is_diagadj(g2) ||
+      game_is_wrapping(g1) != game_is_wrapping(g2)) {
     return false;
   }
   for (uint i = 0; i < game_nb_rows(g1); i++) {
@@ -480,12 +483,11 @@ void game_play_move(game g, uint i, uint j, square s) {
     fprintf(stderr, "You can't replace a tree with something else\n");
     exit(EXIT_FAILURE);
   }
-  move * move = create_move(game_get_square(g,i,j), i,j);
-  queue_push_head(g->undo_hist,move);
+  move *move = create_move(game_get_square(g, i, j), i, j);
+  queue_push_head(g->undo_hist, move);
 
   game_set_square(g, i, j, s);
   free_Moves(g->redo_hist);
-
 }
 
 /**
@@ -524,7 +526,7 @@ int game_check_move(cgame g, uint i, uint j, square s) {
   if (s == EMPTY) {
     return REGULAR;
   }
-  uint i_over, i_under, j_left, j_right; //used when game is wrapping
+  uint i_over, i_under, j_left, j_right;  // used when game is wrapping
 
   if (s == TENT) {
     // placing n+1 tents in column or row is losing
@@ -548,8 +550,9 @@ int game_check_move(cgame g, uint i, uint j, square s) {
         game_get_square(g, i, j) == TENT) {
       return LOSING;
     }
-    // placing tent adjacent to another tent is losing (in case of wrapping = false game)
-    if (!game_is_wrapping(g)){
+    // placing tent adjacent to another tent is losing (in case of wrapping =
+    // false game)
+    if (!game_is_wrapping(g)) {
       if (i > 0 && game_get_square(g, i - 1, j) == TENT) {
         return LOSING;
       }
@@ -562,7 +565,7 @@ int game_check_move(cgame g, uint i, uint j, square s) {
       if (i < game_nb_rows(g) - 1 && game_get_square(g, i + 1, j) == TENT) {
         return LOSING;
       }
-      if (!game_is_diagadj(g)){
+      if (!game_is_diagadj(g)) {
         if (i < game_nb_rows(g) - 1 && j < game_nb_cols(g) - 1 &&
             game_get_square(g, i + 1, j + 1) == TENT) {
           return LOSING;
@@ -580,39 +583,46 @@ int game_check_move(cgame g, uint i, uint j, square s) {
         }
       }
     }
-    // placing tent adjacent to another tent is losing (in case of wrapping = true game)
-    if (game_is_wrapping(g)){
-      if (i == 0){
+    // placing tent adjacent to another tent is losing (in case of wrapping =
+    // true game)
+    if (game_is_wrapping(g)) {
+      if (i == 0) {
         i_over = game_nb_rows(g) - 1;
         i_under = i + 1;
-      }else if (i == game_nb_rows(g) - 1){
-        i_over = i-1;
+      } else if (i == game_nb_rows(g) - 1) {
+        i_over = i - 1;
         i_under = 0;
-      }else{
+      } else {
         i_over = i - 1;
         i_under = i + 1;
       }
-      if (j == 0){
+      if (j == 0) {
         j_left = game_nb_cols(g) - 1;
         j_right = j + 1;
-      }else if (j == game_nb_cols(g) - 1){
-        j_left = j-1;
+      } else if (j == game_nb_cols(g) - 1) {
+        j_left = j - 1;
         j_right = 0;
-      }else{
+      } else {
         j_left = j - 1;
         j_right = j + 1;
       }
-      if (game_get_square(g, i_over, j) == TENT || game_get_square(g, i, j_right) == TENT || game_get_square(g, i_under, j) == TENT || game_get_square(g, i, j_left) == TENT){
+      if (game_get_square(g, i_over, j) == TENT ||
+          game_get_square(g, i, j_right) == TENT ||
+          game_get_square(g, i_under, j) == TENT ||
+          game_get_square(g, i, j_left) == TENT) {
         return LOSING;
       }
-      if (!game_is_diagadj(g)){
-        if (game_get_square(g, i_over, j_left) == TENT || game_get_square(g, i_over, j_right) == TENT || game_get_square(g, i_under, j_left) == TENT || game_get_square(g, i_under, j_right) == TENT){
+      if (!game_is_diagadj(g)) {
+        if (game_get_square(g, i_over, j_left) == TENT ||
+            game_get_square(g, i_over, j_right) == TENT ||
+            game_get_square(g, i_under, j_left) == TENT ||
+            game_get_square(g, i_under, j_right) == TENT) {
           return LOSING;
         }
       }
     }
     // placing tent with no tree around is losing
-    if (!game_is_wrapping(g)){
+    if (!game_is_wrapping(g)) {
       uint nb_trees_around = 0;
       if (i > 0 && game_get_square(g, i - 1, j) == TREE) {
         nb_trees_around++;
@@ -630,8 +640,11 @@ int game_check_move(cgame g, uint i, uint j, square s) {
         return LOSING;
       }
     }
-    if (game_is_wrapping(g)){
-      if (game_get_square(g, i_over, j) != TREE && game_get_square(g, i, j_right) != TREE && game_get_square(g, i_under, j) != TREE && game_get_square(g, i, j_left) != TREE){
+    if (game_is_wrapping(g)) {
+      if (game_get_square(g, i_over, j) != TREE &&
+          game_get_square(g, i, j_right) != TREE &&
+          game_get_square(g, i_under, j) != TREE &&
+          game_get_square(g, i, j_left) != TREE) {
         return LOSING;
       }
     }
@@ -703,7 +716,7 @@ int game_check_move(cgame g, uint i, uint j, square s) {
     }
 
     // surrounding tree by grass is losing (in case of wrapping = false)
-    if (!game_is_wrapping(g)){
+    if (!game_is_wrapping(g)) {
       if (i < game_nb_rows(g) - 1 && game_get_square(g, i + 1, j) == TREE) {
         uint i_tree = i + 1;
         uint j_tree = j;
@@ -818,113 +831,121 @@ int game_check_move(cgame g, uint i, uint j, square s) {
     }
 
     // surrounding tree by grass is losing (in case of wrapping = true)
-    if (game_is_wrapping(g)){
+    if (game_is_wrapping(g)) {
       uint i_tree_over, i_tree_under, j_tree_left, j_tree_right;
       if (game_get_square(g, i_under, j) == TREE) {
         uint i_tree = i_under;
         uint j_tree = j;
-        if (i_tree == 0){
+        if (i_tree == 0) {
           i_tree_over = game_nb_rows(g) - 1;
           i_tree_under = i_tree + 1;
-        }else if (i_tree == game_nb_rows(g) - 1){
-          i_tree_over = i_tree-1;
+        } else if (i_tree == game_nb_rows(g) - 1) {
+          i_tree_over = i_tree - 1;
           i_tree_under = 0;
-        }else{
+        } else {
           i_tree_over = i_tree - 1;
           i_tree_under = i_tree + 1;
         }
-        if (j_tree == 0){
+        if (j_tree == 0) {
           j_tree_left = game_nb_cols(g) - 1;
           j_tree_right = j_tree + 1;
-        }else if (j_tree == game_nb_cols(g) - 1){
-          j_tree_left = j_tree-1;
+        } else if (j_tree == game_nb_cols(g) - 1) {
+          j_tree_left = j_tree - 1;
           j_tree_right = 0;
-        }else{
+        } else {
           j_tree_left = j_tree - 1;
           j_tree_right = j_tree + 1;
         }
-        if (game_get_square(g, i_tree_under, j_tree) == GRASS && game_get_square(g, i_tree, j_tree_right) == GRASS && game_get_square(g, i_tree, j_tree_left) == GRASS){
+        if (game_get_square(g, i_tree_under, j_tree) == GRASS &&
+            game_get_square(g, i_tree, j_tree_right) == GRASS &&
+            game_get_square(g, i_tree, j_tree_left) == GRASS) {
           return LOSING;
         }
       }
       if (game_get_square(g, i, j_right) == TREE) {
         uint i_tree = i;
         uint j_tree = j_right;
-        if (i_tree == 0){
+        if (i_tree == 0) {
           i_tree_over = game_nb_rows(g) - 1;
           i_tree_under = i_tree + 1;
-        }else if (i_tree == game_nb_rows(g) - 1){
-          i_tree_over = i_tree-1;
+        } else if (i_tree == game_nb_rows(g) - 1) {
+          i_tree_over = i_tree - 1;
           i_tree_under = 0;
-        }else{
+        } else {
           i_tree_over = i_tree - 1;
           i_tree_under = i_tree + 1;
         }
-        if (j_tree == 0){
+        if (j_tree == 0) {
           j_tree_left = game_nb_cols(g) - 1;
           j_tree_right = j_tree + 1;
-        }else if (j_tree == game_nb_cols(g) - 1){
-          j_tree_left = j_tree-1;
+        } else if (j_tree == game_nb_cols(g) - 1) {
+          j_tree_left = j_tree - 1;
           j_tree_right = 0;
-        }else{
+        } else {
           j_tree_left = j_tree - 1;
           j_tree_right = j_tree + 1;
         }
-        if (game_get_square(g, i_tree_under, j_tree) == GRASS && game_get_square(g, i_tree, j_tree_right) == GRASS && game_get_square(g, i_tree_over, j_tree) == GRASS){
+        if (game_get_square(g, i_tree_under, j_tree) == GRASS &&
+            game_get_square(g, i_tree, j_tree_right) == GRASS &&
+            game_get_square(g, i_tree_over, j_tree) == GRASS) {
           return LOSING;
         }
       }
       if (game_get_square(g, i_over, j) == TREE) {
         uint i_tree = i_over;
         uint j_tree = j;
-        if (i_tree == 0){
+        if (i_tree == 0) {
           i_tree_over = game_nb_rows(g) - 1;
           i_tree_under = i_tree + 1;
-        }else if (i_tree == game_nb_rows(g) - 1){
-          i_tree_over = i_tree-1;
+        } else if (i_tree == game_nb_rows(g) - 1) {
+          i_tree_over = i_tree - 1;
           i_tree_under = 0;
-        }else{
+        } else {
           i_tree_over = i_tree - 1;
           i_tree_under = i_tree + 1;
         }
-        if (j_tree == 0){
+        if (j_tree == 0) {
           j_tree_left = game_nb_cols(g) - 1;
           j_tree_right = j_tree + 1;
-        }else if (j_tree == game_nb_cols(g) - 1){
-          j_tree_left = j_tree-1;
+        } else if (j_tree == game_nb_cols(g) - 1) {
+          j_tree_left = j_tree - 1;
           j_tree_right = 0;
-        }else{
+        } else {
           j_tree_left = j_tree - 1;
           j_tree_right = j_tree + 1;
         }
-        if (game_get_square(g, i_tree_over, j_tree) == GRASS && game_get_square(g, i_tree, j_tree_right) == GRASS && game_get_square(g, i_tree, j_tree_left) == GRASS){
+        if (game_get_square(g, i_tree_over, j_tree) == GRASS &&
+            game_get_square(g, i_tree, j_tree_right) == GRASS &&
+            game_get_square(g, i_tree, j_tree_left) == GRASS) {
           return LOSING;
         }
       }
       if (game_get_square(g, i, j_left) == TREE) {
         uint i_tree = i;
         uint j_tree = j_left;
-        if (i_tree == 0){
+        if (i_tree == 0) {
           i_tree_over = game_nb_rows(g) - 1;
           i_tree_under = i_tree + 1;
-        }else if (i_tree == game_nb_rows(g) - 1){
-          i_tree_over = i_tree-1;
+        } else if (i_tree == game_nb_rows(g) - 1) {
+          i_tree_over = i_tree - 1;
           i_tree_under = 0;
-        }else{
+        } else {
           i_tree_over = i_tree - 1;
           i_tree_under = i_tree + 1;
         }
-        if (j_tree == 0){
+        if (j_tree == 0) {
           j_tree_left = game_nb_cols(g) - 1;
           j_tree_right = j_tree + 1;
-        }else if (j_tree == game_nb_cols(g) - 1){
-          j_tree_left = j_tree-1;
+        } else if (j_tree == game_nb_cols(g) - 1) {
+          j_tree_left = j_tree - 1;
           j_tree_right = 0;
-        }else{
+        } else {
           j_tree_left = j_tree - 1;
           j_tree_right = j_tree + 1;
         }
-        if (game_get_square(g, i_tree_under, j_tree) == GRASS && game_get_square(g, i_tree_over, j_tree) == GRASS && game_get_square(g, i_tree, j_tree_left) == GRASS){
+        if (game_get_square(g, i_tree_under, j_tree) == GRASS &&
+            game_get_square(g, i_tree_over, j_tree) == GRASS &&
+            game_get_square(g, i_tree, j_tree_left) == GRASS) {
           return LOSING;
         }
       }
@@ -953,13 +974,13 @@ bool game_is_over(cgame g) {
       return false;
     }
   }
-  for (uint j = 0; j < game_nb_cols(g); j++){
+  for (uint j = 0; j < game_nb_cols(g); j++) {
     if (game_get_current_nb_tents_col(g, j) !=
         game_get_expected_nb_tents_col(g, j)) {
       return false;
     }
   }
-  for (uint i = 0; i < game_nb_rows(g); i++){
+  for (uint i = 0; i < game_nb_rows(g); i++) {
     for (uint j = 0; j < game_nb_cols(g); j++) {
       if (game_get_square(g, i, j) != TREE) {
         if (game_check_move(g, i, j, game_get_square(g, i, j)) != REGULAR) {
@@ -1052,10 +1073,13 @@ void game_restart(game g) {
       }
     }
   }
+  free_Moves(g->redo_hist);
+  free_Moves(g->undo_hist);
 }
 
-game game_new_ext(uint nb_rows, uint nb_cols, square *squares, uint *nb_tents_row, uint *nb_tents_col, bool wrapping,
-                  bool diagadj){
+game game_new_ext(uint nb_rows, uint nb_cols, square *squares,
+                  uint *nb_tents_row, uint *nb_tents_col, bool wrapping,
+                  bool diagadj) {
   if (squares == NULL || nb_tents_row == NULL || nb_tents_col == NULL) {
     fprintf(stderr, "Function called on NULL pointer!\n");
     exit(EXIT_FAILURE);
@@ -1083,7 +1107,8 @@ game game_new_ext(uint nb_rows, uint nb_cols, square *squares, uint *nb_tents_ro
  * @param diagadj diagadj option
  * @return the created game
  **/
-game game_new_empty_ext(uint nb_rows, uint nb_cols, bool wrapping, bool diagadj){
+game game_new_empty_ext(uint nb_rows, uint nb_cols, bool wrapping,
+                        bool diagadj) {
   game g = (game)malloc(sizeof(struct game_s));
   if (g == NULL) {
     fprintf(stderr, "Not enough memory!\n");
@@ -1119,10 +1144,10 @@ game game_new_empty_ext(uint nb_rows, uint nb_cols, bool wrapping, bool diagadj)
   for (uint i = 0; i < nb_rows; i++) {
     game_set_expected_nb_tents_row(g, i, 0);
   }
-  for (uint j = 0; j < nb_cols; j++){
+  for (uint j = 0; j < nb_cols; j++) {
     game_set_expected_nb_tents_col(g, j, 0);
   }
-  for (uint i = 0; i < nb_rows; i++){
+  for (uint i = 0; i < nb_rows; i++) {
     for (uint j = 0; j < nb_cols; j++) {
       game_set_square(g, i, j, EMPTY);
     }
@@ -1136,7 +1161,7 @@ game game_new_empty_ext(uint nb_rows, uint nb_cols, bool wrapping, bool diagadj)
  * @return the number of rows on this game
  * @pre @p g is a valid pointer toward a cgame structure
  **/
-uint game_nb_rows(cgame g){
+uint game_nb_rows(cgame g) {
   if (g == NULL) {
     fprintf(stderr, "function called on NULL pointer\n");
     exit(EXIT_FAILURE);
@@ -1150,7 +1175,7 @@ uint game_nb_rows(cgame g){
  * @return the the number of columns on this game
  * @pre @p g is a valid pointer toward a cgame structure
  **/
-uint game_nb_cols(cgame g){
+uint game_nb_cols(cgame g) {
   if (g == NULL) {
     fprintf(stderr, "function called on NULL pointer\n");
     exit(EXIT_FAILURE);
@@ -1163,7 +1188,7 @@ uint game_nb_cols(cgame g){
  * @return true, if wrapping, false otherwise
  * @pre @p g is a valid pointer toward a cgame structure
  **/
-bool game_is_wrapping(cgame g){
+bool game_is_wrapping(cgame g) {
   if (g == NULL) {
     fprintf(stderr, "function called on NULL pointer\n");
     exit(EXIT_FAILURE);
@@ -1176,7 +1201,7 @@ bool game_is_wrapping(cgame g){
  * @return true, if diagadj, false otherwise
  * @pre @p g is a valid pointer toward a cgame structure
  **/
-bool game_is_diagadj(cgame g){
+bool game_is_diagadj(cgame g) {
   if (g == NULL) {
     fprintf(stderr, "function called on NULL pointer\n");
     exit(EXIT_FAILURE);
@@ -1193,19 +1218,19 @@ bool game_is_diagadj(cgame g){
  * @param g the game
  * @pre @p g is a valid pointer toward a cgame structure
  */
-void game_undo(game g){
+void game_undo(game g) {
+  if ((g == NULL) || ((g->undo_hist) == NULL) || (g->redo_hist == NULL))
+    exit(EXIT_FAILURE);
 
-  if ((g == NULL) || ((g->undo_hist)==NULL) || (g->redo_hist == NULL)) exit(EXIT_FAILURE);
-
-  if(!queue_is_empty(g->undo_hist)){
-    move * UndoMove = queue_pop_head(g->undo_hist);
-    move * RedoMove= create_move( game_get_square(g , UndoMove->i , UndoMove->j) ,  UndoMove->i , UndoMove->j);
+  if (!queue_is_empty(g->undo_hist)) {
+    move *UndoMove = queue_pop_head(g->undo_hist);
+    move *RedoMove = create_move(game_get_square(g, UndoMove->i, UndoMove->j),
+                                 UndoMove->i, UndoMove->j);
 
     queue_push_head(g->redo_hist, RedoMove);
-    game_set_square(g , UndoMove->i , UndoMove->j , UndoMove->s);
+    game_set_square(g, UndoMove->i, UndoMove->j, UndoMove->s);
     free(UndoMove);
-    UndoMove=NULL;
-
+    UndoMove = NULL;
   }
   return;
 }
@@ -1219,17 +1244,19 @@ void game_undo(game g){
  * @param g the game
  * @pre @p g is a valid pointer toward a cgame structure
  */
-void game_redo(game g){
-  if ((g == NULL) || ((g->redo_hist)==NULL) || (g->undo_hist == NULL)) exit(EXIT_FAILURE);
+void game_redo(game g) {
+  if ((g == NULL) || ((g->redo_hist) == NULL) || (g->undo_hist == NULL))
+    exit(EXIT_FAILURE);
 
-  if (!queue_is_empty(g->redo_hist)){
-    move * RedoMove = queue_pop_head(g->redo_hist);
-    move * UndoMove= create_move( game_get_square(g , RedoMove->i , RedoMove->j) ,  RedoMove->i , RedoMove->j);
+  if (!queue_is_empty(g->redo_hist)) {
+    move *RedoMove = queue_pop_head(g->redo_hist);
+    move *UndoMove = create_move(game_get_square(g, RedoMove->i, RedoMove->j),
+                                 RedoMove->i, RedoMove->j);
 
     queue_push_head(g->undo_hist, UndoMove);
-    game_set_square(g , RedoMove->i , RedoMove->j , RedoMove->s);
+    game_set_square(g, RedoMove->i, RedoMove->j, RedoMove->s);
     free(RedoMove);
-    RedoMove= NULL;
+    RedoMove = NULL;
   }
   return;
 }

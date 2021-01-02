@@ -8,8 +8,6 @@
     game_new
     game_new_empty
     game_copy
-    game_new_ext
-    game_new_empty_ext
 
 ## **Kea Horvath**
 
@@ -19,7 +17,8 @@
     game_fill_grass_row
     game_fill_grass_col
     game_restart
-    game_undo
+    game_new_ext
+    game_new_empty_ext
 
 ## **Marvin Beites**
 
@@ -42,6 +41,7 @@
     game_get_square
     game_set_expected_nb_tents_row
     game_set_expected_nb_tents_col
+    game_undo
     game_redo
 
 
@@ -64,7 +64,7 @@
     game_fill_grass_row
     game_fill_grass_col
     game_restart
-    game_undo
+    modifications des fonctions déjà existantes pour v2
 
 ## **Marvin Beites**
 
@@ -86,4 +86,5 @@
     game_set_expected_nb_tents_row
     game_set_expected_nb_tents_col
     game_is_over
+    game_undo
     game_redo
