@@ -41,7 +41,7 @@ struct move {
 typedef struct move move;
 
 move *create_move(square s, uint i, uint j) {
-  move *Move = (move*) malloc(sizeof(move));
+  move *Move = (move *)malloc(sizeof(move));
   if (Move == NULL) exit(EXIT_FAILURE);
   Move->s = s;
   Move->i = i;
