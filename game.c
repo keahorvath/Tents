@@ -41,7 +41,7 @@ struct move {
 typedef struct move move;
 
 move *create_move(square s, uint i, uint j) {
-  move *Move = (move*) malloc(sizeof(move));
+  move *Move = (move *)malloc(sizeof(move));
   if (Move == NULL) exit(EXIT_FAILURE);
   Move->s = s;
   Move->i = i;
@@ -365,7 +365,7 @@ uint game_get_expected_nb_tents_all(cgame g) {
   // checking array for expected number of tents for each row.
   // it could also be done by checking the array of expected number of tents for
   // each column instead.
-  for (int i = 0; i < DEFAULT_SIZE; i++) {
+  for (uint i = 0; i < game_nb_rows(g); i++) {
     tents += g->nb_tents_row[i];
   }
   return tents;
@@ -1124,13 +1124,13 @@ game game_new_empty_ext(uint nb_rows, uint nb_cols, bool wrapping,
     fprintf(stderr, "Not enough memory!\n");
     exit(EXIT_FAILURE);
   }
-  g->nb_tents_col = (uint *)malloc(sizeof(uint) * nb_cols);
-  if (g->nb_tents_col == NULL) {
+  g->nb_tents_row = (uint *)malloc(sizeof(uint) * nb_rows);
+  if (g->nb_tents_row == NULL) {
     fprintf(stderr, "Not enough memory!\n");
     exit(EXIT_FAILURE);
   }
-  g->nb_tents_row = (uint *)malloc(sizeof(uint) * nb_rows);
-  if (g->nb_tents_row == NULL) {
+  g->nb_tents_col = (uint *)malloc(sizeof(uint) * nb_cols);
+  if (g->nb_tents_col == NULL) {
     fprintf(stderr, "Not enough memory!\n");
     exit(EXIT_FAILURE);
   }
