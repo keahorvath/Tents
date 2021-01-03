@@ -41,12 +41,12 @@ struct move {
 typedef struct move move;
 
 move *create_move(square s, uint i, uint j) {
-  move *move = malloc(sizeof(move));
-  if (move == NULL) exit(EXIT_FAILURE);
-  move->s = s;
-  move->i = i;
-  move->j = j;
-  return move;
+  move *Move = (move*) malloc(sizeof(move));
+  if (Move == NULL) exit(EXIT_FAILURE);
+  Move->s = s;
+  Move->i = i;
+  Move->j = j;
+  return Move;
 }
 
 void free_Moves(queue *queue) {
