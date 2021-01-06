@@ -292,6 +292,7 @@ bool test_game_fill_grass_row(void) {
   game_delete(g2);
   game_delete(g3);
   game_delete(g4);
+  
   return true;
 }
 
