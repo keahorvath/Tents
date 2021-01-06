@@ -279,8 +279,8 @@ bool test_game_fill_grass_row(void) {
   }
   square squares[] = {TREE, TENT, 0, TENT, TREE, 0, 0, 0, 0};
   square squares0[] = {TREE, TENT, 0, TENT, TREE, 0, GRASS, GRASS, 0};
-  uint nb_tents_row = {1, 1, 0};
-  uint nb_tents_col = {1, 1, 0};
+  uint nb_tents_row[] = {1, 1, 0};
+  uint nb_tents_col[] = {1, 1, 0};
   game g3 = game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, false, true);
   game g4 = game_new_ext(3, 3, squares0, nb_tents_row, nb_tents_col, false, true);
   game_fill_grass_row(g3, 2);
@@ -311,8 +311,8 @@ bool test_game_fill_grass_col(void) {
   }
   square squares[] = {TREE, TENT, 0, TENT, TREE, 0, 0, 0, 0};
   square squares0[] = {TREE, TENT, GRASS, TENT, TREE, GRASS, 0, 0, 0};
-  uint nb_tents_row = {1, 1, 0};
-  uint nb_tents_col = {1, 1, 0};
+  uint nb_tents_row[] = {1, 1, 0};
+  uint nb_tents_col[] = {1, 1, 0};
   game g3 = game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, false, true);
   game g4 = game_new_ext(3, 3, squares0, nb_tents_row, nb_tents_col, false, true);
   game_fill_grass_col(g3, 2);
@@ -341,8 +341,8 @@ bool test_game_restart(void) {
   //test if undo list is empty
   square squares[] = {TREE, TENT, 0, TENT, TREE, 0, 0, 0, 0};
   square squares0[] = {TREE, 0, 0, 0, TREE, 0, 0, 0, 0};
-  uint nb_tents_row = {1, 1, 0};
-  uint nb_tents_col = {1, 1, 0};
+  uint nb_tents_row[] = {1, 1, 0};
+  uint nb_tents_col[] = {1, 1, 0};
   game g3 = game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, false, true);
   game g4 = game_new_ext(3, 3, squares0, nb_tents_row, nb_tents_col, false, true);
   game_play_move(g3, 0, 1, EMPTY);
