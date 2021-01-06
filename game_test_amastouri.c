@@ -119,14 +119,19 @@ bool test_game_equal() {
   game g3 =
       game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, false, true);
   game g4 = game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, true, true);
-  test = game_equal(g3, g4);
-  if (test) {
+  game g5 = game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, false, false);
+  game g6 = game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, true, false);
+
+  if (game_equal(g3, g4) || game_equal(g5, g6)) {
     return false;
   }
   game_delete(g1);
   game_delete(g2);
   game_delete(g3);
   game_delete(g4);
+  game_delete(g5);
+  game_delete(g6);
+
   return true;
 }
 
