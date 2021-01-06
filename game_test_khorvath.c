@@ -277,8 +277,21 @@ bool test_game_fill_grass_row(void) {
   if (!game_equal(g, g2)) {
     return false;
   }
+  square squares[] = {TREE, TENT, 0, TENT, TREE, 0, 0, 0, 0};
+  square squares0[] = {TREE, TENT, 0, TENT, TREE, 0, GRASS, GRASS, 0};
+  uint nb_tents_row = {1, 1, 0};
+  uint nb_tents_col = {1, 1, 0};
+  game g3 = game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, false, true);
+  game g4 = game_new_ext(3, 3, squares0, nb_tents_row, nb_tents_col, false, true);
+  game_fill_grass_row(g3, 2);
+  game_undo(g3);
+  if (!game_equal(g3, g4)){
+    return false;
+  }
   game_delete(g);
   game_delete(g2);
+  game_delete(g3);
+  game_delete(g4);
   return true;
 }
 
@@ -296,8 +309,21 @@ bool test_game_fill_grass_col(void) {
   if (!game_equal(g, g2)) {
     return false;
   }
+  square squares[] = {TREE, TENT, 0, TENT, TREE, 0, 0, 0, 0};
+  square squares0[] = {TREE, TENT, GRASS, TENT, TREE, GRASS, 0, 0, 0};
+  uint nb_tents_row = {1, 1, 0};
+  uint nb_tents_col = {1, 1, 0};
+  game g3 = game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, false, true);
+  game g4 = game_new_ext(3, 3, squares0, nb_tents_row, nb_tents_col, false, true);
+  game_fill_grass_col(g3, 2);
+  game_undo(g3);
+  if (!game_equal(g3, g4)){
+    return false;
+  }
   game_delete(g);
   game_delete(g2);
+  game_delete(g3);
+  game_delete(g4);
   return true;
 }
 
@@ -312,8 +338,23 @@ bool test_game_restart(void) {
       }
     }
   }
+  //test if undo list is empty
+  square squares[] = {TREE, TENT, 0, TENT, TREE, 0, 0, 0, 0};
+  square squares0[] = {TREE, 0, 0, 0, TREE, 0, 0, 0, 0};
+  uint nb_tents_row = {1, 1, 0};
+  uint nb_tents_col = {1, 1, 0};
+  game g3 = game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, false, true);
+  game g4 = game_new_ext(3, 3, squares0, nb_tents_row, nb_tents_col, false, true);
+  game_play_move(g3, 0, 1, EMPTY);
+  game_restart(g3);
+  game_undo(g3);
+  if (!game_equal(g3, g4)){
+    return false;
+  }
   game_delete(g1);
   game_delete(g2);
+  game_delete(g3);
+  game_delete(g4);
   return true;
 }
 
