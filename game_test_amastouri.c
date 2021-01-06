@@ -112,9 +112,21 @@ bool test_game_equal() {
     return false;
   }
   game_play_move(g1, 4, 4, GRASS);
-  game_restart(g1);  // pour les points :) //
+
+  square squares[] = {TREE, TENT, 0, TENT, TREE, 0, 0, 0, 0};
+  uint nb_tents_row[] = {1, 1, 0};
+  uint nb_tents_col[] = {1, 1, 0};
+  game g3 =
+      game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, false, true);
+  game g4 = game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, true, true);
+  test = game_equal(g3, g4);
+  if (test) {
+    return false;
+  }
   game_delete(g1);
   game_delete(g2);
+  game_delete(g3);
+  game_delete(g4);
   return true;
 }
 
