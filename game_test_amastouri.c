@@ -113,6 +113,7 @@ bool test_game_equal() {
   }
   game_play_move(g1, 4, 4, GRASS);
 
+  // test quand wrapping et diagadj différents
   square squares[] = {TREE, TENT, 0, TENT, TREE, 0, 0, 0, 0};
   uint nb_tents_row[] = {1, 1, 0};
   uint nb_tents_col[] = {1, 1, 0};
@@ -126,6 +127,7 @@ bool test_game_equal() {
   if (game_equal(g3, g4) || game_equal(g5, g6)) {
     return false;
   }
+  // test si nb_rows différents
   square squares2[] = {TREE, TENT, 0, TENT, TREE, 0, 0, 0, 0, 0, 0, 0};
   uint nb_tents_row2[] = {1, 1, 0, 0};
   game g7 =
