@@ -119,10 +119,18 @@ bool test_game_equal() {
   game g3 =
       game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, false, true);
   game g4 = game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, true, true);
-  game g5 = game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, false, false);
-  game g6 = game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, true, false);
-
+  game g5 =
+      game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, false, false);
+  game g6 =
+      game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, true, false);
   if (game_equal(g3, g4) || game_equal(g5, g6)) {
+    return false;
+  }
+  square squares2[] = {TREE, TENT, 0, TENT, TREE, 0, 0, 0, 0, 0, 0, 0};
+  uint nb_tents_row2[] = {1, 1, 0, 0};
+  game g7 =
+      game_new_ext(4, 3, squares2, nb_tents_row2, nb_tents_col, false, true);
+  if (game_equal(g3, g7)) {
     return false;
   }
   game_delete(g1);
@@ -131,7 +139,7 @@ bool test_game_equal() {
   game_delete(g4);
   game_delete(g5);
   game_delete(g6);
-
+  game_delete(g7);
   return true;
 }
 
