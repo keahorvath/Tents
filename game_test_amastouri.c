@@ -128,10 +128,10 @@ bool test_game_equal() {
     return false;
   }
   // test si nb_rows différents
-  square squares2[] = {TREE, TENT, 0, TENT, TREE, 0, 0, 0, 0, 0, 0, 0};
+  //square squares2[] = {TREE, TENT, 0, TENT, TREE, 0, 0, 0, 0, 0, 0, 0};
   uint nb_tents_row2[] = {1, 1, 0, 0};
   game g7 =
-      game_new_ext(4, 3, squares2, nb_tents_row2, nb_tents_col, false, true);
+      game_new_ext(4, 3, squares, nb_tents_row2, nb_tents_col, false, true);
   if (game_equal(g3, g7)) {
     return false;
   }
