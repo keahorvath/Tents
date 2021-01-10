@@ -124,7 +124,7 @@ bool test_game_equal() {
       game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, false, false);
   game g6 =
       game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, true, false);
-  if (game_equal(g3, g4) || game_equal(g5, g6)) {
+  if (game_equal(g3, g4) || game_equal(g5, g6) || game_equal(g3, g5)) {
     return false;
   }
   // test si nb_rows différents
