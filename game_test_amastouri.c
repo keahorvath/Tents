@@ -114,8 +114,8 @@ bool test_game_equal() {
   game_play_move(g1, 4, 4, GRASS);
 
   // test quand wrapping et diagadj différents
-  square squares[] = {TREE, TENT, 0, TENT, TREE, 0, 0, 0, 0};
-  uint nb_tents_row[] = {1, 1, 0};
+  square squares[] = {TREE, TENT, 0, 0, 0, 0, TENT, TREE, 0};
+  uint nb_tents_row[] = {1, 0, 1};
   uint nb_tents_col[] = {1, 1, 0};
   game g3 =
       game_new_ext(3, 3, squares, nb_tents_row, nb_tents_col, false, true);
