@@ -56,23 +56,6 @@ void queue_push_head(queue *q, void *data)
   q->length++;
 }
 
-/* *********************************************************** */
-
-void queue_push_tail(queue *q, void *data)
-{
-  assert(q);
-  element_t *e = malloc(sizeof(element_t));
-  assert(e);
-  e->data = data;
-  e->prev = q->tail;
-  e->next = NULL;
-  if (q->tail)
-    q->tail->next = e;
-  q->tail = e;
-  if (!q->head)
-    q->head = e;
-  q->length++;
-}
 
 /* *********************************************************** */
 
@@ -114,36 +97,10 @@ void *queue_pop_tail(queue *q)
 
 /* *********************************************************** */
 
-int queue_length(const queue *q)
-{
-  assert(q);
-  return q->length;
-}
-
-/* *********************************************************** */
-
 bool queue_is_empty(const queue *q)
 {
   assert(q);
   return (q->length == 0);
-}
-
-/* *********************************************************** */
-
-void *queue_peek_head(queue *q)
-{
-  assert(q);
-  assert(q->head);
-  return q->head->data;
-}
-
-/* *********************************************************** */
-
-void *queue_peek_tail(queue *q)
-{
-  assert(q);
-  assert(q->tail);
-  return q->tail->data;
 }
 
 /* *********************************************************** */
@@ -160,40 +117,6 @@ void queue_clear(queue *q)
   }
   q->head = q->tail = NULL;
   q->length = 0;
-}
-
-/* *********************************************************** */
-
-void queue_clear_full(queue *q, void (*destroy)(void *))
-{
-  assert(q);
-  element_t *e = q->head;
-  while (e)
-  {
-    element_t *tmp = e;
-    if (destroy)
-      destroy(e->data);
-    e = e->next;
-    free(tmp);
-  }
-  q->head = q->tail = NULL;
-  q->length = 0;
-}
-
-/* *********************************************************** */
-
-void queue_free(queue *q)
-{
-  queue_clear(q);
-  free(q);
-}
-
-/* *********************************************************** */
-
-void queue_free_full(queue *q, void (*destroy)(void *))
-{
-  queue_clear_full(q, destroy);
-  free(q);
 }
 
 /* *********************************************************** */
