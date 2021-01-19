@@ -72,14 +72,17 @@ void free_Moves(queue *queue) {
  * @return the created game
  **/
 game game_new(square *squares, uint *nb_tents_row, uint *nb_tents_col) {
-  if (squares == NULL || nb_tents_row == NULL || nb_tents_col == NULL) {
-    fprintf(stderr, "Function called on NULL pointer!\n");
+//if the space of the game wasn't make then the game call an error//
+	if (squares == NULL || nb_tents_row == NULL || nb_tents_col == NULL) {
+    	fprintf(stderr, "Function called on NULL pointer!\n");
     exit(EXIT_FAILURE);
   }
   game g = game_new_empty();
+//put the square in the game//
   for (uint i = 0; i < DEFAULT_SIZE * DEFAULT_SIZE; i++) {
     g->squares[i] = squares[i];
   }
+//put the corresponding objects to all the square//
   for (uint i = 0; i < DEFAULT_SIZE; i++) {
     g->nb_tents_col[i] = nb_tents_col[i];
     g->nb_tents_row[i] = nb_tents_row[i];
@@ -94,21 +97,26 @@ game game_new(square *squares, uint *nb_tents_row, uint *nb_tents_col) {
  * @return the created game
  **/
 game game_new_empty(void) {
+//create a new memory space//
   game g = (game)malloc(sizeof(struct game_s));
+//if the memory space wasn't create then call an error//
   if (g == NULL) {
     fprintf(stderr, "Not enough memory!\n");
     exit(EXIT_FAILURE);
   }
+//create a new memory space for each squares//
   g->squares = (square *)malloc(sizeof(square) * DEFAULT_SIZE * DEFAULT_SIZE);
   if (g->squares == NULL) {
     fprintf(stderr, "Not enough memory!\n");
     exit(EXIT_FAILURE);
   }
+//create a new memory space for each number of tents in columns//
   g->nb_tents_col = (uint *)malloc(sizeof(uint) * DEFAULT_SIZE);
   if (g->nb_tents_col == NULL) {
     fprintf(stderr, "Not enough memory!\n");
     exit(EXIT_FAILURE);
   }
+//create a new memory space for each number of rows//
   g->nb_tents_row = (uint *)malloc(sizeof(uint) * DEFAULT_SIZE);
   if (g->nb_tents_row == NULL) {
     fprintf(stderr, "Not enough memory!\n");
@@ -120,7 +128,7 @@ game game_new_empty(void) {
   g->diagadj = false;
   g->undo_hist = queue_new();
   g->redo_hist = queue_new();
-
+//pose all the expected tents in the game for each column and each row//
   for (int i = 0; i < DEFAULT_SIZE; i++) {
     game_set_expected_nb_tents_row(g, i, 0);
     game_set_expected_nb_tents_col(g, i, 0);
@@ -138,6 +146,7 @@ game game_new_empty(void) {
  * @pre @p g must be a valid pointer toward a game structure.
  **/
 game game_copy(cgame g) {
+//if the game doesn't exist then call an error//
   if (g == NULL) {
     fprintf(stderr, "Function called on NULL pointer\n");
     exit(EXIT_FAILURE);
@@ -170,27 +179,33 @@ game game_copy(cgame g) {
  * @pre @p g2 must be a valid pointer toward a game structure.
  **/
 bool game_equal(cgame g1, cgame g2) {
+//if the two games aren' create then call an error//
   if (g1 == NULL || g2 == NULL) {
     fprintf(stderr, "Function call on NULL pointer\n");
   }
+//if the columns and the rows of g1 are differents of g2 then its false//
   if (game_nb_cols(g1) != game_nb_cols(g2) ||
-      game_nb_rows(g1) != game_nb_rows(g2)) {
-    return false;
+      	game_nb_rows(g1) != game_nb_rows(g2)) {
+    	return false;
   }
+//if the diagonals of g1 are differents of g2 then its false//
   if (game_is_diagadj(g1) != game_is_diagadj(g2) ||
-      game_is_wrapping(g1) != game_is_wrapping(g2)) {
-    return false;
+      	game_is_wrapping(g1) != game_is_wrapping(g2)) {
+    	return false;
   }
+//for a specific row, if g1 is different of g2 then its false//
   for (uint i = 0; i < game_nb_rows(g1); i++) {
     if (g1->nb_tents_row[i] != g2->nb_tents_row[i]) {
       return false;
     }
   }
+//for a specific column, if g1 is different of g2 then its false//
   for (uint j = 0; j < game_nb_cols(g1); j++) {
     if (g1->nb_tents_col[j] != g2->nb_tents_col[j]) {
       return false;
     }
   }
+//for all the game if a square of g1 is different of a square of g2 then its false//
   for (uint i = 0; i < game_nb_rows(g1) * game_nb_cols(g2); i++) {
     if (g1->squares[i] != g2->squares[i]) {
       return false;
