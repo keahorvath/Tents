@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "extra_functions.h"
 #include "game.h"
 #include "game_aux.h"
 #include "game_ext.h"
@@ -409,7 +408,7 @@ bool test_game_new_empty_ext(void) {
   game_delete(gm);
   return true;
 }
-
+/*
 bool test_make_array_of_all_adjacent_cells(void) {
   game g = game_new_empty_ext(4, 3, false, false);
   // test on non wrapping game where a cell has all 8 adjacent cells
@@ -481,7 +480,7 @@ bool test_make_array_of_ortho_adjacent_cells(void) {
   game_delete(g2);
   return true;
 }
-
+*/
 int main(int argc, char* argv[]) {
   printf("=> Start test \"%s\"\n", argv[1]);
   bool testPassed = false;
@@ -502,10 +501,6 @@ int main(int argc, char* argv[]) {
     testPassed = test_game_new_empty_ext();
   } else if (strcmp("game_new_ext", argv[1]) == 0) {
     testPassed = test_game_new_ext();
-  } else if (strcmp("make_array_of_all_adjacent_cells", argv[1]) == 0) {
-    testPassed = test_make_array_of_all_adjacent_cells();
-  } else if (strcmp("make_array_of_ortho_adjacent_cells", argv[1]) == 0) {
-    testPassed = test_make_array_of_ortho_adjacent_cells();
   } else {
     fprintf(stderr, "Error: test \"%s\" not found!\n", argv[1]);
     exit(EXIT_FAILURE);
