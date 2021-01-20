@@ -234,7 +234,7 @@ bool test_game_is_over(void) {
     return false;
   }
 
-  // test 7 if nb tents = nb trees
+  // test 6 if nb tents = nb trees
   square squares5[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0,
                        0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -357,7 +357,6 @@ bool test_game_restart(void) {
   return true;
 }
 
-/**test_game_new **/
 bool test_game_new_ext(void) {
   game gm = game_new_empty_ext(3, 3, false, true);
   game_set_square(gm, 0, 0, TREE);
@@ -382,7 +381,6 @@ bool test_game_new_ext(void) {
   return true;
 }
 
-/**test_game_new_empty **/
 bool test_game_new_empty_ext(void) {
   game gm = game_new_empty_ext(4, 3, true, false);
   for (uint i = 0; i < 4; i++) {
