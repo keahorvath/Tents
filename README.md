@@ -69,6 +69,9 @@
     modifications des fonctions déjà existantes pour v2
     make_array_of_all_adjacent_cells
     make_array_of_ortho_adjacent_cells
+    test_pointer
+    test_i_value
+    test_j_value
 
 ## **Marvin Beites**
 
