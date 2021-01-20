@@ -408,79 +408,7 @@ bool test_game_new_empty_ext(void) {
   game_delete(gm);
   return true;
 }
-/*
-bool test_make_array_of_all_adjacent_cells(void) {
-  game g = game_new_empty_ext(4, 3, false, false);
-  // test on non wrapping game where a cell has all 8 adjacent cells
-  uint expected_array[] = {1, 0, 0, 0, 0, 1, 0, 2, 1, 2, 2, 2, 2, 1, 2, 0};
-  uint* array = make_array_of_all_adjacent_cells(g, 1, 1);
-  for (uint i = 0; i < 16; i++) {
-    if (expected_array[i] != array[i]) {
-      return false;
-    }
-  }
-  free(array);
-  // test on non wrapping game where a cell has only 3 adjacent cells
-  uint expected_array2[] = {0, 1, 1, 2, 1, 1};
-  uint* array2 = make_array_of_all_adjacent_cells(g, 0, 2);
-  for (uint i = 0; i < 6; i++) {
-    if (expected_array2[i] != array2[i]) {
-      return false;
-    }
-  }
-  free(array2);
-  // test on wrapping game
-  game g2 = game_new_empty_ext(4, 4, true, false);
-  uint expected_array3[] = {0, 2, 3, 2, 3, 3, 3, 0, 0, 0, 1, 0, 1, 3, 1, 2};
-  uint* array3 = make_array_of_all_adjacent_cells(g2, 0, 3);
-  for (uint i = 0; i < 16; i++) {
-    if (expected_array3[i] != array3[i]) {
-      return false;
-    }
-  }
-  free(array3);
-  game_delete(g);
-  game_delete(g2);
-  return true;
-}
 
-bool test_make_array_of_ortho_adjacent_cells(void) {
-  game g = game_new_empty_ext(4, 3, false, false);
-  // test on non wrapping game where a cell has all 4 orthogonally adjacent
-  // cells
-  uint expected_array[] = {1, 0, 0, 1, 1, 2, 2, 1};
-  uint* array = make_array_of_ortho_adjacent_cells(g, 1, 1);
-  for (uint i = 0; i < 8; i++) {
-    if (expected_array[i] != array[i]) {
-      return false;
-    }
-  }
-  free(array);
-  // test on non wrapping game where a cell has only 2 orthogonally adjacent
-  // cells
-  uint expected_array2[] = {0, 1, 1, 2};
-  uint* array2 = make_array_of_ortho_adjacent_cells(g, 0, 2);
-  for (uint i = 0; i < 4; i++) {
-    if (expected_array2[i] != array2[i]) {
-      return false;
-    }
-  }
-  free(array2);
-  // test on wrapping game
-  game g2 = game_new_empty_ext(4, 4, true, false);
-  uint expected_array3[] = {0, 2, 3, 3, 0, 0, 1, 3};
-  uint* array3 = make_array_of_ortho_adjacent_cells(g2, 0, 3);
-  for (uint i = 0; i < 8; i++) {
-    if (expected_array3[i] != array3[i]) {
-      return false;
-    }
-  }
-  free(array3);
-  game_delete(g);
-  game_delete(g2);
-  return true;
-}
-*/
 int main(int argc, char* argv[]) {
   printf("=> Start test \"%s\"\n", argv[1]);
   bool testPassed = false;

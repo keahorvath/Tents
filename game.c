@@ -6,8 +6,8 @@
 #include "game_ext.h"
 #include "queue.h"
 
-static uint* make_array_of_all_adjacent_cells(cgame g, uint i, uint j);
-static uint* make_array_of_ortho_adjacent_cells(cgame g, uint i, uint j);
+static uint *make_array_of_all_adjacent_cells(cgame g, uint i, uint j);
+static uint *make_array_of_ortho_adjacent_cells(cgame g, uint i, uint j);
 static void test_pointer(cgame g);
 static void test_i_value(cgame g, uint i);
 static void test_j_value(cgame g, uint j);
