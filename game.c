@@ -50,6 +50,17 @@ struct move {
  **/
 typedef struct move move;
 
+/**
+ * @brief stores a move in a structure allocated dynamically.
+ * @param squares an array describing the initial square values (row-major
+ * storage)
+ * @param i the number of row
+ * @param j the number of column
+ * @pre @p squares must be an initialized array of default size squared.
+ * @pre @p i must be an unsigned integer.
+ * @pre @p j must be an unsigned integer.
+ * @return the created Move.
+ **/
 move *create_move(square s, uint i, uint j) {
   move *Move = (move *)malloc(sizeof(move));
   if (Move == NULL) exit(EXIT_FAILURE);
@@ -59,6 +70,11 @@ move *create_move(square s, uint i, uint j) {
   return Move;
 }
 
+/**
+ * @brief free the move allocated dynamically.
+ * @param queue a pointer to a queue
+ * @return nothing.
+ **/
 void free_Moves(queue *queue) {
   if (queue != NULL) {
     while (!queue_is_empty(queue)) {
@@ -425,6 +441,9 @@ uint game_get_current_nb_tents_all(cgame g) {
  * @brief Plays a move in a given square.
  * @details This function allows to play both a regular or a losing move, but
  * not an illegal move (see @ref index).
+ * Before playing, it stores the type of square  in row @param i and column 
+ * @param j in the history of the game : @param undo_hist.
+ * Once played it delete the moves in the futur queue  @param redo_hist.
  * @param g the game
  * @param i row index
  * @param j column index
@@ -991,9 +1010,9 @@ bool game_is_diagadj(cgame g) {
 
 /**
  * @brief Undoes the last move.
- * @details Searches in the history the last move played (by calling
- * @ref game_play_move or @ref game_redo), and restores the state of the game
- * before that move. If no moves have been played, this function does nothing.
+ * @details Searches in the @ref redo_hist queue the last move and play it.
+ * If no moves have been played, this function does nothing.
+ * add that last move to @ref redo_hist.
  * The @ref game_restart function clears the history.
  * @param g the game
  * @pre @p g is a valid pointer toward a cgame structure
@@ -1019,8 +1038,8 @@ void game_undo(game g) {
  * @brief Redoes the last move.
  * @details Searches in the history the last cancelled move (by calling @ref
  * game_undo), and replays it. If there are no more moves to be replayed, this
- * function does nothing. After playing a new move with @ref game_play_move, it
- * is no longer possible to redo an old cancelled move.
+ * function does nothing. 
+ * add the move created by the old square to @ref redo_hist.
  * @param g the game
  * @pre @p g is a valid pointer toward a cgame structure
  */
