@@ -441,7 +441,7 @@ uint game_get_current_nb_tents_all(cgame g) {
  * @brief Plays a move in a given square.
  * @details This function allows to play both a regular or a losing move, but
  * not an illegal move (see @ref index).
- * Before playing, it stores the type of square  in row @param i and column 
+ * Before playing, it stores the type of square  in row @param i and column
  * @param j in the history of the game : @param undo_hist.
  * Once played it delete the moves in the futur queue  @param redo_hist.
  * @param g the game
@@ -1038,7 +1038,7 @@ void game_undo(game g) {
  * @brief Redoes the last move.
  * @details Searches in the history the last cancelled move (by calling @ref
  * game_undo), and replays it. If there are no more moves to be replayed, this
- * function does nothing. 
+ * function does nothing.
  * add the move created by the old square to @ref redo_hist.
  * @param g the game
  * @pre @p g is a valid pointer toward a cgame structure
