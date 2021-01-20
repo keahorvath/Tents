@@ -72,3 +72,5 @@ add_test(test_khorvath_game_fill_grass_col ./game_test_khorvath game_fill_grass_
 add_test(test_khorvath_game_restart ./game_test_khorvath game_restart)
 add_test(test_khorvath_game_new_ext ./game_test_khorvath game_new_ext)
 add_test(test_khorvath_game_new_empty_ext ./game_test_khorvath game_new_empty_ext)
+add_test(test_khorvath_make_array_of_all_adjacent_cells ./game_test_khorvath make_array_of_all_adjacent_cells)
+add_test(test_khorvath_make_array_of_ortho_adjacent_cells ./game_test_khorvath make_array_of_ortho_adjacent_cells)

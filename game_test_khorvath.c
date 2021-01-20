@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "extra_functions.h"
 #include "game.h"
 #include "game_aux.h"
 #include "game_ext.h"
@@ -84,13 +85,11 @@ bool test_game_check_move(void) {
       game_check_move(ga, 1, 5, TENT) != LOSING) {
     return false;
   }
-
   // test 6 if placing tent in row and column with no tents required is losing
   if (game_check_move(g, 7, 1, TENT) != LOSING ||
       game_check_move(g, 3, 7, TENT) != LOSING) {
     return false;
   }
-
   // test 7 if placing grass and not enough empty squares for tents is losing
   if (game_check_move(g, 0, 0, GRASS) != LOSING) {
     return false;
@@ -120,21 +119,15 @@ bool test_game_check_move(void) {
     return false;
   }
 
-  // test 10 if reverse game_default_solution is regular
-  game g3 = game_default_solution();
-  for (uint i = 0; i < DEFAULT_SIZE; i++) {
-    for (uint j = 0; j < DEFAULT_SIZE; j++) {
-      if (game_get_square(g3, i, j) == TENT) {
-        if (game_check_move(g3, i, j, GRASS) == REGULAR) {
-          return false;
-        }
-      }
-      if (game_get_square(g3, i, j) == GRASS) {
-        if (game_check_move(g3, i, j, TENT) == REGULAR) {
-          return false;
-        }
-      }
-    }
+  // test 10 if placing more tents than trees is losing
+  square squares3[] = {0, TREE, 0, 0, 0, 0, 0, 0, 0};
+  uint nb_tents_row3[] = {2, 0, 0};
+  uint nb_tents_col3[] = {1, 0, 1};
+  game g3 =
+      game_new_ext(3, 3, squares3, nb_tents_row3, nb_tents_col3, false, false);
+  game_play_move(g3, 0, 0, TENT);
+  if (game_check_move(g, 0, 2, TENT) != LOSING) {
+    return false;
   }
 
   // test 11 if wrapping works
@@ -417,7 +410,79 @@ bool test_game_new_empty_ext(void) {
   return true;
 }
 
-int main(int argc, char *argv[]) {
+bool test_make_array_of_all_adjacent_cells(void) {
+  game g = game_new_empty_ext(4, 3, false, false);
+  // test on non wrapping game where a cell has all 8 adjacent cells
+  uint expected_array[] = {1, 0, 0, 0, 0, 1, 0, 2, 1, 2, 2, 2, 2, 1, 2, 0};
+  uint* array = make_array_of_all_adjacent_cells(g, 1, 1);
+  for (uint i = 0; i < 16; i++) {
+    if (expected_array[i] != array[i]) {
+      return false;
+    }
+  }
+  free(array);
+  // test on non wrapping game where a cell has only 3 adjacent cells
+  uint expected_array2[] = {0, 1, 1, 2, 1, 1};
+  uint* array2 = make_array_of_all_adjacent_cells(g, 0, 2);
+  for (uint i = 0; i < 6; i++) {
+    if (expected_array2[i] != array2[i]) {
+      return false;
+    }
+  }
+  free(array2);
+  // test on wrapping game
+  game g2 = game_new_empty_ext(4, 4, true, false);
+  uint expected_array3[] = {0, 2, 3, 2, 3, 3, 3, 0, 0, 0, 1, 0, 1, 3, 1, 2};
+  uint* array3 = make_array_of_all_adjacent_cells(g2, 0, 3);
+  for (uint i = 0; i < 16; i++) {
+    if (expected_array3[i] != array3[i]) {
+      return false;
+    }
+  }
+  free(array3);
+  game_delete(g);
+  game_delete(g2);
+  return true;
+}
+
+bool test_make_array_of_ortho_adjacent_cells(void) {
+  game g = game_new_empty_ext(4, 3, false, false);
+  // test on non wrapping game where a cell has all 4 orthogonally adjacent
+  // cells
+  uint expected_array[] = {1, 0, 0, 1, 1, 2, 2, 1};
+  uint* array = make_array_of_ortho_adjacent_cells(g, 1, 1);
+  for (uint i = 0; i < 8; i++) {
+    if (expected_array[i] != array[i]) {
+      return false;
+    }
+  }
+  free(array);
+  // test on non wrapping game where a cell has only 2 orthogonally adjacent
+  // cells
+  uint expected_array2[] = {0, 1, 1, 2};
+  uint* array2 = make_array_of_ortho_adjacent_cells(g, 0, 2);
+  for (uint i = 0; i < 4; i++) {
+    if (expected_array2[i] != array2[i]) {
+      return false;
+    }
+  }
+  free(array2);
+  // test on wrapping game
+  game g2 = game_new_empty_ext(4, 4, true, false);
+  uint expected_array3[] = {0, 2, 3, 3, 0, 0, 1, 3};
+  uint* array3 = make_array_of_ortho_adjacent_cells(g2, 0, 3);
+  for (uint i = 0; i < 8; i++) {
+    if (expected_array3[i] != array3[i]) {
+      return false;
+    }
+  }
+  free(array3);
+  game_delete(g);
+  game_delete(g2);
+  return true;
+}
+
+int main(int argc, char* argv[]) {
   printf("=> Start test \"%s\"\n", argv[1]);
   bool testPassed = false;
 
@@ -437,6 +502,10 @@ int main(int argc, char *argv[]) {
     testPassed = test_game_new_empty_ext();
   } else if (strcmp("game_new_ext", argv[1]) == 0) {
     testPassed = test_game_new_ext();
+  } else if (strcmp("make_array_of_all_adjacent_cells", argv[1]) == 0) {
+    testPassed = test_make_array_of_all_adjacent_cells();
+  } else if (strcmp("make_array_of_ortho_adjacent_cells", argv[1]) == 0) {
+    testPassed = test_make_array_of_ortho_adjacent_cells();
   } else {
     fprintf(stderr, "Error: test \"%s\" not found!\n", argv[1]);
     exit(EXIT_FAILURE);
