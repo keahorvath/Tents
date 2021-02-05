@@ -407,12 +407,12 @@ bool test_game_new_empty_ext(void) {
   return true;
 }
 
-bool test_load_game(void){
+bool test_game_load(void){
 
 }
 
-bool test_save_game(void){
-
+bool test_game_save(void){
+  //File *f = game_save()
 }
 
 int main(int argc, char* argv[]) {
@@ -435,10 +435,10 @@ int main(int argc, char* argv[]) {
     testPassed = test_game_new_empty_ext();
   } else if (strcmp("game_new_ext", argv[1]) == 0) {
     testPassed = test_game_new_ext();
-  }else if (strcmp("load_game", argv[1]) == 0){
-    testPassed = test_load_game();
-  }else if (strcmp("save_game", argv[1]) == 0){
-    testPassed = test_save_game();
+  }else if (strcmp("game_load", argv[1]) == 0){
+    testPassed = test_game_load();
+  }else if (strcmp("game_save", argv[1]) == 0){
+    testPassed = test_game_save();
   } else {
     fprintf(stderr, "Error: test \"%s\" not found!\n", argv[1]);
     exit(EXIT_FAILURE);
