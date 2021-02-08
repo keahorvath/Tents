@@ -3,6 +3,7 @@
 #include "game.h"
 #include "game_aux.h"
 #include "game_ext.h"
+#include "game_tools.h"
 
 int main(void) {
   game current_game = game_default();
@@ -28,6 +29,10 @@ int main(void) {
     } else if (c == 'y') {
       game_redo(current_game);
       game_print(current_game);
+    } else if (c == 'l') {
+      game_load(current_game);
+    } else if (c == 's') {
+      game_save(current_game);
     } else if (ret1 == EOF) {
       printf("End of file\n");
       exit(EXIT_SUCCESS);
