@@ -40,8 +40,8 @@ int main(int argc, char *argv[]) {
       exit(EXIT_SUCCESS);
     }
     int ret2 = scanf("%u %u", &i, &j);
-    if (ret1 == 1 && ret2 == 2 && (c == 't' || c == 'g' || c == 'e') && i < game_nb_rows(current_game) &&
-        j < game_nb_cols(current_game)) {
+    if (ret1 == 1 && ret2 == 2 && (c == 't' || c == 'g' || c == 'e') &&
+        i < game_nb_rows(current_game) && j < game_nb_cols(current_game)) {
       if (game_get_square(current_game, i, j) != TREE) {
         square s;
         if (c == 't') {
