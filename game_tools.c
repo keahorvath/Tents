@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "game_tools.h"
 #include "game.h"
 #include "game_ext.h"
 
@@ -43,13 +44,12 @@ game game_load(char *filename) {
           square[indice]= 3;
       }      
     }
-    game g= game_new(square, nb_tents_row, nb_tents_col);
+    game g= game_new_ext(
+          square,nb_row,nb_cols, nb_tents_row, nb_tents_col,is_swap,is_diagadj);
     if (g==NULL){
       printf("thin");
       return NULL;
     }
-    g->wrapping = is_swap;
-    g->diagadj = is_diagadj;
     return g;
   }
   return NULL;
