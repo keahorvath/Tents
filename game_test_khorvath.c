@@ -5,6 +5,7 @@
 #include "game.h"
 #include "game_aux.h"
 #include "game_ext.h"
+#include "game_tools.h"
 #include "queue.h"
 
 bool test_game_play_move(void) {
@@ -407,12 +408,34 @@ bool test_game_new_empty_ext(void) {
   return true;
 }
 
-bool test_game_load(void){
-
+bool test_game_load(void) {
+  game g1 = game_default_solution();
+  game_save(g1, "save_1.tnt");
+  game g2 = game_load("save_1.tnt");
+  if (!game_equal(g1, g2)) {
+    return false;
+  }
+  square squares[] = {TREE, TENT, EMPTY, GRASS, TENT, TREE, GRASS, EMPTY};
+  uint nb_tents_row[] = {1, 1};
+  uint nb_tents_col[] = {0, 1, 0, 1};
+  game g3 =
+      game_new_ext(2, 4, squares, nb_tents_row, nb_tents_col, false, true);
+  game_save(g3, "save_2.tnt");
+  game g4 = game_load("save_2.tnt");
+  if (!game_equal(g3, g4)) {
+    return false;
+  }
+  game_delete(g1);
+  game_delete(g2);
+  game_delete(g3);
+  game_delete(g4);
+  return true;
 }
 
-bool test_game_save(void){
-  //File *f = game_save()
+bool test_game_save(void) {
+  game g = game_default_solution();
+  game_save(g, "save_1.tnt");
+  return true;
 }
 
 int main(int argc, char* argv[]) {
@@ -435,9 +458,9 @@ int main(int argc, char* argv[]) {
     testPassed = test_game_new_empty_ext();
   } else if (strcmp("game_new_ext", argv[1]) == 0) {
     testPassed = test_game_new_ext();
-  }else if (strcmp("game_load", argv[1]) == 0){
+  } else if (strcmp("game_load", argv[1]) == 0) {
     testPassed = test_game_load();
-  }else if (strcmp("game_save", argv[1]) == 0){
+  } else if (strcmp("game_save", argv[1]) == 0) {
     testPassed = test_game_save();
   } else {
     fprintf(stderr, "Error: test \"%s\" not found!\n", argv[1]);

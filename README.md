@@ -19,6 +19,8 @@
     game_restart
     game_new_ext
     game_new_empty_ext
+    game_load
+    game_save
 
 ## **Marvin Beites**
 
@@ -56,6 +58,7 @@
     game_delete
     game_new_ext
     game_new_empty_ext
+    save et load dans game_text
 
 ## **Kea Horvath**
 
@@ -83,6 +86,7 @@
     game_nb_cols
     game_is_wrapping
     game_is_diagadj
+    game_save
 
 ## **Amira Mastouri**
 
@@ -93,3 +97,4 @@
     game_is_over
     game_undo
     game_redo
+    game_load
