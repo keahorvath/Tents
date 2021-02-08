@@ -6,10 +6,12 @@
 #include "game_tools.h"
 
 int main(int argc, char *argv[]) {
-  game current_game = game_default();
-  if(argv[1] != NULL){
-  printf("Chargement du nouveau fichier");
-  game_load(argv[1]);
+  game current_game;
+  if (argc == 2) {
+    printf("Chargement du nouveau fichier\n");
+    current_game = game_load(argv[1]);
+  } else {
+    current_game = game_default();
   }
   char c;
   uint i, j;

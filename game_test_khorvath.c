@@ -433,8 +433,67 @@ bool test_game_load(void) {
 }
 
 bool test_game_save(void) {
-  game g = game_default_solution();
+  square squares[] = {TREE, TENT, EMPTY, GRASS, TENT, TREE, GRASS, EMPTY};
+  uint rows[] = {1, 1};
+  uint cols[] = {0, 1, 0, 1};
+  game g = game_new_ext(2, 4, squares, rows, cols, false, true);
   game_save(g, "save_1.tnt");
+  FILE* f = fopen("save_1.tnt", "r");
+  if (f == NULL) {
+    fprintf(stderr, "File couldn't open!\n");
+    exit(EXIT_FAILURE);
+  }
+  unsigned int nb_rows, nb_cols, is_wrapping, is_diagadj;
+  int i = fscanf(f, "%u%*c%u%*c%u%*c%u%*c", &nb_rows, &nb_cols, &is_wrapping,
+                 &is_diagadj);
+  if (nb_rows != game_nb_rows(g) || nb_cols != game_nb_cols(g) ||
+      is_wrapping != game_is_wrapping(g) || is_diagadj != game_is_diagadj(g)) {
+    return false;
+  }
+  uint nb_tents_row[nb_rows];
+  uint nb_tents_col[nb_cols];
+  // load row line
+  for (int indice = 0; indice < nb_rows; indice++) {
+    i = fscanf(f, "%u%*c", nb_tents_row + indice);
+    if (nb_tents_row[indice] != game_get_expected_nb_tents_row(g, indice)) {
+      return false;
+    }
+  }
+  // load column line
+  for (int indice = 0; indice < nb_cols; indice++) {
+    i = fscanf(f, "%u%*c", nb_tents_col + indice);
+    if (nb_tents_col[indice] != game_get_expected_nb_tents_col(g, indice)) {
+      return false;
+    }
+  }
+  fseek(f, 1, SEEK_CUR);  // skip the character '\n '
+  // load the grill of the game
+  square square[nb_rows * nb_cols];
+  for (uint indice = 0; indice < nb_rows * nb_cols; indice++) {
+    char s;
+    if ((indice != 0) && (indice != (nb_rows * nb_cols - 1)) &&
+        (indice % nb_cols == 0)) {
+      fseek(f, 1, SEEK_CUR);  // skip the character '\n '
+    }
+    i = fscanf(f, "%c", &s);
+    if ((i) && (s == ' ')) {
+      square[indice] = EMPTY;
+    }
+    if ((i) && (s == 'x')) {
+      square[indice] = TREE;
+    }
+    if ((i) && (s == '*')) {
+      square[indice] = TENT;
+    }
+    if ((i) && (s == '-')) {
+      square[indice] = GRASS;
+    }
+    if (square[indice] !=
+        game_get_square(g, (indice) / nb_cols, (indice) % nb_cols)) {
+      return false;
+    }
+  }
+  game_delete(g);
   return true;
 }
 
