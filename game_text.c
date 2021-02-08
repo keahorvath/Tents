@@ -5,9 +5,12 @@
 #include "game_ext.h"
 #include "game_tools.h"
 
-int main(void) {
+int main(int argc, char *argv[]) {
   game current_game = game_default();
-  char *game1;
+  if(argv[1] != NULL){
+  printf("Chargement du nouveau fichier");
+  game_load(argv[1]);
+  }
   char c;
   uint i, j;
   while (!game_is_over(current_game)) {
@@ -30,10 +33,6 @@ int main(void) {
     } else if (c == 'y') {
       game_redo(current_game);
       game_print(current_game);
-    } else if (c == 'l') {
-      game_load(game1);
-    } else if (c == 's') {
-      game_save(current_game, game1);
     } else if (ret1 == EOF) {
       printf("End of file\n");
       exit(EXIT_SUCCESS);
