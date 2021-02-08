@@ -7,6 +7,7 @@
 
 int main(void) {
   game current_game = game_default();
+  char *game1;
   char c;
   uint i, j;
   while (!game_is_over(current_game)) {
@@ -30,9 +31,9 @@ int main(void) {
       game_redo(current_game);
       game_print(current_game);
     } else if (c == 'l') {
-      game_load(current_game);
+      game_load(game1);
     } else if (c == 's') {
-      game_save(current_game);
+      game_save(current_game, game1);
     } else if (ret1 == EOF) {
       printf("End of file\n");
       exit(EXIT_SUCCESS);
