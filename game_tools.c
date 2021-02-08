@@ -5,9 +5,56 @@
 #include "game_ext.h"
 
 game game_load(char *filename) {
-  game g = game_new_empty();
-  return g;
+  FILE *f;
+  f = fopen(filename, "r");
+  if (f != NULL) {
+    unsigned int nb_row , nb_cols , is_swap , is_diagadj;
+    int i = fscanf(f,"%u%*c%u%*c%u%*c%u%*c", 
+                    &nb_row , &nb_cols , &is_swap , &is_diagadj);    
+    unsigned int  nb_tents_row[nb_row];
+    unsigned int  nb_tents_col[nb_cols];
+    //load row line
+    for (int  indice = 0 ; indice < nb_row; indice++ ){
+      i = fscanf(f,"%u%*c", nb_tents_row + indice);
+    }
+    //load column line
+    for (int  indice = 0 ; indice < nb_cols; indice++ ){
+      i = fscanf(f,"%u%*c", nb_tents_col + indice);
+    }
+    fseek ( f , 1 , SEEK_CUR );     //skip the character '\n '
+    //load the grill of the game 
+    square square[nb_row*nb_cols];
+    for (int indice = 0; indice <nb_row*nb_cols; indice++) {
+      char s;
+      if ((indice!=0 ) && (indice!=(nb_row*nb_cols-1)) && (indice%(nb_cols)==0)){
+        fseek ( f , 1 , SEEK_CUR );     //skip the character '\n '
+      }
+      i = fscanf(f,"%c", &s);
+      if ((i) && (s==' ' ) ){
+          square[indice]= 0;
+      }
+      if ((i) && (s=='x') ){
+          square[indice]= 1;
+      }
+      if ((i) && (s=='*') ){
+          square[indice]= 2;
+      }
+      if ((i) && (s=='-') ){
+          square[indice]= 3;
+      }      
+    }
+    game g= game_new(square, nb_tents_row, nb_tents_col);
+    if (g==NULL){
+      printf("thin");
+      return NULL;
+    }
+    g->wrapping = is_swap;
+    g->diagadj = is_diagadj;
+    return g;
+  }
+  return NULL;
 }
+
 
 void game_save(cgame g, char *filename) {
   FILE *f = fopen(filename, "w");
