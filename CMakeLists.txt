@@ -8,7 +8,7 @@ enable_testing()
 include(CTest)
 
 #positionne la variable
-set(CMAKE_C_FLAGS "-std=c99 -g -Wall")
+set(CMAKE_C_FLAGS "-std=c99 -g --coverage -Wall")
 
 set(CMAKE_BUILD_TYPE_DEBUG)
 set(CMAKE_VERBOSE_MAKEFILE ON)
