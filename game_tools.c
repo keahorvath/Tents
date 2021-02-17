@@ -91,32 +91,38 @@ void game_save(cgame g, char *filename) {
   fclose(f);
 }
 
-bool game_solve(game g){
-  if (game_is_over(g)){
+bool game_solve(game g) {
+  // comment faire pour qu'en cas de jeu sans solution,
+  // le jeu soit inchangé??
+  // parce que vu que c'est récursif, si on fait une copie au début,
+  // la copie changera à chaque appel de la fonction...
+  if (game_is_over(g)) {
     return true;
   }
-  if (game_is_full(g)){
+  if (game_is_full(g)) {
     return false;
   }
   uint nb_of_moves_made = 0;
-  for (uint i = 0; i < game_nb_rows(g); i++){
-    for (uint j = 0; j < game_nb_cols(g); j++){
-      if (game_get_square(g, i, j) == EMPTY && game_check_move(g, i, j, TENT) == LOSING){
+  for (uint i = 0; i < game_nb_rows(g); i++) {
+    for (uint j = 0; j < game_nb_cols(g); j++) {
+      if (game_get_square(g, i, j) == EMPTY &&
+          game_check_move(g, i, j, TENT) == LOSING) {
         game_play_move(g, i, j, GRASS);
         nb_of_moves_made++;
-      }
-      else if (game_get_square(g, i, j) == EMPTY && game_check_move(g, i, j, GRASS) == LOSING){
+      } else if (game_get_square(g, i, j) == EMPTY &&
+                 game_check_move(g, i, j, GRASS) == LOSING) {
         game_play_move(g, i, j, TENT);
         nb_of_moves_made++;
       }
     }
   }
-  //if the nb_of_moves_made is 0, it means that any of the empty cells can be a tent
-  if (nb_of_moves_made == 0){
-    for (uint i = 0; i < game_nb_rows(g); i++){
-      for (uint j = 0; j < game_nb_cols(g); j++){
-        //choose the first empty cell found and put a tent
-        if (game_get_square(g, i, j) == EMPTY){
+  // if the nb_of_moves_made is 0, it means that any of the empty cells can be a
+  // tent
+  if (nb_of_moves_made == 0) {
+    for (uint i = 0; i < game_nb_rows(g); i++) {
+      for (uint j = 0; j < game_nb_cols(g); j++) {
+        // choose the first empty cell found and put a tent
+        if (game_get_square(g, i, j) == EMPTY) {
           game_play_move(g, i, j, TENT);
           return game_solve(g);
         }
@@ -126,14 +132,12 @@ bool game_solve(game g){
   return game_solve(g);
 }
 
-uint game_nb_solutions(game g){
-  return 0;
-}
+uint game_nb_solutions(game g) { return 0; }
 
-bool game_is_full(cgame g){
-  for (uint i = 0; i < game_nb_rows(g); i++){
-    for (uint j = 0; j < game_nb_cols(g); j++){
-      if (game_get_square(g, i, j) == EMPTY){
+bool game_is_full(cgame g) {
+  for (uint i = 0; i < game_nb_rows(g); i++) {
+    for (uint j = 0; j < game_nb_cols(g); j++) {
+      if (game_get_square(g, i, j) == EMPTY) {
         return false;
       }
     }

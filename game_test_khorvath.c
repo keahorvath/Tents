@@ -497,25 +497,26 @@ bool test_game_save(void) {
   return true;
 }
 
-bool test_game_solve(void){
+bool test_game_solve(void) {
   game g1 = game_default();
   game g2 = game_default_solution();
-  if (!game_solve(g1)){
+  if (!game_solve(g1)) {
     return false;
   }
-  if (!game_equal(g1, g2)){
+  if (!game_equal(g1, g2)) {
     return false;
   }
-  //test on a game with no solutions
-  square squares[] = {EMPTY, EMPTY, EMPTY, EMPTY, TREE, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY};
+  // test on a game with no solutions
+  square squares[] = {EMPTY, EMPTY, EMPTY, EMPTY, TREE,  EMPTY,
+                      EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY};
   uint nb_tents_row[] = {0, 1, 1, 0};
   uint nb_tents_col[] = {0, 1, 1};
   game g3 =
       game_new_ext(4, 3, squares, nb_tents_row, nb_tents_col, false, true);
-  if (game_solve(g3)){
+  if (game_solve(g3)) {
     return false;
   }
-  //game_print(g3);
+  // game_print(g3);
   /*
   game g4 = game_load("/home/keahorvath/PT2/tents-a62e2/save1.tnt");
   game_print(g4);
@@ -554,7 +555,7 @@ int main(int argc, char* argv[]) {
     testPassed = test_game_load();
   } else if (strcmp("game_save", argv[1]) == 0) {
     testPassed = test_game_save();
-  }else if (strcmp("game_solve", argv[1]) == 0){
+  } else if (strcmp("game_solve", argv[1]) == 0) {
     testPassed = test_game_solve();
   } else {
     fprintf(stderr, "Error: test \"%s\" not found!\n", argv[1]);
