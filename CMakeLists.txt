@@ -73,4 +73,4 @@ add_test(test_khorvath_game_new_ext ./game_test_khorvath game_new_ext)
 add_test(test_khorvath_game_new_empty_ext ./game_test_khorvath game_new_empty_ext)
 add_test(test_khorvath_game_load ./game_test_khorvath game_load)
 add_test(test_khorvath_game_save ./game_test_khorvath game_save)
-
+add_test(test_khorvath_game_solve ./game_test_khorvath game_solve)

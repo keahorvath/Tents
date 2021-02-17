@@ -497,6 +497,22 @@ bool test_game_save(void) {
   return true;
 }
 
+bool test_game_solve(void){
+  game g1 = game_default();
+  game g2 = game_default_solution();
+  if (!game_solve(g1)){
+    game_print(g1);
+    return false;
+  }
+  game_print(g1);
+  if (!game_equal(g1, g2)){
+    return false;
+  }
+  game_delete(g1);
+  game_delete(g2);
+  return true;
+}
+
 int main(int argc, char* argv[]) {
   printf("=> Start test \"%s\"\n", argv[1]);
   bool testPassed = false;
@@ -521,6 +537,8 @@ int main(int argc, char* argv[]) {
     testPassed = test_game_load();
   } else if (strcmp("game_save", argv[1]) == 0) {
     testPassed = test_game_save();
+  }else if (strcmp("game_solve", argv[1]) == 0){
+    testPassed = test_game_solve();
   } else {
     fprintf(stderr, "Error: test \"%s\" not found!\n", argv[1]);
     exit(EXIT_FAILURE);
