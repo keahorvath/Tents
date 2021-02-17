@@ -90,7 +90,20 @@ void game_save(cgame g, char *filename) {
 }
 
 bool game_solve(game g){
-  return true;
+  if (game_is_over(g)){
+    return true;
+  }
+  for (uint i = 0; i < game_nb_rows(g); i++){
+    for (uint j = 0; j < game_nb_cols(g); j++){
+      if (game_check_move(g, i, j, TENT) == LOSING){
+        game_play_move(g, i, j, GRASS);
+      }
+      else if (game_check_move(g, i, j, GRASS) == LOSING){
+        game_play_move(g, i, j, TENT);
+      }
+    }
+  }
+  return game_solve(g);
 }
 
 uint game_nb_solutions(game g){
