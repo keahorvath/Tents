@@ -513,10 +513,13 @@ bool test_game_solve(void) {
   uint nb_tents_col[] = {0, 1, 1};
   game g3 =
       game_new_ext(4, 3, squares, nb_tents_row, nb_tents_col, false, true);
+  game g3_copy = game_copy(g3);
   if (game_solve(g3)) {
     return false;
   }
-  // game_print(g3);
+  if (!game_equal(g3, g3_copy)){
+    return false;
+  }
   /*
   game g4 = game_load("/home/keahorvath/PT2/tents-a62e2/save1.tnt");
   game_print(g4);

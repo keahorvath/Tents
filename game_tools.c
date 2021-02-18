@@ -4,8 +4,10 @@
 #include <stdlib.h>
 #include "game.h"
 #include "game_ext.h"
+#include "game_aux.h"
 
 static bool game_is_full(cgame g);
+static bool game_solve_rec(game g, uint total_nb_moves);
 
 game game_load(char *filename) {
   FILE *f;
@@ -91,15 +93,15 @@ void game_save(cgame g, char *filename) {
   fclose(f);
 }
 
-bool game_solve(game g) {
-  // comment faire pour qu'en cas de jeu sans solution,
-  // le jeu soit inchangé??
-  // parce que vu que c'est récursif, si on fait une copie au début,
-  // la copie changera à chaque appel de la fonction...
+bool game_solve_rec(game g, uint total_nb_moves){
   if (game_is_over(g)) {
     return true;
   }
   if (game_is_full(g)) {
+    //if the game doesn't have a solution we have to bring it back to its original state
+    for (uint i = 0; i < total_nb_moves; i++){
+      game_undo(g);
+    }
     return false;
   }
   uint nb_of_moves_made = 0;
@@ -109,10 +111,12 @@ bool game_solve(game g) {
           game_check_move(g, i, j, TENT) == LOSING) {
         game_play_move(g, i, j, GRASS);
         nb_of_moves_made++;
+        total_nb_moves++;
       } else if (game_get_square(g, i, j) == EMPTY &&
                  game_check_move(g, i, j, GRASS) == LOSING) {
         game_play_move(g, i, j, TENT);
         nb_of_moves_made++;
+        total_nb_moves++;
       }
     }
   }
@@ -124,12 +128,21 @@ bool game_solve(game g) {
         // choose the first empty cell found and put a tent
         if (game_get_square(g, i, j) == EMPTY) {
           game_play_move(g, i, j, TENT);
-          return game_solve(g);
+          total_nb_moves++;
+          return game_solve_rec(g, total_nb_moves);
         }
       }
     }
   }
-  return game_solve(g);
+  return game_solve_rec(g, total_nb_moves);
+}
+
+bool game_solve(game g) {
+  bool game_is_solved = game_solve_rec(g, 0);
+  if (!game_is_solved){
+    return false;
+  }
+  return true;
 }
 
 uint game_nb_solutions(game g) { return 0; }
