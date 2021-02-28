@@ -20,9 +20,10 @@ add_executable(game_test_khorvath game_test_khorvath.c)
 add_executable(game_test_amastouri game_test_amastouri.c)
 add_executable(game_test_alleymarie game_test_alleymarie.c)
 add_executable(game_test_marbeites game_test_marbeites.c)
+add_executable(game_solve game_tools.c)
 
 #crée la librairie
-add_library(game game.c game_aux.c queue.c game_tools.c) 
+add_library(game game.c game_aux.c queue.c game_tools.c)
 
 #définit les bibliothèques utilisées
 target_link_libraries(game_text game)

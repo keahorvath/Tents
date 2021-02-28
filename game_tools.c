@@ -157,3 +157,20 @@ bool game_is_full(cgame g) {
   }
   return true;
 }
+
+/*int main(int argc, char *argv[]) {
+  char option = argv[1];
+  FILE f;
+  int ret1 = scanf("%c", &option);
+    if (option == '-s'){
+      f = open(argv[3], "a");
+      f.write(game_solve_rec(argv[2]));
+      f.close();
+
+    }
+    else if (option == '-c') {
+      f = open(argv[3], "a");
+      f.write(game_nb_solutions(argv[2]));
+      f.close();
+    }
+}*/
