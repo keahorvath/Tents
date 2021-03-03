@@ -5,9 +5,11 @@
 #include "game.h"
 #include "game_ext.h"
 #include "game_aux.h"
+#include "queue.h"
 
 static bool game_is_full(cgame g);
-static bool game_solve_rec(game g, uint total_nb_moves);
+static bool game_solve_rec(game g);
+static int game_fill(game g);
 
 game game_load(char *filename) {
   FILE *f;
@@ -93,56 +95,72 @@ void game_save(cgame g, char *filename) {
   fclose(f);
 }
 
-bool game_solve_rec(game g, uint total_nb_moves){
-  if (game_is_over(g)) {
-    return true;
-  }
-  if (game_is_full(g)) {
-    //if the game doesn't have a solution we have to bring it back to its original state
-    for (uint i = 0; i < total_nb_moves; i++){
-      game_undo(g);
-    }
-    return false;
-  }
-  uint nb_of_moves_made = 0;
-  for (uint i = 0; i < game_nb_rows(g); i++) {
-    for (uint j = 0; j < game_nb_cols(g); j++) {
-      if (game_get_square(g, i, j) == EMPTY &&
-          game_check_move(g, i, j, TENT) == LOSING) {
-        game_play_move(g, i, j, GRASS);
-        nb_of_moves_made++;
-        total_nb_moves++;
-      } else if (game_get_square(g, i, j) == EMPTY &&
-                 game_check_move(g, i, j, GRASS) == LOSING) {
+bool game_solve_rec(game g){
+  int nb_moves;
+  for (uint i = 0; i < game_nb_rows(g); i++){
+    for (uint j = 0; j < game_nb_cols(g); j++){
+      if (game_get_square(g, i, j) == EMPTY){
         game_play_move(g, i, j, TENT);
-        nb_of_moves_made++;
-        total_nb_moves++;
-      }
-    }
-  }
-  // if the nb_of_moves_made is 0, it means that any of the empty cells can be a
-  // tent
-  if (nb_of_moves_made == 0) {
-    for (uint i = 0; i < game_nb_rows(g); i++) {
-      for (uint j = 0; j < game_nb_cols(g); j++) {
-        // choose the first empty cell found and put a tent
-        if (game_get_square(g, i, j) == EMPTY) {
-          game_play_move(g, i, j, TENT);
-          total_nb_moves++;
-          return game_solve_rec(g, total_nb_moves);
+        nb_moves = game_fill(g);
+        if (nb_moves == -1){
+          game_play_move(g, i, j, GRASS);
+          continue;
+        }
+        if (game_is_over(g)){
+          return true;
+        }
+        game_solve_rec(g);
+        while(game_get_square(g, i, j) != EMPTY){
+          game_undo(g);
         }
       }
     }
   }
-  return game_solve_rec(g, total_nb_moves);
+  return false;
 }
 
 bool game_solve(game g) {
-  bool game_is_solved = game_solve_rec(g, 0);
+  uint nb_moves = game_fill(g);
+  if (game_is_over(g)){
+    return true;
+  }
+  bool game_is_solved = game_solve_rec(g);
   if (!game_is_solved){
+    for (uint i = 0; i < nb_moves; i++){
+      game_undo(g);
+    }
     return false;
   }
   return true;
+}
+
+int game_fill(game g){
+  uint nb_moves = 1;
+  uint total_nb_moves = 0;
+  while (nb_moves != 0){
+    nb_moves = 0;
+    for (uint i = 0; i < game_nb_rows(g); i++) {
+      for (uint j = 0; j < game_nb_cols(g); j++) {
+        if (game_get_square(g, i, j) == EMPTY &&
+            game_check_move(g, i, j, TENT) == LOSING && game_check_move(g, i, j, GRASS) == REGULAR) {
+          game_play_move(g, i, j, GRASS);
+          nb_moves++;
+          total_nb_moves++;
+        } else if (game_get_square(g, i, j) == EMPTY &&
+                  game_check_move(g, i, j, GRASS) == LOSING && game_check_move(g, i, j, TENT) == REGULAR) {
+          game_play_move(g, i, j, TENT);
+          nb_moves++;
+          total_nb_moves++;
+        }else if (game_get_square(g, i, j) == EMPTY && game_check_move(g, i, j, TENT) == LOSING && game_check_move(g, i, j, GRASS) == LOSING){
+          for (uint nb = 0; nb < total_nb_moves+1; nb++){
+            game_undo(g);
+          }
+          return -1;
+        }
+      }
+    }
+  }
+  return total_nb_moves;
 }
 
 uint game_nb_solutions(game g) { return 0; }
@@ -158,19 +176,3 @@ bool game_is_full(cgame g) {
   return true;
 }
 
-/*int main(int argc, char *argv[]) {
-  char option = argv[1];
-  FILE f;
-  int ret1 = scanf("%c", &option);
-    if (option == '-s'){
-      f = open(argv[3], "a");
-      f.write(game_solve_rec(argv[2]));
-      f.close();
-
-    }
-    else if (option == '-c') {
-      f = open(argv[3], "a");
-      f.write(game_nb_solutions(argv[2]));
-      f.close();
-    }
-}*/
