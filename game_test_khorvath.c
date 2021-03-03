@@ -522,14 +522,6 @@ bool test_game_solve(void) {
   if (!game_equal(g3, g3_copy)){
     return false;
   }
-  /*
-  game g4 = game_load("/home/keahorvath/PT2/tents-a62e2/save1.tnt");
-  game_print(g4);
-  if (!game_solve(g4)){
-    return false;
-  }
-  game_print(g4);
-  */
   game_delete(g1);
   game_delete(g2);
   game_delete(g3);
