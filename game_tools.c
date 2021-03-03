@@ -175,9 +175,62 @@ int game_fill(game g) {
   return total_nb_moves;
 }
 
+<<<<<<< HEAD
 uint game_nb_solutions_rec(game g, uint nb_solutions) {
   uint cpt = 0;
   uint nb_moves;
+=======
+uint game_nb_solutions_rec(game g,uint indice,uint nb_solution) { 
+  uint nb = nb_solution;
+  if (game_is_over(g)){
+      return nb++;
+  }
+  if (game_is_full(g)){
+    return nb;
+  }
+  uint i = indice / game_nb_rows(g);
+  uint j = indice % game_nb_cols(g);
+  if (game_get_square(g, i, j) == EMPTY &&
+      game_check_move(g, i, j, TENT) == LOSING){
+        game_play_move(g, i, j, GRASS);
+        nb = game_nb_solutions_rec(g, indice+1, nb);
+        
+  }else if (game_get_square(g, i, j) == EMPTY &&
+            game_check_move(g, i, j, GRASS) == LOSING){
+              game_play_move(g, i, j, TENT);
+              nb = game_nb_solutions_rec(g, indice+1, nb);
+  }else if(game_get_square(g, i, j) == EMPTY){
+    // on tente avec de l'herbe
+		game_play_move(g, i, j, GRASS);
+    nb = game_nb_solutions_rec(g, indice+1, nb);
+		//initialize the game and we try with tent
+		for (uint y = j; y < game_nb_cols(g); y++) {
+			if (game_get_square(g, i, y) != TREE){
+				  game_set_square(g, i, y, EMPTY);
+			}
+		}
+		for (uint x = i+1; x < game_nb_rows(g); x++) {
+    		for (uint y = 0; y < game_nb_cols(g); y++) {
+          if (game_get_square(g, x, y) != TREE){
+            game_set_square(g, x, y, EMPTY);
+          }
+        }
+    }
+		game_play_move(g, i, j, TENT);
+    //game_print(g);
+    nb = game_nb_solutions_rec(g, indice+1, nb);
+  } 
+  return game_nb_solutions_rec(g, indice+1, nb);
+}
+
+
+uint game_nb_solutions(game g) { 
+  uint nb_solution_total= game_nb_solutions_rec(g,0,0);
+  return nb_solution_total;
+}
+
+bool game_is_full(cgame g) {
+>>>>>>> 170c095faa9b18ca0e4be79ef4825d0876a39af8
   for (uint i = 0; i < game_nb_rows(g); i++) {
     for (uint j = 0; j < game_nb_cols(g); j++) {
       if (game_get_square(g, i, j) == EMPTY) {
