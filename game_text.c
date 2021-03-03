@@ -54,6 +54,9 @@ int main(int argc, char *argv[]) {
           s = EMPTY;
         }
         printf("You put %c in the (%u, %u) position\n", c, i, j);
+        if (game_check_move(current_game, i, j, s) == LOSING){
+          printf("You did a losing move!\n");
+        }
         game_play_move(current_game, i, j, s);
       }
     } else if (ret2 == EOF) {

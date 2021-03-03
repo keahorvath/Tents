@@ -500,6 +500,8 @@ bool test_game_save(void) {
 bool test_game_solve(void) {
   game g1 = game_default();
   game g2 = game_default_solution();
+  game_print(g1);
+  game_print(g2);
   if (!game_solve(g1)) {
     return false;
   }

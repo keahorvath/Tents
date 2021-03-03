@@ -9,18 +9,34 @@ void game_print(cgame g) {
     fprintf(stderr, "function called on null address");
     exit(EXIT_FAILURE);
   }
-  printf("   ");
-  for (uint i = 0; i < game_nb_cols(g); i++) {
-    printf("%u", i);
+  printf("    ");
+  for (uint i = 0; i < game_nb_cols(g); i+= 2) {
+    if (i < 10){
+      printf("%u ", i);
+    }else{
+      printf("%u", i);
+    }
+  }
+  printf("\n     ");
+  for (uint i = 1; i < game_nb_cols(g); i+= 2) {
+    if (i < 10){
+      printf("%u ", i);
+    }else{
+      printf("%u", i);
+    }
   }
   printf("   \n");
-  printf("   ");
+  printf("    ");
   for (uint i = 0; i < game_nb_cols(g); i++) {
     printf("-");
   }
   printf("   \n");
   for (uint i = 0; i < game_nb_rows(g); i++) {
-    printf("%u |", i);
+    if (i < 10){
+      printf(" %u |", i);
+    }else{
+      printf("%u |", i);
+    }
     for (uint j = 0; j < game_nb_cols(g); j++) {
       if (game_get_square(g, i, j) == EMPTY) {
         printf(" ");
@@ -37,12 +53,12 @@ void game_print(cgame g) {
     }
     printf("| %u\n", game_get_expected_nb_tents_row(g, i));
   }
-  printf("   ");
+  printf("    ");
   for (uint i = 0; i < game_nb_cols(g); i++) {
     printf("-");
   }
   printf("   \n");
-  printf("   ");
+  printf("    ");
   for (uint i = 0; i < game_nb_cols(g); i++) {
     printf("%u", game_get_expected_nb_tents_col(g, i));
   }
