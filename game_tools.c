@@ -204,7 +204,7 @@ uint game_nb_solutions_rec(game g,uint indice,uint nb_solution) {
     //game_print(g);
     nb = game_nb_solutions_rec(g, indice+1, nb);
   } 
-  return nb = game_nb_solutions_rec(g, indice+1, nb);
+  return game_nb_solutions_rec(g, indice+1, nb);
 }
 
 
