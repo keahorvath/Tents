@@ -519,12 +519,13 @@ bool test_game_solve(void) {
   if (game_solve(g3)) {
     return false;
   }
-  if (!game_equal(g3, g3_copy)){
+  if (!game_equal(g3, g3_copy)) {
     return false;
   }
   game_delete(g1);
   game_delete(g2);
   game_delete(g3);
+  game_delete(g3_copy);
   return true;
 }
 

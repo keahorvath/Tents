@@ -10,18 +10,18 @@ void game_print(cgame g) {
     exit(EXIT_FAILURE);
   }
   printf("    ");
-  for (uint i = 0; i < game_nb_cols(g); i+= 2) {
-    if (i < 10){
+  for (uint i = 0; i < game_nb_cols(g); i += 2) {
+    if (i < 10) {
       printf("%u ", i);
-    }else{
+    } else {
       printf("%u", i);
     }
   }
   printf("\n     ");
-  for (uint i = 1; i < game_nb_cols(g); i+= 2) {
-    if (i < 10){
+  for (uint i = 1; i < game_nb_cols(g); i += 2) {
+    if (i < 10) {
       printf("%u ", i);
-    }else{
+    } else {
       printf("%u", i);
     }
   }
@@ -32,9 +32,9 @@ void game_print(cgame g) {
   }
   printf("   \n");
   for (uint i = 0; i < game_nb_rows(g); i++) {
-    if (i < 10){
+    if (i < 10) {
       printf(" %u |", i);
-    }else{
+    } else {
       printf("%u |", i);
     }
     for (uint j = 0; j < game_nb_cols(g); j++) {

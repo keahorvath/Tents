@@ -4,14 +4,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "game.h"
-#include "game_ext.h"
 #include "game_aux.h"
+#include "game_ext.h"
 #include "queue.h"
 
-static bool game_is_full(cgame g);
 static bool game_solve_rec(game g);
 static int game_fill(game g);
-
+static uint game_nb_solutions_rec(game g, uint nb_solutions);
 game game_load(char *filename) {
   FILE *f;
   f = fopen(filename, "r");
@@ -96,25 +95,25 @@ void game_save(cgame g, char *filename) {
   fclose(f);
 }
 
-bool game_solve_rec(game g){
-  if (game_is_over(g)){
+bool game_solve_rec(game g) {
+  if (game_is_over(g)) {
     return true;
   }
   uint nb_moves;
-  for (uint i = 0; i < game_nb_rows(g); i++){
-    for (uint j = 0; j < game_nb_cols(g); j++){
-      if (game_get_square(g, i, j) == EMPTY){
+  for (uint i = 0; i < game_nb_rows(g); i++) {
+    for (uint j = 0; j < game_nb_cols(g); j++) {
+      if (game_get_square(g, i, j) == EMPTY) {
         game_play_move(g, i, j, TENT);
         nb_moves = game_fill(g);
-        if (nb_moves == -1){
+        if (nb_moves == -1) {
           game_play_move(g, i, j, GRASS);
           continue;
         }
         game_solve_rec(g);
-        if (game_is_over(g)){
+        if (game_is_over(g)) {
           return true;
         }
-        while(game_get_square(g, i, j) != EMPTY){
+        while (game_get_square(g, i, j) != EMPTY) {
           game_undo(g);
         }
       }
@@ -124,10 +123,14 @@ bool game_solve_rec(game g){
 }
 
 bool game_solve(game g) {
+  if (g == NULL) {
+    fprintf(stderr, "Function called on NULL pointer\n");
+    exit(EXIT_FAILURE);
+  }
   uint nb_moves = game_fill(g);
   bool game_is_solved = game_solve_rec(g);
-  if (!game_is_solved){
-    for (uint i = 0; i < nb_moves; i++){
+  if (!game_is_solved) {
+    for (uint i = 0; i < nb_moves; i++) {
       game_undo(g);
     }
     return false;
@@ -135,25 +138,33 @@ bool game_solve(game g) {
   return true;
 }
 
-int game_fill(game g){
+int game_fill(game g) {
+  if (g == NULL) {
+    fprintf(stderr, "Function called on NULL pointer\n");
+    exit(EXIT_FAILURE);
+  }
   uint nb_moves = 1;
   uint total_nb_moves = 0;
-  while (nb_moves != 0){
+  while (nb_moves != 0) {
     nb_moves = 0;
     for (uint i = 0; i < game_nb_rows(g); i++) {
       for (uint j = 0; j < game_nb_cols(g); j++) {
         if (game_get_square(g, i, j) == EMPTY &&
-            game_check_move(g, i, j, TENT) == LOSING && game_check_move(g, i, j, GRASS) == REGULAR) {
+            game_check_move(g, i, j, TENT) == LOSING &&
+            game_check_move(g, i, j, GRASS) == REGULAR) {
           game_play_move(g, i, j, GRASS);
           nb_moves++;
           total_nb_moves++;
         } else if (game_get_square(g, i, j) == EMPTY &&
-                  game_check_move(g, i, j, GRASS) == LOSING && game_check_move(g, i, j, TENT) == REGULAR) {
+                   game_check_move(g, i, j, GRASS) == LOSING &&
+                   game_check_move(g, i, j, TENT) == REGULAR) {
           game_play_move(g, i, j, TENT);
           nb_moves++;
           total_nb_moves++;
-        }else if (game_get_square(g, i, j) == EMPTY && game_check_move(g, i, j, TENT) == LOSING && game_check_move(g, i, j, GRASS) == LOSING){
-          for (uint nb = 0; nb < total_nb_moves+1; nb++){
+        } else if (game_get_square(g, i, j) == EMPTY &&
+                   game_check_move(g, i, j, TENT) == LOSING &&
+                   game_check_move(g, i, j, GRASS) == LOSING) {
+          for (uint nb = 0; nb < total_nb_moves + 1; nb++) {
             game_undo(g);
           }
           return -1;
@@ -164,63 +175,39 @@ int game_fill(game g){
   return total_nb_moves;
 }
 
-uint game_nb_solutions_rec(game g,uint indice,uint nb_solution) { 
-  uint nb = nb_solution;
-  if (game_is_over(g)){
-      return nb++;
-  }
-  if (game_is_full(g)){
-    return nb;
-  }
-  uint i = indice / game_nb_rows(g);
-  uint j = indice % game_nb_cols(g);
-  if (game_get_square(g, i, j) == EMPTY &&
-      game_check_move(g, i, j, TENT) == LOSING){
-        game_play_move(g, i, j, GRASS);
-        nb = game_nb_solutions_rec(g, indice+1, nb);
-        
-  }else if (game_get_square(g, i, j) == EMPTY &&
-            game_check_move(g, i, j, GRASS) == LOSING){
-              game_play_move(g, i, j, TENT);
-              nb = game_nb_solutions_rec(g, indice+1, nb);
-  }else if(game_get_square(g, i, j) == EMPTY){
-    // on tente avec de l'herbe
-		game_play_move(g, i, j, GRASS);
-    nb = game_nb_solutions_rec(g, indice+1, nb);
-		//initialize the game and we try with tent
-		for (uint y = j; y < game_nb_cols(g); y++) {
-			if (game_get_square(g, i, y) != TREE){
-				  game_set_square(g, i, y, EMPTY);
-			}
-		}
-		for (uint x = i+1; x < game_nb_rows(g); x++) {
-    		for (uint y = 0; y < game_nb_cols(g); y++) {
-          if (game_get_square(g, x, y) != TREE){
-            game_set_square(g, x, y, EMPTY);
-          }
-        }
-    }
-		game_play_move(g, i, j, TENT);
-    //game_print(g);
-    nb = game_nb_solutions_rec(g, indice+1, nb);
-  } 
-  return nb = game_nb_solutions_rec(g, indice+1, nb);
-}
-
-
-uint game_nb_solutions(game g) { 
-  uint nb_solution_total= game_nb_solutions_rec(g,0,0);
-  return nb_solution_total;
-}
-
-bool game_is_full(cgame g) {
+uint game_nb_solutions_rec(game g, uint nb_solutions) {
+  uint cpt = 0;
+  uint nb_moves;
   for (uint i = 0; i < game_nb_rows(g); i++) {
     for (uint j = 0; j < game_nb_cols(g); j++) {
       if (game_get_square(g, i, j) == EMPTY) {
-        return false;
+        game_play_move(g, i, j, TENT);
+        nb_moves = game_fill(g);
+        if (nb_moves == -1) {
+          game_play_move(g, i, j, GRASS);
+          continue;
+        }
+        game_print(g);
+        game_nb_solutions_rec(g, nb_solutions);
+        if (game_is_over(g)) {
+          printf("One solution\n");
+          cpt++;
+        }
+        while (game_get_square(g, i, j) != EMPTY) {
+          game_undo(g);
+        }
       }
     }
   }
-  return true;
+  return 1;
 }
 
+uint game_nb_solutions(game g) {
+  if (g == NULL) {
+    fprintf(stderr, "Function called on NULL pointer\n");
+    exit(EXIT_FAILURE);
+  }
+  uint nb_moves = game_fill(g);
+  return 1;
+  // return game_nb_solutions_rec(g, 0);
+}
