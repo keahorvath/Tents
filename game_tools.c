@@ -8,7 +8,7 @@
 #include "queue.h"
 
 static bool game_is_full(cgame g);
-static bool game_solve_rec(game g);
+static bool game_solve_rec(game g, uint nb_of_iteration, bool sol);
 static int game_fill(game g);
 
 game game_load(char *filename) {
@@ -94,36 +94,151 @@ void game_save(cgame g, char *filename) {
   }
   fclose(f);
 }
+/*
+bool game_solve_rec(game g, uint total_nb_moves){
+  if (game_is_over(g)) {
+    printf("Its good!\n");
+    return true;
+  }
+  if (game_is_full(g)) {
+    //if the game doesn't have a solution we have to bring it back to its original state
+    for (uint i = 0; i < total_nb_moves; i++){
+      game_undo(g);
+    }
+    printf("Its not good :(\n");
+    return false;
+  }
+  //game_print(g);
+  uint nb_of_moves_made = 0;
+  for (uint i = 0; i < game_nb_rows(g); i++) {
+    for (uint j = 0; j < game_nb_cols(g); j++) {
+      if (game_get_square(g, i, j) == EMPTY &&
+          game_check_move(g, i, j, TENT) == LOSING) {
+        game_play_move(g, i, j, GRASS);
+        nb_of_moves_made++;
+        total_nb_moves++;
+      } else if (game_get_square(g, i, j) == EMPTY &&
+                 game_check_move(g, i, j, GRASS) == LOSING) {
+        game_play_move(g, i, j, TENT);
+        nb_of_moves_made++;
+        total_nb_moves++;
+      }
+    }
+  }
+  // if the nb_of_moves_made is 0, it means that any of the empty cells can be a
+  // tent
+  if (nb_of_moves_made == 0) {
+    for (uint i = 0; i < game_nb_rows(g); i++) {
+      for (uint j = 0; j < game_nb_cols(g); j++) {
+        // choose the first empty cell found and put a tent
+        if (game_get_square(g, i, j) == EMPTY) {
 
-bool game_solve_rec(game g){
-  int nb_moves;
+          game_play_move(g, i, j, TENT);
+          total_nb_moves++;
+          return game_solve_rec(g, total_nb_moves);
+        }
+      }
+    }
+  }
+  return game_solve_rec(g, total_nb_moves);
+}
+
+bool game_solve(game g) {
+  queue *possible_tent_placements;
+  bool game_is_solved = game_solve_rec(g, 0);
+  if (!game_is_solved){
+    return false;
+  }
+  return true;
+}
+*/
+
+
+bool game_solve_rec(game g, uint nb_of_iteration, bool sol){
+  uint nb_moves;
+
+  //game_print(g);
+  //printf("iteration nb %u\n", nb_of_iteration);
+
   for (uint i = 0; i < game_nb_rows(g); i++){
     for (uint j = 0; j < game_nb_cols(g); j++){
       if (game_get_square(g, i, j) == EMPTY){
+        printf("play tent in %u %u\n", i, j);
         game_play_move(g, i, j, TENT);
         nb_moves = game_fill(g);
         if (nb_moves == -1){
           game_play_move(g, i, j, GRASS);
           continue;
         }
-        if (game_is_over(g)){
+        if (game_is_over(g) || sol == true){
+          printf("We found a solution\n");
+          game_print(g);
+          sol = true;
           return true;
         }
-        game_solve_rec(g);
+        game_solve_rec(g, nb_of_iteration++, false);
+        printf("removing tent from %u %u\n", i, j);
         while(game_get_square(g, i, j) != EMPTY){
           game_undo(g);
         }
+        game_print(g);
+
       }
     }
   }
+  if (nb_of_iteration == 1){
+    printf("no solution\n");
+    return false;
+  }
+}
+
+bool game_solve(game g) {
+  uint nb_moves = game_fill(g);
+  printf("phase 1 done\n");
+  game_print(g);
+  bool game_is_solved = game_solve_rec(g, 1, false);
+  if (!game_is_solved){
+    for (uint i = 0; i < nb_moves; i++){
+      game_undo(g);
+    }
+    return false;
+  }
+  return true;
+}
+/*
+bool game_solve_rec(game g){
+  uint nb_moves = game_fill(g);
+  if (game_is_over(g)){
+    printf("We found a solution\n");
+    return true;
+  }
+  //game_print(g);
+  for (uint i = 0; i < game_nb_rows(g); i++){
+    for (uint j = 0; j < game_nb_cols(g); j++){
+      if (game_get_square(g, i, j) == EMPTY){
+        if (game_check_move(g, i, j, TENT) == REGULAR){
+          printf("play tent in %u %u\n", i, j);
+          game_play_move(g, i, j, TENT);
+          return game_solve_rec(g);
+        }
+        for (uint nb = 0; nb < nb_moves + 1; nb++){
+        printf("undo\n");
+
+          game_undo(g);
+        }
+        printf("play grass in %u %u\n", i, j);
+        game_play_move(g, i, j, GRASS);
+      }
+    }
+  }
+  printf("No solution\n");
   return false;
 }
 
 bool game_solve(game g) {
   uint nb_moves = game_fill(g);
-  if (game_is_over(g)){
-    return true;
-  }
+  printf("phase 1 done\n");
+  game_print(g);
   bool game_is_solved = game_solve_rec(g);
   if (!game_is_solved){
     for (uint i = 0; i < nb_moves; i++){
@@ -133,7 +248,7 @@ bool game_solve(game g) {
   }
   return true;
 }
-
+*/
 int game_fill(game g){
   uint nb_moves = 1;
   uint total_nb_moves = 0;
@@ -143,26 +258,58 @@ int game_fill(game g){
       for (uint j = 0; j < game_nb_cols(g); j++) {
         if (game_get_square(g, i, j) == EMPTY &&
             game_check_move(g, i, j, TENT) == LOSING && game_check_move(g, i, j, GRASS) == REGULAR) {
+              printf("placing grass in %u %u\n", i, j);
           game_play_move(g, i, j, GRASS);
           nb_moves++;
           total_nb_moves++;
         } else if (game_get_square(g, i, j) == EMPTY &&
                   game_check_move(g, i, j, GRASS) == LOSING && game_check_move(g, i, j, TENT) == REGULAR) {
+                    printf("placing tent in %u %u\n", i, j);
           game_play_move(g, i, j, TENT);
           nb_moves++;
           total_nb_moves++;
         }else if (game_get_square(g, i, j) == EMPTY && game_check_move(g, i, j, TENT) == LOSING && game_check_move(g, i, j, GRASS) == LOSING){
+          printf("Not possible\n");
           for (uint nb = 0; nb < total_nb_moves+1; nb++){
             game_undo(g);
           }
+          game_print(g);
           return -1;
         }
       }
     }
+    game_print(g);
   }
   return total_nb_moves;
 }
-
+/*
+uint game_fill(game g){
+  uint nb_moves = 1;
+  uint total_nb_moves = 0;
+  while (nb_moves != 0){
+    nb_moves = 0;
+    for (uint i = 0; i < game_nb_rows(g); i++) {
+      for (uint j = 0; j < game_nb_cols(g); j++) {
+        if (game_get_square(g, i, j) == EMPTY &&
+            game_check_move(g, i, j, TENT) == LOSING && game_check_move(g, i, j, GRASS) == REGULAR) {
+          printf("placing grass in %u %u\n", i, j);
+          game_play_move(g, i, j, GRASS);
+          nb_moves++;
+          total_nb_moves++;
+        } else if (game_get_square(g, i, j) == EMPTY &&
+                  game_check_move(g, i, j, GRASS) == LOSING && game_check_move(g, i, j, TENT) == REGULAR) {
+                    printf("placing tent in %u %u\n", i, j);
+          game_play_move(g, i, j, TENT);
+          nb_moves++;
+          total_nb_moves++;
+        }
+      }
+    }
+    //game_print(g);
+  }
+  return total_nb_moves;
+}
+*/
 uint game_nb_solutions(game g) { return 0; }
 
 bool game_is_full(cgame g) {
