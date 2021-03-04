@@ -13,6 +13,7 @@ set(CMAKE_C_FLAGS "-std=c99 -g --coverage -Wall")
 set(CMAKE_BUILD_TYPE_DEBUG)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_C_COMPILER gcc)
+set(CMAKE_C_FLAGS_RELEASE "-O3")
 
 #définit le nom du programme ainsi que ses sources
 add_executable(game_text game_text.c)
