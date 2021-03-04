@@ -137,6 +137,7 @@ bool game_solve(game g) {
     exit(EXIT_FAILURE);
   }
   uint nb_moves = game_fill(g);
+  printf("game after first fill\n");
   game_print(g);
   bool game_is_solved = game_solve_rec(g);
   if (!game_is_solved) {

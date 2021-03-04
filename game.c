@@ -468,20 +468,22 @@ int game_check_move(cgame g, uint i, uint j, square s) {
         uint *cells_adj_tree =
             make_array_of_ortho_adjacent_cells(g, cell_i, cell_j);
         uint ind2 = 1;
-        uint nb_grass_around_tree = 0;
+        uint nb_things_around_tree = 0;
+        uint nb_cells_around_tree = 0;
         if (game_get_square(g, i, j) != GRASS) {
-          nb_grass_around_tree++;
+          nb_things_around_tree++;
         }
         while (cells_adj_tree[ind2 - 1] < game_nb_rows(g)) {
           if (game_get_square(g, cells_adj_tree[ind2 - 1],
-                              cells_adj_tree[ind2]) == GRASS) {
-            nb_grass_around_tree++;
+                              cells_adj_tree[ind2]) == GRASS || game_get_square(g, cells_adj_tree[ind2 - 1],
+                              cells_adj_tree[ind2]) == TREE ) {
+            nb_things_around_tree++;
           }
           ind2 += 2;
+          nb_cells_around_tree++;
         }
-        uint nb_space_around_tree = (ind2 - 1) / 2;
         free(cells_adj_tree);
-        if (nb_grass_around_tree == nb_space_around_tree) {
+        if (nb_things_around_tree == nb_cells_around_tree) {
           free(all_adj_cells);
           free(ortho_adj_cells);
           return LOSING;
