@@ -10,7 +10,8 @@
 
 static bool game_solve_rec(game g);
 static int game_fill(game g);
-static uint game_nb_solutions_rec(game g, uint nb_solutions);
+static uint game_nb_solutions_rec(game g, uint indice, uint nb_solutions);
+static bool game_is_full(cgame g);
 game game_load(char *filename) {
   FILE *f;
   f = fopen(filename, "r");
@@ -175,11 +176,6 @@ int game_fill(game g) {
   return total_nb_moves;
 }
 
-<<<<<<< HEAD
-uint game_nb_solutions_rec(game g, uint nb_solutions) {
-  uint cpt = 0;
-  uint nb_moves;
-=======
 uint game_nb_solutions_rec(game g,uint indice,uint nb_solution) { 
   uint nb = nb_solution;
   if (game_is_over(g)){
@@ -230,21 +226,22 @@ uint game_nb_solutions(game g) {
 }
 
 bool game_is_full(cgame g) {
->>>>>>> 170c095faa9b18ca0e4be79ef4825d0876a39af8
   for (uint i = 0; i < game_nb_rows(g); i++) {
     for (uint j = 0; j < game_nb_cols(g); j++) {
       if (game_get_square(g, i, j) == EMPTY) {
         game_play_move(g, i, j, TENT);
-        nb_moves = game_fill(g);
+        //nb_moves = game_fill(g);
+        /*
         if (nb_moves == -1) {
           game_play_move(g, i, j, GRASS);
           continue;
         }
+        */
         game_print(g);
-        game_nb_solutions_rec(g, nb_solutions);
+        //game_nb_solutions_rec(g, nb_solutions);
         if (game_is_over(g)) {
           printf("One solution\n");
-          cpt++;
+          //cpt++;
         }
         while (game_get_square(g, i, j) != EMPTY) {
           game_undo(g);
@@ -253,14 +250,4 @@ bool game_is_full(cgame g) {
     }
   }
   return 1;
-}
-
-uint game_nb_solutions(game g) {
-  if (g == NULL) {
-    fprintf(stderr, "Function called on NULL pointer\n");
-    exit(EXIT_FAILURE);
-  }
-  uint nb_moves = game_fill(g);
-  return 1;
-  // return game_nb_solutions_rec(g, 0);
 }
