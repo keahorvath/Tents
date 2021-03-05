@@ -475,8 +475,9 @@ int game_check_move(cgame g, uint i, uint j, square s) {
         }
         while (cells_adj_tree[ind2 - 1] < game_nb_rows(g)) {
           if (game_get_square(g, cells_adj_tree[ind2 - 1],
-                              cells_adj_tree[ind2]) == GRASS || game_get_square(g, cells_adj_tree[ind2 - 1],
-                              cells_adj_tree[ind2]) == TREE ) {
+                              cells_adj_tree[ind2]) == GRASS ||
+              game_get_square(g, cells_adj_tree[ind2 - 1],
+                              cells_adj_tree[ind2]) == TREE) {
             nb_things_around_tree++;
           }
           ind2 += 2;
