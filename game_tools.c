@@ -111,6 +111,8 @@ uint game_solve_rec(game g, bool count_solutions, uint *p_nb_sol_found) {
   if (count_solutions == true) {
     game_fill(g);
   }
+  printf("game after first fill\n");
+  game_print(g);
   uint nb_moves;
   bool stop = false;
   uint nb_sol_before = 0;
@@ -123,14 +125,21 @@ uint game_solve_rec(game g, bool count_solutions, uint *p_nb_sol_found) {
         break;
       }
       if (game_get_square(g, i, j) == EMPTY) {
+        game_print(g);
+        printf("play tent in %u %u \n", i, j);
         game_play_move(g, i, j, TENT);
         nb_moves = game_fill(g);
+        game_print(g);
         if (nb_moves == -1) {
+          printf("replacing with grass in %u %u \n", i, j);
+
           game_play_move(g, i, j, GRASS);
           continue;
         }
         nb_sol_before = game_solve_rec(g, count_solutions, p_nb_sol_found);
         if (game_is_over(g)) {
+          printf("SOLUTION\n");
+          game_print(g);
           *p_nb_sol_found += 1;
           if (!count_solutions) {
             return true;
@@ -166,6 +175,8 @@ bool game_solve(game g) {
   if (game_is_over(g)) {
     return true;
   }
+  printf("game after first fill\n");
+  game_print(g);
   uint nb_solution_found = 0;
   uint nb_sols = game_solve_rec(g, false, &nb_solution_found);
   if (nb_sols == 0) {
@@ -174,6 +185,7 @@ bool game_solve(game g) {
     }
     return false;
   }
+  printf("SOLUTION\n");
   return true;
 }
 
@@ -189,6 +201,8 @@ uint game_nb_solutions(game g) {
   if (game_is_over(g)) {
     return 1;
   }
+  printf("game after first fill\n");
+  game_print(g);
   uint nb_solution_found = 0;
   uint game_is_solved = game_solve_rec(g, true, &nb_solution_found);
 
@@ -198,6 +212,7 @@ uint game_nb_solutions(game g) {
     }
     return 0;
   }
+  printf("SOLUTION\n");
   return nb_solution_found;
 }
 
@@ -231,10 +246,12 @@ int game_extra_check_move(cgame g, uint i, uint j, square s) {
   } else if ((j == game_nb_rows(g) - 1) && game_is_wrapping(g)) {
     right_j = 0;
   }
+  uint sec_size_hor = size_of_section(g, i, j, false);
+  uint sec_size_vert = size_of_section(g, i, j, true);
   if (nb_possible_tent_placements_row(g, i) ==
       (game_get_expected_nb_tents_row(g, i) -
        game_get_current_nb_tents_row(g, i))) {
-    if (size_of_section(g, i, j, false) % 2 == 1) {
+    if (sec_size_hor % 2 == 1 && sec_size_hor != game_nb_cols(g)) {
       if (nb_empty_cells_to_the_left(g, i, j) % 2 == 1) {
         if (s == TENT) {
           return LOSING;
@@ -248,7 +265,7 @@ int game_extra_check_move(cgame g, uint i, uint j, square s) {
   } else if (nb_possible_tent_placements_col(g, j) ==
              (game_get_expected_nb_tents_col(g, j) -
               game_get_current_nb_tents_col(g, j))) {
-    if (size_of_section(g, i, j, true) % 2 == 1) {
+    if (sec_size_vert % 2 == 1 && sec_size_vert != game_nb_rows(g)) {
       if (nb_empty_cells_above(g, i, j) % 2 == 1) {
         if (s == TENT) {
           return LOSING;
@@ -347,7 +364,17 @@ uint size_of_section(cgame g, uint i, uint j, bool vertical) {
     exit(EXIT_FAILURE);
   }
   if (vertical) {
+    if ((i == 0 && (nb_empty_cells_above(g, i, j) == game_nb_rows(g) - 1)) ||
+        (i == game_nb_rows(g) - 1 &&
+         nb_empty_cells_below(g, i, j) == game_nb_rows(g) - 1)) {
+      return game_nb_rows(g);
+    }
     return 1 + nb_empty_cells_above(g, i, j) + nb_empty_cells_below(g, i, j);
+  }
+  if ((j == 0 && nb_empty_cells_to_the_left(g, i, j) == game_nb_cols(g) - 1) ||
+      (j == game_nb_cols(g) - 1 &&
+       nb_empty_cells_to_the_right(g, i, j) == game_nb_cols(g) - 1)) {
+    return game_nb_cols(g);
   }
   return 1 + nb_empty_cells_to_the_right(g, i, j) +
          nb_empty_cells_to_the_left(g, i, j);
@@ -378,16 +405,18 @@ uint nb_empty_cells_above(cgame g, uint i, uint j) {
 uint nb_empty_cells_below(cgame g, uint i, uint j) {
   uint nb = 0;
   uint current_i = i;
+  uint cpt = 0;
   while (current_i != game_nb_rows(g) &&
-         game_get_square(g, current_i, j) == EMPTY) {
+         game_get_square(g, current_i, j) == EMPTY && cpt != game_nb_rows(g)) {
     nb++;
-    if (current_i != game_nb_rows(g) + 1) {
+    if (current_i != game_nb_rows(g) - 1) {
       current_i = current_i + 1;
     } else if (game_is_wrapping(g)) {
       current_i = 0;
     } else {
       current_i = game_nb_rows(g);
     }
+    cpt++;
   }
   if (game_get_square(g, i, j) == EMPTY) {
     return nb - 1;
@@ -396,10 +425,11 @@ uint nb_empty_cells_below(cgame g, uint i, uint j) {
 }
 
 uint nb_empty_cells_to_the_right(cgame g, uint i, uint j) {
+  uint cpt = 0;
   uint nb = 0;
   uint current_j = j;
   while (current_j != game_nb_cols(g) &&
-         game_get_square(g, i, current_j) == EMPTY) {
+         game_get_square(g, i, current_j) == EMPTY && cpt != game_nb_cols(g)) {
     nb++;
     if (current_j != game_nb_cols(g) - 1) {
       current_j = current_j + 1;
