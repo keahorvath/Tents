@@ -6,6 +6,11 @@
 #include <SDL.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include "game_tools.h"
+#include "game.h"
+#include "game_aux.h"
+#include "game_ext.h"
+#include "queue.h"
 
 typedef struct Env_t Env;
 

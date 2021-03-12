@@ -7,19 +7,50 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "game_tools.h"
+#include "game.h"
+#include "game_aux.h"
+#include "game_ext.h"
+#include "queue.h"
 
+#define MIN_DIST_BORDER 100
+#define PALM_TREE "tree.png"
 /* **************************************************************** */
 
 struct Env_t {
-  /* PUT YOUR VARIABLES HERE */
+  SDL_Texture* tree;
+  int grid_beginning_x;
+  int grid_beginning_y;
+  int cell_size;
+  game g;
 };
 
 /* **************************************************************** */
 
 Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   Env *env = malloc(sizeof(struct Env_t));
+  PRINT("Left click to place a tent, right click to place water.\n");
 
-  /* PUT YOUR CODE HERE TO INIT TEXTURES, ... */
+  //create the game 
+  if (argc == 2){
+    env->g = game_load(argv[1]);
+    if (env->g == NULL){
+      fprintf(stderr, "File couldn't open!\n");
+      exit(EXIT_FAILURE);
+    }
+  }else if(argc == 1){
+    env->g = game_default();
+  }else{
+    fprintf(stderr,"Wrong number of arguments!\n");
+    exit(EXIT_FAILURE);
+  }
+
+  //get current window size
+  int w, h;
+  SDL_GetWindowSize(win, &w, &h);
+
+  env->tree = IMG_LoadTexture(ren, PALM_TREE);
+  if (!env->tree) ERROR("IMG_LoadTexture: %s\n", PALM_TREE);
 
   return env;
 }
@@ -27,6 +58,38 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
 /* **************************************************************** */
 
 void render(SDL_Window *win, SDL_Renderer *ren, Env *env) { /* PUT YOUR CODE HERE TO RENDER TEXTURES, ... */
+  int w, h;
+  SDL_GetWindowSize(win, &w, &h);
+  uint space_avail_per_cell_x = w / game_nb_cols(env->g);
+  uint space_avail_per_cell_y = h /game_nb_rows(env->g);
+  if (space_avail_per_cell_x > space_avail_per_cell_y){
+    env->cell_size = (h-2*MIN_DIST_BORDER) /game_nb_rows(env->g);
+  }else{
+    env->cell_size = (w-2*MIN_DIST_BORDER) /game_nb_cols(env->g);
+  }
+  env->grid_beginning_y = MIN_DIST_BORDER;
+  env->grid_beginning_x = w/2 - env->cell_size*game_nb_cols(env->g)/2;
+  /* render the tents, water and trees */
+  SDL_Rect rect;
+  for (uint i = 0; i < game_nb_rows(env->g); i++){
+    for (uint j = 0; j < game_nb_cols(env->g); j++){
+      rect.x = env->grid_beginning_x + i*env->cell_size;
+      rect.y = env->grid_beginning_y + j*env->cell_size;
+      rect.w = env->cell_size;
+      rect.h = env->cell_size;
+      if (game_get_square(env->g, i, j) == TREE){
+        SDL_RenderCopy(ren, env->tree, NULL, &rect);
+      }
+    }
+  }
+  /* render the grid */
+  SDL_SetRenderDrawColor(ren, 0, 0, 0, SDL_ALPHA_OPAQUE); /* black */
+  for (uint i = 0; i < game_nb_cols(env->g)+1; i++){
+    SDL_RenderDrawLine(ren, env->grid_beginning_x + i*env->cell_size, env->grid_beginning_y, env->grid_beginning_x + i*env->cell_size, env->grid_beginning_y + game_nb_rows(env->g)*env->cell_size);
+  }
+  for (uint j = 0; j < game_nb_rows(env->g)+1; j++){
+    SDL_RenderDrawLine(ren, env->grid_beginning_x, env->grid_beginning_y + j*env->cell_size, env->grid_beginning_x + game_nb_cols(env->g)*env->cell_size, env->grid_beginning_y + j*env->cell_size);
+  }
 }
 
 /* **************************************************************** */

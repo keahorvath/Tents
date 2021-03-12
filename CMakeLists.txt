@@ -15,6 +15,22 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_C_COMPILER gcc)
 set(CMAKE_C_FLAGS_RELEASE "-O3")
 
+## use a CMake3 package to solve SDL2 dependencies
+find_package(SDL2 REQUIRED)
+set(SDL2_ALL_INC ${SDL2_INCLUDE_DIRS})
+set(SDL2_ALL_LIBS ${SDL2_LIBRARIES} -lSDL2_ttf -lSDL2_image) # add extra SDL2 libraries
+
+## print this 
+message(STATUS "SDL2 include dir: ${SDL2_ALL_INC}")
+message(STATUS "SDL2 all libraries: ${SDL2_ALL_LIBS}")
+
+## compilation rules
+include_directories(${SDL2_ALL_INC})
+add_executable(minimal minimal.c)
+target_link_libraries(minimal ${SDL2_ALL_LIBS} m)
+add_executable(model game_sdl.c model.c)
+target_link_libraries(model ${SDL2_ALL_LIBS} m game)
+
 #définit le nom du programme ainsi que ses sources
 add_executable(game_text game_text.c)
 add_executable(game_test_khorvath game_test_khorvath.c)
@@ -34,6 +50,10 @@ target_link_libraries(game_test_khorvath game)
 target_link_libraries(game_test_marbeites game)
 target_link_libraries(game_test_alleymarie game)
 
+## copy useful data files in build dir
+foreach(file "tree.png")
+  file(COPY ${file} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endforeach(file)
 
 #Tests alleymarie
 add_test(test_alleymarie_game_print ./game_test_alleymarie game_print)

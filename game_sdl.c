@@ -2,23 +2,18 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include "model.h"
 #include "game_tools.h"
 #include "game.h"
 #include "game_aux.h"
 #include "game_ext.h"
 #include "queue.h"
+#include <SDL.h>
+#include <SDL_image.h>  // required to load transparent texture from PNG
+#include <SDL_ttf.h>    // required to use TTF fonts
 
 
 int main(int argc, char* argv[]) {
-  game current_game;
-  if (argc == 2) {
-    printf("Chargement du nouveau fichier\n");
-    current_game = game_load(argv[1]);
-  } else {
-    current_game = game_default();
-  }
-
   /* initialize SDL2 and some extensions */
   if (SDL_Init(SDL_INIT_VIDEO) != 0)
     ERROR("Error: SDL_Init VIDEO (%s)", SDL_GetError());

@@ -1,5 +1,4 @@
 #include "game_tools.h"
-#include <setjmp.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,8 +9,7 @@
 
 static uint game_solve_rec(game g, bool count_solution, uint *p_nb_sol);
 static int game_fill(game g);
-static uint game_nb_solutions_rec(game g, uint indice, uint nb_solutions);
-static bool game_is_full(cgame g);
+static int game_extra_check_move(cgame g, uint i, uint j, square s);
 static uint nb_empty_cells_to_the_left(cgame g, uint i, uint j);
 static uint nb_empty_cells_to_the_right(cgame g, uint i, uint j);
 static uint nb_empty_cells_above(cgame g, uint i, uint j);
@@ -111,8 +109,6 @@ uint game_solve_rec(game g, bool count_solutions, uint *p_nb_sol_found) {
   if (count_solutions == true) {
     game_fill(g);
   }
-  printf("game after first fill\n");
-  game_print(g);
   uint nb_moves;
   bool stop = false;
   uint nb_sol_before = 0;
@@ -125,21 +121,14 @@ uint game_solve_rec(game g, bool count_solutions, uint *p_nb_sol_found) {
         break;
       }
       if (game_get_square(g, i, j) == EMPTY) {
-        game_print(g);
-        printf("play tent in %u %u \n", i, j);
         game_play_move(g, i, j, TENT);
         nb_moves = game_fill(g);
-        game_print(g);
         if (nb_moves == -1) {
-          printf("replacing with grass in %u %u \n", i, j);
-
           game_play_move(g, i, j, GRASS);
           continue;
         }
         nb_sol_before = game_solve_rec(g, count_solutions, p_nb_sol_found);
         if (game_is_over(g)) {
-          printf("SOLUTION\n");
-          game_print(g);
           *p_nb_sol_found += 1;
           if (!count_solutions) {
             return true;
@@ -175,8 +164,6 @@ bool game_solve(game g) {
   if (game_is_over(g)) {
     return true;
   }
-  printf("game after first fill\n");
-  game_print(g);
   uint nb_solution_found = 0;
   uint nb_sols = game_solve_rec(g, false, &nb_solution_found);
   if (nb_sols == 0) {
@@ -185,7 +172,6 @@ bool game_solve(game g) {
     }
     return false;
   }
-  printf("SOLUTION\n");
   return true;
 }
 
@@ -201,8 +187,6 @@ uint game_nb_solutions(game g) {
   if (game_is_over(g)) {
     return 1;
   }
-  printf("game after first fill\n");
-  game_print(g);
   uint nb_solution_found = 0;
   uint game_is_solved = game_solve_rec(g, true, &nb_solution_found);
 
@@ -212,7 +196,6 @@ uint game_nb_solutions(game g) {
     }
     return 0;
   }
-  printf("SOLUTION\n");
   return nb_solution_found;
 }
 
