@@ -47,11 +47,14 @@ int main(int argc, char *argv[]) {
         if (c == 't') {
           s = TENT;
         }
-        if (c == 'g') {
+        else if (c == 'g') {
           s = GRASS;
         }
-        if (c == 'e') {
+        else if (c == 'e') {
           s = EMPTY;
+        }else{
+          fprintf(stderr, "Wrong character\n");
+          exit(EXIT_FAILURE);
         }
         printf("You put %c in the (%u, %u) position\n", c, i, j);
         if (game_check_move(current_game, i, j, s) == LOSING) {

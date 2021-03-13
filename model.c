@@ -17,7 +17,9 @@
 #define PALM_TREE "tree.png"
 #define WATER "water.png"
 #define RAFT "raft.jpg"
+#define BACKGROUND "ocean.jpg"
 #define FONT "arial.ttf"
+#define FONT_SIZE 20 //font size is twenty pixels smaller than the cell size
 
 
 /* **************************************************************** */
@@ -26,6 +28,7 @@ struct Env_t {
   SDL_Texture* tree;
   SDL_Texture* water;
   SDL_Texture* raft;
+  SDL_Texture* background;
   int grid_beginning_x;
   int grid_beginning_y;
   int cell_size;
@@ -58,7 +61,9 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   if (!env->water) ERROR("IMG_LoadTexture: %s\n", WATER);
   env->raft = IMG_LoadTexture(ren, RAFT);
   if (!env->raft) ERROR("IMG_LoadTexture: %s\n", RAFT);
-
+  env->background = IMG_LoadTexture(ren, BACKGROUND);
+  if (!env->background) ERROR("IMG_LoadTexture: %s\n", BACKGROUND);  
+  
   return env;
 }
 
@@ -67,6 +72,15 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
 void render(SDL_Window *win, SDL_Renderer *ren, Env *env) { /* PUT YOUR CODE HERE TO RENDER TEXTURES, ... */
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
+  SDL_Rect rect;
+  rect.x = 0;
+  rect.y = 0;
+  rect.w = w;
+  rect.h = h;
+  /* render background texture */
+  SDL_SetRenderDrawColor(ren, 255, 255, 255, SDL_ALPHA_OPAQUE); /* black */
+  SDL_RenderCopy(ren, env->background, &rect, NULL); /* stretch it */
+
   uint space_avail_per_cell_x = w / game_nb_cols(env->g);
   uint space_avail_per_cell_y = h /game_nb_rows(env->g);
   if (space_avail_per_cell_x > space_avail_per_cell_y){
@@ -76,8 +90,13 @@ void render(SDL_Window *win, SDL_Renderer *ren, Env *env) { /* PUT YOUR CODE HER
   }
   env->grid_beginning_y = MIN_DIST_BORDER;
   env->grid_beginning_x = w/2 - env->cell_size*game_nb_cols(env->g)/2;
+
+  rect.x = env->grid_beginning_x;
+  rect.y = env->grid_beginning_y;
+  rect.w = env->cell_size*game_nb_cols(env->g);
+  rect.h = env->cell_size*game_nb_rows(env->g);
+  SDL_RenderFillRect(ren, &rect);
   /* render the tents, water and trees */
-  SDL_Rect rect;
   for (uint i = 0; i < game_nb_rows(env->g); i++){
     for (uint j = 0; j < game_nb_cols(env->g); j++){
       rect.x = env->grid_beginning_x + j*env->cell_size;
@@ -95,6 +114,7 @@ void render(SDL_Window *win, SDL_Renderer *ren, Env *env) { /* PUT YOUR CODE HER
       }
     }
   }
+
   /* render the grid */
   SDL_SetRenderDrawColor(ren, 0, 0, 0, SDL_ALPHA_OPAQUE); /* black */
   for (uint i = 0; i < game_nb_cols(env->g)+1; i++){
@@ -103,9 +123,6 @@ void render(SDL_Window *win, SDL_Renderer *ren, Env *env) { /* PUT YOUR CODE HER
   for (uint j = 0; j < game_nb_rows(env->g)+1; j++){
     SDL_RenderDrawLine(ren, env->grid_beginning_x, env->grid_beginning_y + j*env->cell_size, env->grid_beginning_x + game_nb_cols(env->g)*env->cell_size, env->grid_beginning_y + j*env->cell_size);
   }
-
-  /* render the text */
-  
 }
 
 /* **************************************************************** */
