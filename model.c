@@ -15,10 +15,17 @@
 
 #define MIN_DIST_BORDER 100
 #define PALM_TREE "tree.png"
+#define WATER "water.png"
+#define RAFT "raft.jpg"
+#define FONT "arial.ttf"
+
+
 /* **************************************************************** */
 
 struct Env_t {
   SDL_Texture* tree;
+  SDL_Texture* water;
+  SDL_Texture* raft;
   int grid_beginning_x;
   int grid_beginning_y;
   int cell_size;
@@ -45,12 +52,12 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  //get current window size
-  int w, h;
-  SDL_GetWindowSize(win, &w, &h);
-
   env->tree = IMG_LoadTexture(ren, PALM_TREE);
   if (!env->tree) ERROR("IMG_LoadTexture: %s\n", PALM_TREE);
+  env->water = IMG_LoadTexture(ren, WATER);
+  if (!env->water) ERROR("IMG_LoadTexture: %s\n", WATER);
+  env->raft = IMG_LoadTexture(ren, RAFT);
+  if (!env->raft) ERROR("IMG_LoadTexture: %s\n", RAFT);
 
   return env;
 }
@@ -73,12 +80,18 @@ void render(SDL_Window *win, SDL_Renderer *ren, Env *env) { /* PUT YOUR CODE HER
   SDL_Rect rect;
   for (uint i = 0; i < game_nb_rows(env->g); i++){
     for (uint j = 0; j < game_nb_cols(env->g); j++){
-      rect.x = env->grid_beginning_x + i*env->cell_size;
-      rect.y = env->grid_beginning_y + j*env->cell_size;
+      rect.x = env->grid_beginning_x + j*env->cell_size;
+      rect.y = env->grid_beginning_y + i*env->cell_size;
       rect.w = env->cell_size;
       rect.h = env->cell_size;
       if (game_get_square(env->g, i, j) == TREE){
         SDL_RenderCopy(ren, env->tree, NULL, &rect);
+      }
+      else if (game_get_square(env->g, i, j) == GRASS){
+        SDL_RenderCopy(ren, env->water, NULL, &rect);
+      }
+      else if (game_get_square(env->g, i, j) == TENT){
+        SDL_RenderCopy(ren, env->raft, NULL, &rect);
       }
     }
   }
@@ -90,6 +103,9 @@ void render(SDL_Window *win, SDL_Renderer *ren, Env *env) { /* PUT YOUR CODE HER
   for (uint j = 0; j < game_nb_rows(env->g)+1; j++){
     SDL_RenderDrawLine(ren, env->grid_beginning_x, env->grid_beginning_y + j*env->cell_size, env->grid_beginning_x + game_nb_cols(env->g)*env->cell_size, env->grid_beginning_y + j*env->cell_size);
   }
+
+  /* render the text */
+  
 }
 
 /* **************************************************************** */

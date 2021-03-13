@@ -51,7 +51,7 @@ target_link_libraries(game_test_marbeites game)
 target_link_libraries(game_test_alleymarie game)
 
 ## copy useful data files in build dir
-foreach(file "tree.png")
+foreach(file "tree.png" "water.png" "raft.jpg")
   file(COPY ${file} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endforeach(file)
 
