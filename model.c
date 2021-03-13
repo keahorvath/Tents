@@ -162,9 +162,17 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
     row = (uint)(mouse.y - env->grid_beginning_y)/env->cell_size;
     col = (uint)(mouse.x - env->grid_beginning_x)/env->cell_size;
     if (b.button == SDL_BUTTON_LEFT){
-      game_play_move(env->g, row, col, TENT);
+      if (game_get_square(env->g, row, col) == TENT || game_get_square(env->g, row, col) == GRASS){
+        game_play_move(env->g, row, col, EMPTY);
+      }else if (game_get_square(env->g, row, col) == EMPTY){
+        game_play_move(env->g, row, col, TENT);
+      }
     }else if (b.button == SDL_BUTTON_RIGHT){
-      game_play_move(env->g, row, col, GRASS);
+      if (game_get_square(env->g, row, col) == TENT || game_get_square(env->g, row, col) == GRASS){
+        game_play_move(env->g, row, col, EMPTY);
+      }else if (game_get_square(env->g, row, col) == EMPTY){
+        game_play_move(env->g, row, col, GRASS);
+      }
     }
   }
   return false;
