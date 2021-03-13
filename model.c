@@ -17,6 +17,8 @@
 #define PALM_TREE "tree.png"
 #define WATER "water.png"
 #define RAFT "raft.jpg"
+#define L_WATER "losing_water.png"
+#define L_RAFT "losing_raft.jpg"
 #define BACKGROUND "ocean.jpg"
 #define FONT "arial.ttf"
 #define FONT_SIZE 20 //font size is twenty pixels smaller than the cell size
@@ -28,6 +30,8 @@ struct Env_t {
   SDL_Texture* tree;
   SDL_Texture* water;
   SDL_Texture* raft;
+  SDL_Texture* losing_water;
+  SDL_Texture* losing_raft;
   SDL_Texture* background;
   int grid_beginning_x;
   int grid_beginning_y;
@@ -61,6 +65,10 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   if (!env->water) ERROR("IMG_LoadTexture: %s\n", WATER);
   env->raft = IMG_LoadTexture(ren, RAFT);
   if (!env->raft) ERROR("IMG_LoadTexture: %s\n", RAFT);
+  env->losing_water = IMG_LoadTexture(ren, L_WATER);
+  if (!env->losing_water) ERROR("IMG_LoadTexture: %s\n", L_WATER);
+  env->losing_raft = IMG_LoadTexture(ren, L_RAFT);
+  if (!env->losing_raft) ERROR("IMG_LoadTexture: %s\n", L_RAFT);
   env->background = IMG_LoadTexture(ren, BACKGROUND);
   if (!env->background) ERROR("IMG_LoadTexture: %s\n", BACKGROUND);  
   
@@ -107,10 +115,18 @@ void render(SDL_Window *win, SDL_Renderer *ren, Env *env) { /* PUT YOUR CODE HER
         SDL_RenderCopy(ren, env->tree, NULL, &rect);
       }
       else if (game_get_square(env->g, i, j) == GRASS){
-        SDL_RenderCopy(ren, env->water, NULL, &rect);
+        if (game_check_move(env->g, i, j, GRASS) == REGULAR){
+          SDL_RenderCopy(ren, env->water, NULL, &rect);
+        }else if (game_check_move(env->g, i, j, GRASS) == LOSING){
+          SDL_RenderCopy(ren, env->losing_water, NULL, &rect);
+        }
       }
       else if (game_get_square(env->g, i, j) == TENT){
-        SDL_RenderCopy(ren, env->raft, NULL, &rect);
+        if (game_check_move(env->g, i, j, TENT) == REGULAR){
+          SDL_RenderCopy(ren, env->raft, NULL, &rect);
+        }else if (game_check_move(env->g, i, j, TENT) == LOSING){
+          SDL_RenderCopy(ren, env->losing_raft, NULL, &rect);
+        }
       }
     }
   }
@@ -131,9 +147,26 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
   if (e->type == SDL_QUIT) {
     return true;
   }
-
-  /* PUT YOUR CODE HERE TO PROCESS EVENTS */
-
+  int w, h;
+  SDL_GetWindowSize(win, &w, &h);
+  if (e->type == SDL_MOUSEBUTTONDOWN) {
+    SDL_Point mouse;
+    SDL_GetMouseState(&mouse.x, &mouse.y);
+    //check if mouse is in the grid
+    if (mouse.x < env->grid_beginning_x || mouse.x > env->grid_beginning_x+env->cell_size*game_nb_cols(env->g) || mouse.y < env->grid_beginning_y || mouse.y > env->grid_beginning_y+env->cell_size*game_nb_rows(env->g)){
+      return false;
+    }
+    SDL_MouseButtonEvent b = e->button;
+    //convert mouse position to cell in grid
+    uint row, col;
+    row = (uint)(mouse.y - env->grid_beginning_y)/env->cell_size;
+    col = (uint)(mouse.x - env->grid_beginning_x)/env->cell_size;
+    if (b.button == SDL_BUTTON_LEFT){
+      game_play_move(env->g, row, col, TENT);
+    }else if (b.button == SDL_BUTTON_RIGHT){
+      game_play_move(env->g, row, col, GRASS);
+    }
+  }
   return false;
 }
 
