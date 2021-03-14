@@ -33,6 +33,7 @@ struct Env_t {
   SDL_Texture *losing_raft;
   SDL_Texture *background;
   SDL_Texture **text;
+  SDL_Texture *game_over_text;
   int grid_beginning_x;
   int grid_beginning_y;
   int cell_size;
@@ -107,6 +108,10 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
         SDL_CreateTextureFromSurface(ren, surf);
     SDL_FreeSurface(surf);
   }
+  TTF_SetFontStyle(font, TTF_STYLE_BOLD);                                   // TTF_STYLE_ITALIC | TTF_STYLE_NORMAL
+  SDL_Surface* surf = TTF_RenderText_Blended(font, "Congratulations! Trump found his new home!", color);  // blended rendering for ultra nice text
+  env->game_over_text = SDL_CreateTextureFromSurface(ren, surf);
+  SDL_FreeSurface(surf);
   TTF_CloseFont(font);
 
   return env;
@@ -198,6 +203,15 @@ void render(SDL_Window *win, SDL_Renderer *ren,
     rect.w = env->cell_size - FONT_SIZE;
     rect.h = env->cell_size - FONT_SIZE;
     SDL_RenderCopy(ren, env->text[j + game_nb_rows(env->g)], NULL, &rect);
+  }
+
+  /*render game_over*/
+  if (game_is_over(env->g)){
+    rect.w = w - FONT_SIZE*2;
+    rect.h = h / game_nb_rows(env->g);
+    rect.x = w / 2 - rect.w / 2;
+    rect.y = h / 2 - rect.h / 2;
+    SDL_RenderCopy(ren, env->game_over_text, NULL, &rect);
   }
 }
 
