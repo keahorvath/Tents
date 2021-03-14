@@ -197,7 +197,7 @@ void render(SDL_Window *win, SDL_Renderer *ren,
              FONT_SIZE / 2;
     rect.w = env->cell_size - FONT_SIZE;
     rect.h = env->cell_size - FONT_SIZE;
-    SDL_RenderCopy(ren, env->text[j], NULL, &rect);
+    SDL_RenderCopy(ren, env->text[j + game_nb_rows(env->g)], NULL, &rect);
   }
 }
 
