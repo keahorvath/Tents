@@ -1,17 +1,15 @@
 #include <SDL.h>
+#include <SDL_image.h>  // required to load transparent texture from PNG
+#include <SDL_ttf.h>    // required to use TTF fonts
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "model.h"
-#include "game_tools.h"
 #include "game.h"
 #include "game_aux.h"
 #include "game_ext.h"
+#include "game_tools.h"
+#include "model.h"
 #include "queue.h"
-#include <SDL.h>
-#include <SDL_image.h>  // required to load transparent texture from PNG
-#include <SDL_ttf.h>    // required to use TTF fonts
-
 
 int main(int argc, char* argv[]) {
   /* initialize SDL2 and some extensions */

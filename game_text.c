@@ -46,13 +46,11 @@ int main(int argc, char *argv[]) {
         square s;
         if (c == 't') {
           s = TENT;
-        }
-        else if (c == 'g') {
+        } else if (c == 'g') {
           s = GRASS;
-        }
-        else if (c == 'e') {
+        } else if (c == 'e') {
           s = EMPTY;
-        }else{
+        } else {
           fprintf(stderr, "Wrong character\n");
           exit(EXIT_FAILURE);
         }

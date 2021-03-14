@@ -7,10 +7,10 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "game_tools.h"
 #include "game.h"
 #include "game_aux.h"
 #include "game_ext.h"
+#include "game_tools.h"
 #include "queue.h"
 
 #define MIN_DIST_BORDER 100
@@ -21,18 +21,18 @@
 #define L_RAFT "losing_raft.jpg"
 #define BACKGROUND "ocean.jpg"
 #define FONT "arial.ttf"
-#define FONT_SIZE 20 //font size is twenty pixels smaller than the cell size
-
+#define FONT_SIZE 30  // font size is twenty pixels smaller than the cell size
 
 /* **************************************************************** */
 
 struct Env_t {
-  SDL_Texture* tree;
-  SDL_Texture* water;
-  SDL_Texture* raft;
-  SDL_Texture* losing_water;
-  SDL_Texture* losing_raft;
-  SDL_Texture* background;
+  SDL_Texture *tree;
+  SDL_Texture *water;
+  SDL_Texture *raft;
+  SDL_Texture *losing_water;
+  SDL_Texture *losing_raft;
+  SDL_Texture *background;
+  SDL_Texture **text;
   int grid_beginning_x;
   int grid_beginning_y;
   int cell_size;
@@ -45,17 +45,17 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   Env *env = malloc(sizeof(struct Env_t));
   PRINT("Left click to place a tent, right click to place water.\n");
 
-  //create the game 
-  if (argc == 2){
+  // create the game
+  if (argc == 2) {
     env->g = game_load(argv[1]);
-    if (env->g == NULL){
+    if (env->g == NULL) {
       fprintf(stderr, "File couldn't open!\n");
       exit(EXIT_FAILURE);
     }
-  }else if(argc == 1){
+  } else if (argc == 1) {
     env->g = game_default();
-  }else{
-    fprintf(stderr,"Wrong number of arguments!\n");
+  } else {
+    fprintf(stderr, "Wrong number of arguments!\n");
     exit(EXIT_FAILURE);
   }
 
@@ -70,14 +70,52 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   env->losing_raft = IMG_LoadTexture(ren, L_RAFT);
   if (!env->losing_raft) ERROR("IMG_LoadTexture: %s\n", L_RAFT);
   env->background = IMG_LoadTexture(ren, BACKGROUND);
-  if (!env->background) ERROR("IMG_LoadTexture: %s\n", BACKGROUND);  
-  
+  if (!env->background) ERROR("IMG_LoadTexture: %s\n", BACKGROUND);
+
+  int w, h;
+  SDL_GetWindowSize(win, &w, &h);
+  uint space_avail_per_cell_x = w / game_nb_cols(env->g);
+  uint space_avail_per_cell_y = h / game_nb_rows(env->g);
+  if (space_avail_per_cell_x > space_avail_per_cell_y) {
+    env->cell_size = (h - 2 * MIN_DIST_BORDER) / game_nb_rows(env->g);
+  } else {
+    env->cell_size = (w - 2 * MIN_DIST_BORDER) / game_nb_cols(env->g);
+  }
+  env->grid_beginning_y = MIN_DIST_BORDER;
+  env->grid_beginning_x = w / 2 - env->cell_size * game_nb_cols(env->g) / 2;
+
+  env->text = (SDL_Texture **)malloc(
+      sizeof(SDL_Texture *) * (game_nb_cols(env->g) + game_nb_rows(env->g)));
+  SDL_Color color = {0, 0, 0, 255}; /* blue color in RGBA */
+  TTF_Font *font = TTF_OpenFont(FONT, env->cell_size - FONT_SIZE);
+  if (!font) ERROR("TTF_OpenFont: %s\n", FONT);
+  TTF_SetFontStyle(font,
+                   TTF_STYLE_BOLD);  // TTF_STYLE_ITALIC | TTF_STYLE_NORMAL
+  char text_tents[2];
+  for (uint i = 0; i < game_nb_rows(env->g); i++) {
+    sprintf(text_tents, "%u", game_get_expected_nb_tents_row(env->g, i));
+    SDL_Surface *surf = TTF_RenderText_Blended(
+        font, text_tents, color);  // blended rendering for ultra nice text
+    env->text[i] = SDL_CreateTextureFromSurface(ren, surf);
+    SDL_FreeSurface(surf);
+  }
+  for (uint j = 0; j < game_nb_cols(env->g); j++) {
+    sprintf(text_tents, "%u", game_get_expected_nb_tents_col(env->g, j));
+    SDL_Surface *surf = TTF_RenderText_Blended(
+        font, text_tents, color);  // blended rendering for ultra nice text
+    env->text[game_nb_rows(env->g) + j] =
+        SDL_CreateTextureFromSurface(ren, surf);
+    SDL_FreeSurface(surf);
+  }
+  TTF_CloseFont(font);
+
   return env;
 }
 
 /* **************************************************************** */
 
-void render(SDL_Window *win, SDL_Renderer *ren, Env *env) { /* PUT YOUR CODE HERE TO RENDER TEXTURES, ... */
+void render(SDL_Window *win, SDL_Renderer *ren,
+            Env *env) { /* PUT YOUR CODE HERE TO RENDER TEXTURES, ... */
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
   SDL_Rect rect;
@@ -86,45 +124,43 @@ void render(SDL_Window *win, SDL_Renderer *ren, Env *env) { /* PUT YOUR CODE HER
   rect.w = w;
   rect.h = h;
   /* render background texture */
-  SDL_SetRenderDrawColor(ren, 255, 255, 255, SDL_ALPHA_OPAQUE); /* black */
-  SDL_RenderCopy(ren, env->background, &rect, NULL); /* stretch it */
+  SDL_SetRenderDrawColor(ren, 255, 255, 255, SDL_ALPHA_OPAQUE); /* white */
+  SDL_RenderCopy(ren, env->background, &rect, NULL);            /* stretch it */
 
   uint space_avail_per_cell_x = w / game_nb_cols(env->g);
-  uint space_avail_per_cell_y = h /game_nb_rows(env->g);
-  if (space_avail_per_cell_x > space_avail_per_cell_y){
-    env->cell_size = (h-2*MIN_DIST_BORDER) /game_nb_rows(env->g);
-  }else{
-    env->cell_size = (w-2*MIN_DIST_BORDER) /game_nb_cols(env->g);
+  uint space_avail_per_cell_y = h / game_nb_rows(env->g);
+  if (space_avail_per_cell_x > space_avail_per_cell_y) {
+    env->cell_size = (h - 2 * MIN_DIST_BORDER) / game_nb_rows(env->g);
+  } else {
+    env->cell_size = (w - 2 * MIN_DIST_BORDER) / game_nb_cols(env->g);
   }
   env->grid_beginning_y = MIN_DIST_BORDER;
-  env->grid_beginning_x = w/2 - env->cell_size*game_nb_cols(env->g)/2;
+  env->grid_beginning_x = w / 2 - env->cell_size * game_nb_cols(env->g) / 2;
 
   rect.x = env->grid_beginning_x;
   rect.y = env->grid_beginning_y;
-  rect.w = env->cell_size*game_nb_cols(env->g);
-  rect.h = env->cell_size*game_nb_rows(env->g);
+  rect.w = env->cell_size * game_nb_cols(env->g);
+  rect.h = env->cell_size * game_nb_rows(env->g);
   SDL_RenderFillRect(ren, &rect);
   /* render the tents, water and trees */
-  for (uint i = 0; i < game_nb_rows(env->g); i++){
-    for (uint j = 0; j < game_nb_cols(env->g); j++){
-      rect.x = env->grid_beginning_x + j*env->cell_size;
-      rect.y = env->grid_beginning_y + i*env->cell_size;
+  for (uint i = 0; i < game_nb_rows(env->g); i++) {
+    for (uint j = 0; j < game_nb_cols(env->g); j++) {
+      rect.x = env->grid_beginning_x + j * env->cell_size;
+      rect.y = env->grid_beginning_y + i * env->cell_size;
       rect.w = env->cell_size;
       rect.h = env->cell_size;
-      if (game_get_square(env->g, i, j) == TREE){
+      if (game_get_square(env->g, i, j) == TREE) {
         SDL_RenderCopy(ren, env->tree, NULL, &rect);
-      }
-      else if (game_get_square(env->g, i, j) == GRASS){
-        if (game_check_move(env->g, i, j, GRASS) == REGULAR){
+      } else if (game_get_square(env->g, i, j) == GRASS) {
+        if (game_check_move(env->g, i, j, GRASS) == REGULAR) {
           SDL_RenderCopy(ren, env->water, NULL, &rect);
-        }else if (game_check_move(env->g, i, j, GRASS) == LOSING){
+        } else if (game_check_move(env->g, i, j, GRASS) == LOSING) {
           SDL_RenderCopy(ren, env->losing_water, NULL, &rect);
         }
-      }
-      else if (game_get_square(env->g, i, j) == TENT){
-        if (game_check_move(env->g, i, j, TENT) == REGULAR){
+      } else if (game_get_square(env->g, i, j) == TENT) {
+        if (game_check_move(env->g, i, j, TENT) == REGULAR) {
           SDL_RenderCopy(ren, env->raft, NULL, &rect);
-        }else if (game_check_move(env->g, i, j, TENT) == LOSING){
+        } else if (game_check_move(env->g, i, j, TENT) == LOSING) {
           SDL_RenderCopy(ren, env->losing_raft, NULL, &rect);
         }
       }
@@ -133,11 +169,35 @@ void render(SDL_Window *win, SDL_Renderer *ren, Env *env) { /* PUT YOUR CODE HER
 
   /* render the grid */
   SDL_SetRenderDrawColor(ren, 0, 0, 0, SDL_ALPHA_OPAQUE); /* black */
-  for (uint i = 0; i < game_nb_cols(env->g)+1; i++){
-    SDL_RenderDrawLine(ren, env->grid_beginning_x + i*env->cell_size, env->grid_beginning_y, env->grid_beginning_x + i*env->cell_size, env->grid_beginning_y + game_nb_rows(env->g)*env->cell_size);
+  for (uint i = 0; i < game_nb_cols(env->g) + 1; i++) {
+    SDL_RenderDrawLine(
+        ren, env->grid_beginning_x + i * env->cell_size, env->grid_beginning_y,
+        env->grid_beginning_x + i * env->cell_size,
+        env->grid_beginning_y + game_nb_rows(env->g) * env->cell_size);
   }
-  for (uint j = 0; j < game_nb_rows(env->g)+1; j++){
-    SDL_RenderDrawLine(ren, env->grid_beginning_x, env->grid_beginning_y + j*env->cell_size, env->grid_beginning_x + game_nb_cols(env->g)*env->cell_size, env->grid_beginning_y + j*env->cell_size);
+  for (uint j = 0; j < game_nb_rows(env->g) + 1; j++) {
+    SDL_RenderDrawLine(
+        ren, env->grid_beginning_x, env->grid_beginning_y + j * env->cell_size,
+        env->grid_beginning_x + game_nb_cols(env->g) * env->cell_size,
+        env->grid_beginning_y + j * env->cell_size);
+  }
+
+  /*render the nb_tents text*/
+  for (uint i = 0; i < (game_nb_rows(env->g)); i++) {
+    rect.x = env->grid_beginning_x + game_nb_cols(env->g) * env->cell_size +
+             FONT_SIZE / 2;
+    rect.y = env->grid_beginning_y + env->cell_size * i + FONT_SIZE / 2;
+    rect.w = env->cell_size - FONT_SIZE;
+    rect.h = env->cell_size - FONT_SIZE;
+    SDL_RenderCopy(ren, env->text[i], NULL, &rect);
+  }
+  for (uint j = 0; j < (game_nb_cols(env->g)); j++) {
+    rect.x = env->grid_beginning_x + j * env->cell_size + FONT_SIZE / 2;
+    rect.y = env->grid_beginning_y + env->cell_size * game_nb_rows(env->g) +
+             FONT_SIZE / 2;
+    rect.w = env->cell_size - FONT_SIZE;
+    rect.h = env->cell_size - FONT_SIZE;
+    SDL_RenderCopy(ren, env->text[j], NULL, &rect);
   }
 }
 
@@ -152,25 +212,32 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
   if (e->type == SDL_MOUSEBUTTONDOWN) {
     SDL_Point mouse;
     SDL_GetMouseState(&mouse.x, &mouse.y);
-    //check if mouse is in the grid
-    if (mouse.x < env->grid_beginning_x || mouse.x > env->grid_beginning_x+env->cell_size*game_nb_cols(env->g) || mouse.y < env->grid_beginning_y || mouse.y > env->grid_beginning_y+env->cell_size*game_nb_rows(env->g)){
+    // check if mouse is in the grid
+    if (mouse.x < env->grid_beginning_x ||
+        mouse.x >
+            env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) ||
+        mouse.y < env->grid_beginning_y ||
+        mouse.y >
+            env->grid_beginning_y + env->cell_size * game_nb_rows(env->g)) {
       return false;
     }
     SDL_MouseButtonEvent b = e->button;
-    //convert mouse position to cell in grid
+    // convert mouse position to cell in grid
     uint row, col;
-    row = (uint)(mouse.y - env->grid_beginning_y)/env->cell_size;
-    col = (uint)(mouse.x - env->grid_beginning_x)/env->cell_size;
-    if (b.button == SDL_BUTTON_LEFT){
-      if (game_get_square(env->g, row, col) == TENT || game_get_square(env->g, row, col) == GRASS){
+    row = (uint)(mouse.y - env->grid_beginning_y) / env->cell_size;
+    col = (uint)(mouse.x - env->grid_beginning_x) / env->cell_size;
+    if (b.button == SDL_BUTTON_LEFT) {
+      if (game_get_square(env->g, row, col) == TENT ||
+          game_get_square(env->g, row, col) == GRASS) {
         game_play_move(env->g, row, col, EMPTY);
-      }else if (game_get_square(env->g, row, col) == EMPTY){
+      } else if (game_get_square(env->g, row, col) == EMPTY) {
         game_play_move(env->g, row, col, TENT);
       }
-    }else if (b.button == SDL_BUTTON_RIGHT){
-      if (game_get_square(env->g, row, col) == TENT || game_get_square(env->g, row, col) == GRASS){
+    } else if (b.button == SDL_BUTTON_RIGHT) {
+      if (game_get_square(env->g, row, col) == TENT ||
+          game_get_square(env->g, row, col) == GRASS) {
         game_play_move(env->g, row, col, EMPTY);
-      }else if (game_get_square(env->g, row, col) == EMPTY){
+      } else if (game_get_square(env->g, row, col) == EMPTY) {
         game_play_move(env->g, row, col, GRASS);
       }
     }
