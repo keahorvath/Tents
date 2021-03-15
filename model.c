@@ -130,18 +130,16 @@ void render(SDL_Window *win, SDL_Renderer *ren,
   rect.y = 0;
   rect.w = w;
   rect.h = h;
-  SDL_Rect button_undo;
-  button_undo.x = 20;
-  button_undo.y = 40;
-  button_undo.w = 20;
-  button_undo.h = 20;
+  /*SDL_Rect button_undo;
+  button_undo.x = 0;
+  button_undo.y = 0;
+  button_undo.w = 1;
+  button_undo.h = 1;
   SDL_Rect button_redo;
-  button_redo.x = 10;
-  button_redo.y = 30;
-  button_undo.w = 20;
-  button_undo.h = 20;
-  SDL_RenderFillRect(ren, &button_undo);
-  SDL_RenderFillRect(ren, &button_redo);
+  button_redo.x = 0;
+  button_redo.y = 0;
+  button_undo.w = 0;
+  button_undo.h = 0;*/
   /* render background texture */
   SDL_SetRenderDrawColor(ren, 255, 255, 255, SDL_ALPHA_OPAQUE); /* white */
   SDL_RenderCopy(ren, env->background, &rect, NULL);            /* stretch it */
@@ -161,6 +159,8 @@ void render(SDL_Window *win, SDL_Renderer *ren,
   rect.w = env->cell_size * game_nb_cols(env->g);
   rect.h = env->cell_size * game_nb_rows(env->g);
   SDL_RenderFillRect(ren, &rect);
+  //SDL_RenderFillRect(ren, &button_undo);
+  //SDL_RenderFillRect(ren, &button_redo);
   /* render the tents, water and trees */
   for (uint i = 0; i < game_nb_rows(env->g); i++) {
     for (uint j = 0; j < game_nb_cols(env->g); j++) {
