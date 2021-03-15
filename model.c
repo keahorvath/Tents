@@ -112,6 +112,8 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   }
   TTF_SetFontStyle(font, TTF_STYLE_BOLD);                                   // TTF_STYLE_ITALIC | TTF_STYLE_NORMAL
   SDL_Surface* surf = TTF_RenderText_Blended(font, "Congratulations! Trump found his new home!", color);  // blended rendering for ultra nice text
+  //SDL_Surface* undo = TTF_RenderText_Blended(font, "Undo", color);
+  //SDL_Surface* redo = TTF_RenderText_Blended(front, "Redo", color);
   env->game_over_text = SDL_CreateTextureFromSurface(ren, surf);
   SDL_FreeSurface(surf);
   TTF_CloseFont(font);
@@ -270,6 +272,12 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
       }
     }
   }
+  /*if(mouse.x = button_undo.x && mouse.y = button_undo.y){
+    game_undo();
+  }
+  if(mouse.x = button_redo.x && mouse.y = button_redo.y){
+    game_redo();
+  } */
   return false;
 }
 
