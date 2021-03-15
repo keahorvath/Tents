@@ -19,6 +19,10 @@
 #define L_WATER "losing_water.png"
 #define L_RAFT "losing_raft.jpg"
 #define BACKGROUND "blue_background.jpg"
+#define UNDO "undo.png"
+#define REDO "redo.png"
+#define RESTART "restart.png"
+#define SOLVE "solve.png"
 #define FONT "Calibri.ttf"
 #define FONT_RATIO 0.7  // ratio of font size to cell size
 #define GRID_RATIO 0.75 //ratio of grid size to window size
@@ -34,8 +38,10 @@ struct Env_t {
   SDL_Texture *background;
   SDL_Texture **text;
   SDL_Texture *game_over_text;
-  SDL_Texture *text_undo;
-  SDL_Texture *text_redo;
+  SDL_Texture *undo;
+  SDL_Texture *redo;
+  SDL_Texture *restart; 
+  SDL_Texture *solve;
   int grid_beginning_x;
   int grid_beginning_y;
   int cell_size;
