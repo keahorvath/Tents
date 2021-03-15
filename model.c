@@ -34,6 +34,8 @@ struct Env_t {
   SDL_Texture *background;
   SDL_Texture **text;
   SDL_Texture *game_over_text;
+  SDL_Texture *text_undo;
+  SDL_Texture *text_redo;
   int grid_beginning_x;
   int grid_beginning_y;
   int cell_size;
@@ -128,6 +130,18 @@ void render(SDL_Window *win, SDL_Renderer *ren,
   rect.y = 0;
   rect.w = w;
   rect.h = h;
+  SDL_Rect button_undo;
+  button_undo.x = 20;
+  button_undo.y = 40;
+  button_undo.w = 20;
+  button_undo.h = 20;
+  SDL_Rect button_redo;
+  button_redo.x = 10;
+  button_redo.y = 30;
+  button_undo.w = 20;
+  button_undo.h = 20;
+  SDL_RenderFillRect(ren, &button_undo);
+  SDL_RenderFillRect(ren, &button_redo);
   /* render background texture */
   SDL_SetRenderDrawColor(ren, 255, 255, 255, SDL_ALPHA_OPAQUE); /* white */
   SDL_RenderCopy(ren, env->background, &rect, NULL);            /* stretch it */
