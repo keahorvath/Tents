@@ -19,8 +19,8 @@
 #define RAFT "raft.jpg"
 #define L_WATER "losing_water.png"
 #define L_RAFT "losing_raft.jpg"
-#define BACKGROUND "ocean.jpg"
-#define FONT "arial.ttf"
+#define BACKGROUND "blue_background.jpg"
+#define FONT "Calibri.ttf"
 #define FONT_SIZE 30  // font size is twenty pixels smaller than the cell size
 
 /* **************************************************************** */
@@ -87,8 +87,8 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
 
   env->text = (SDL_Texture **)malloc(
       sizeof(SDL_Texture *) * (game_nb_cols(env->g) + game_nb_rows(env->g)));
-  SDL_Color color = {0, 0, 0, 255}; /* blue color in RGBA */
-  TTF_Font *font = TTF_OpenFont(FONT, env->cell_size - FONT_SIZE);
+  SDL_Color color = {255, 255, 255, 255}; /* blue color in RGBA */
+  TTF_Font *font = TTF_OpenFont(FONT, w);
   if (!font) ERROR("TTF_OpenFont: %s\n", FONT);
   TTF_SetFontStyle(font,
                    TTF_STYLE_BOLD);  // TTF_STYLE_ITALIC | TTF_STYLE_NORMAL
