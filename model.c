@@ -20,7 +20,7 @@
 #define L_RAFT "losing_raft.jpg"
 #define BACKGROUND "blue_background.jpg"
 #define FONT "Calibri.ttf"
-#define FONT_RATIO 0.6  // ratio of font size to cell size
+#define FONT_RATIO 0.8  // ratio of font size to cell size
 #define GRID_RATIO 0.75 //ratio of grid size to window size
 
 /* **************************************************************** */
@@ -197,11 +197,11 @@ void render(SDL_Window *win, SDL_Renderer *ren,
   }
 
   /*render the nb_tents text*/
-  rect.w = (int)((1-FONT_RATIO)*env->cell_size);
+  rect.w = (int)(FONT_RATIO/2*env->cell_size);
   rect.h = (int)(FONT_RATIO*env->cell_size);
   for (uint i = 0; i < (game_nb_rows(env->g)); i++) {
     rect.x = env->grid_beginning_x + game_nb_cols(env->g) * env->cell_size +
-             (int)((1-FONT_RATIO)*env->cell_size);
+             (int)(FONT_RATIO/2*env->cell_size);
     rect.y = env->grid_beginning_y + env->cell_size * i + (int)((1-FONT_RATIO)/2*env->cell_size);
 
     SDL_RenderCopy(ren, env->text[i], NULL, &rect);
