@@ -264,11 +264,19 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
       }
     }
   }
+  else if(e->type == SDL_KEYDOWN){
+    if(e->key.keysym.sym == SDLK_u){
+      game_undo(env->g);
+    }
+    if(e->key.keysym.sym == SDLK_r){
+      game_redo(env->g);
+    }
+  }
   /*if(mouse.x = button_undo.x && mouse.y = button_undo.y){
-    game_undo();
+    game_undo(g);
   }
   if(mouse.x = button_redo.x && mouse.y = button_redo.y){
-    game_redo();
+    game_redo(g);
   } */
   return false;
 }
