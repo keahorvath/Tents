@@ -20,7 +20,7 @@
 #define L_RAFT "losing_raft.jpg"
 #define BACKGROUND "blue_background.jpg"
 #define FONT "Calibri.ttf"
-#define FONT_RATIO 0.8  // ratio of font size to cell size
+#define FONT_RATIO 0.7  // ratio of font size to cell size
 #define GRID_RATIO 0.75 //ratio of grid size to window size
 
 /* **************************************************************** */
@@ -140,13 +140,13 @@ void render(SDL_Window *win, SDL_Renderer *ren,
   uint space_avail_per_cell_x = w / game_nb_cols(env->g);
   uint space_avail_per_cell_y = h / game_nb_rows(env->g);
   if (space_avail_per_cell_x > space_avail_per_cell_y) {
-    env->cell_size = (int)(GRID_RATIO*h/ game_nb_rows(env->g));
-    env->grid_beginning_x = w / 2 - env->cell_size * game_nb_cols(env->g) / 2;
+    env->cell_size = (int)(GRID_RATIO*h/ (game_nb_rows(env->g)+1));
+    env->grid_beginning_x = w / 2 - env->cell_size * (game_nb_cols(env->g)+1) / 2;
     env->grid_beginning_y = (int)((1-GRID_RATIO)*h/2);
   } else {
-    env->cell_size = (int)(GRID_RATIO*w/ game_nb_cols(env->g));
+    env->cell_size = (int)(GRID_RATIO*w/ (game_nb_cols(env->g)+1));
     env->grid_beginning_x = (int)((1-GRID_RATIO)*w/2);
-    env->grid_beginning_y = h / 2 - env->cell_size * game_nb_rows(env->g) / 2;
+    env->grid_beginning_y = h / 2 - env->cell_size * (game_nb_rows(env->g)+1) / 2;
   }
 
   rect.x = env->grid_beginning_x;
@@ -201,15 +201,15 @@ void render(SDL_Window *win, SDL_Renderer *ren,
   rect.h = (int)(FONT_RATIO*env->cell_size);
   for (uint i = 0; i < (game_nb_rows(env->g)); i++) {
     rect.x = env->grid_beginning_x + game_nb_cols(env->g) * env->cell_size +
-             (int)(FONT_RATIO/2*env->cell_size);
+             (int)((1- FONT_RATIO/2)/2*env->cell_size);
     rect.y = env->grid_beginning_y + env->cell_size * i + (int)((1-FONT_RATIO)/2*env->cell_size);
 
     SDL_RenderCopy(ren, env->text[i], NULL, &rect);
   }
   for (uint j = 0; j < (game_nb_cols(env->g)); j++) {
     rect.y = env->grid_beginning_y + game_nb_rows(env->g) * env->cell_size +
-             (int)((1-FONT_RATIO)*env->cell_size);
-    rect.x = env->grid_beginning_x + env->cell_size * j + (int)(FONT_RATIO/2*env->cell_size);
+             (int)((1 - FONT_RATIO)/2*env->cell_size);
+    rect.x = env->grid_beginning_x + env->cell_size * j + (int)((1- FONT_RATIO/2)/2*env->cell_size);
     SDL_RenderCopy(ren, env->text[j + game_nb_rows(env->g)], NULL, &rect);
   }
 
