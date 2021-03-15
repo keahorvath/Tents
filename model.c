@@ -13,7 +13,6 @@
 #include "game_tools.h"
 #include "queue.h"
 
-#define MIN_DIST_BORDER 100
 #define PALM_TREE "tree.png"
 #define WATER "water.png"
 #define RAFT "raft.jpg"
@@ -21,7 +20,8 @@
 #define L_RAFT "losing_raft.jpg"
 #define BACKGROUND "blue_background.jpg"
 #define FONT "Calibri.ttf"
-#define FONT_SIZE 30  // font size is twenty pixels smaller than the cell size
+#define FONT_RATIO 0.6  // ratio of font size to cell size
+#define GRID_RATIO 0.75 //ratio of grid size to window size
 
 /* **************************************************************** */
 
@@ -77,15 +77,6 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
 
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
-  uint space_avail_per_cell_x = w / game_nb_cols(env->g);
-  uint space_avail_per_cell_y = h / game_nb_rows(env->g);
-  if (space_avail_per_cell_x > space_avail_per_cell_y) {
-    env->cell_size = (h - 2 * MIN_DIST_BORDER) / game_nb_rows(env->g);
-  } else {
-    env->cell_size = (w - 2 * MIN_DIST_BORDER) / game_nb_cols(env->g);
-  }
-  env->grid_beginning_y = MIN_DIST_BORDER;
-  env->grid_beginning_x = w / 2 - env->cell_size * game_nb_cols(env->g) / 2;
 
   env->text = (SDL_Texture **)malloc(
       sizeof(SDL_Texture *) * (game_nb_cols(env->g) + game_nb_rows(env->g)));
@@ -149,12 +140,14 @@ void render(SDL_Window *win, SDL_Renderer *ren,
   uint space_avail_per_cell_x = w / game_nb_cols(env->g);
   uint space_avail_per_cell_y = h / game_nb_rows(env->g);
   if (space_avail_per_cell_x > space_avail_per_cell_y) {
-    env->cell_size = (h - 2 * MIN_DIST_BORDER) / game_nb_rows(env->g);
+    env->cell_size = (int)(GRID_RATIO*h/ game_nb_rows(env->g));
+    env->grid_beginning_x = w / 2 - env->cell_size * game_nb_cols(env->g) / 2;
+    env->grid_beginning_y = (int)((1-GRID_RATIO)*h/2);
   } else {
-    env->cell_size = (w - 2 * MIN_DIST_BORDER) / game_nb_cols(env->g);
+    env->cell_size = (int)(GRID_RATIO*w/ game_nb_cols(env->g));
+    env->grid_beginning_x = (int)((1-GRID_RATIO)*w/2);
+    env->grid_beginning_y = h / 2 - env->cell_size * game_nb_rows(env->g) / 2;
   }
-  env->grid_beginning_y = MIN_DIST_BORDER;
-  env->grid_beginning_x = w / 2 - env->cell_size * game_nb_cols(env->g) / 2;
 
   rect.x = env->grid_beginning_x;
   rect.y = env->grid_beginning_y;
@@ -204,26 +197,25 @@ void render(SDL_Window *win, SDL_Renderer *ren,
   }
 
   /*render the nb_tents text*/
+  rect.w = (int)((1-FONT_RATIO)*env->cell_size);
+  rect.h = (int)(FONT_RATIO*env->cell_size);
   for (uint i = 0; i < (game_nb_rows(env->g)); i++) {
     rect.x = env->grid_beginning_x + game_nb_cols(env->g) * env->cell_size +
-             FONT_SIZE / 2;
-    rect.y = env->grid_beginning_y + env->cell_size * i + FONT_SIZE / 2;
-    rect.w = env->cell_size - FONT_SIZE;
-    rect.h = env->cell_size - FONT_SIZE;
+             (int)((1-FONT_RATIO)*env->cell_size);
+    rect.y = env->grid_beginning_y + env->cell_size * i + (int)((1-FONT_RATIO)/2*env->cell_size);
+
     SDL_RenderCopy(ren, env->text[i], NULL, &rect);
   }
   for (uint j = 0; j < (game_nb_cols(env->g)); j++) {
-    rect.x = env->grid_beginning_x + j * env->cell_size + FONT_SIZE / 2;
-    rect.y = env->grid_beginning_y + env->cell_size * game_nb_rows(env->g) +
-             FONT_SIZE / 2;
-    rect.w = env->cell_size - FONT_SIZE;
-    rect.h = env->cell_size - FONT_SIZE;
+    rect.y = env->grid_beginning_y + game_nb_rows(env->g) * env->cell_size +
+             (int)((1-FONT_RATIO)*env->cell_size);
+    rect.x = env->grid_beginning_x + env->cell_size * j + (int)(FONT_RATIO/2*env->cell_size);
     SDL_RenderCopy(ren, env->text[j + game_nb_rows(env->g)], NULL, &rect);
   }
 
   /*render game_over*/
   if (game_is_over(env->g)){
-    rect.w = w - FONT_SIZE*2;
+    rect.w = w;
     rect.h = h / game_nb_rows(env->g);
     rect.x = w / 2 - rect.w / 2;
     rect.y = h / 2 - rect.h / 2;

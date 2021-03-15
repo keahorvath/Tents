@@ -1,0 +1,18 @@
+15 15 0 0 
+4 3 4 3 3 3 3 2 4 1 6 1 6 1 1 
+5 3 2 3 3 2 4 3 2 5 1 4 2 4 2 
+   x           
+xx    x x   x  
+     x    x  xx
+     x xx  x   
+ xxx         xx
+          x    
+ x             
+     xxxx x    
+  x      x  x  
+    x  x   x   
+    x          
+ x xx x   x  x 
+ x x      x x  
+x              
+         x     
