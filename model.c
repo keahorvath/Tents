@@ -7,12 +7,15 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <dirent.h>
+#include <limits.h>
 #include "game.h"
 #include "game_aux.h"
 #include "game_ext.h"
 #include "game_tools.h"
 #include "queue.h"
 
+#define GAMES_DIR "games"
 #define PALM_TREE "tree.png"
 #define WATER "water.png"
 #define RAFT "raft.jpg"
@@ -28,6 +31,8 @@
 #define GRID_RATIO 0.75 //ratio of grid size to window size
 
 /* **************************************************************** */
+static void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren,
+            Env *env);
 
 struct Env_t {
   SDL_Texture *tree;
@@ -37,7 +42,6 @@ struct Env_t {
   SDL_Texture *losing_raft;
   SDL_Texture *background;
   SDL_Texture **text;
-  SDL_Texture *game_over_text;
   SDL_Texture *undo;
   SDL_Texture *redo;
   SDL_Texture *restart; 
@@ -45,6 +49,7 @@ struct Env_t {
   int grid_beginning_x;
   int grid_beginning_y;
   int cell_size;
+  queue *games;
   game g;
 };
 
@@ -86,35 +91,21 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
 
   env->text = (SDL_Texture **)malloc(
       sizeof(SDL_Texture *) * (game_nb_cols(env->g) + game_nb_rows(env->g)));
-  SDL_Color color = {255, 255, 255, 255}; /* blue color in RGBA */
-  TTF_Font *font = TTF_OpenFont(FONT, w);
-  if (!font) ERROR("TTF_OpenFont: %s\n", FONT);
-  TTF_SetFontStyle(font,
-                   TTF_STYLE_BOLD);  // TTF_STYLE_ITALIC | TTF_STYLE_NORMAL
-  char text_tents[2];
-  for (uint i = 0; i < game_nb_rows(env->g); i++) {
-    sprintf(text_tents, "%u", game_get_expected_nb_tents_row(env->g, i));
-    SDL_Surface *surf = TTF_RenderText_Blended(
-        font, text_tents, color);  // blended rendering for ultra nice text
-    env->text[i] = SDL_CreateTextureFromSurface(ren, surf);
-    SDL_FreeSurface(surf);
-  }
-  for (uint j = 0; j < game_nb_cols(env->g); j++) {
-    sprintf(text_tents, "%u", game_get_expected_nb_tents_col(env->g, j));
-    SDL_Surface *surf = TTF_RenderText_Blended(
-        font, text_tents, color);  // blended rendering for ultra nice text
-    env->text[game_nb_rows(env->g) + j] =
-        SDL_CreateTextureFromSurface(ren, surf);
-    SDL_FreeSurface(surf);
-  }
-  TTF_SetFontStyle(font, TTF_STYLE_BOLD);                                   // TTF_STYLE_ITALIC | TTF_STYLE_NORMAL
-  SDL_Surface* surf = TTF_RenderText_Blended(font, "Congratulations! Trump found his new home!", color);  // blended rendering for ultra nice text
+
+  initialize_tents_text(win, ren, env);
   //SDL_Surface* undo = TTF_RenderText_Blended(font, "Undo", color);
   //SDL_Surface* redo = TTF_RenderText_Blended(front, "Redo", color);
-  env->game_over_text = SDL_CreateTextureFromSurface(ren, surf);
-  SDL_FreeSurface(surf);
-  TTF_CloseFont(font);
-
+  env->games = queue_new();
+  queue_push_head(env->games, "level1.tnt");
+  queue_push_head(env->games, "level2.tnt");
+  queue_push_head(env->games, "level3.tnt");
+  queue_push_head(env->games, "level4.tnt");
+  queue_push_head(env->games, "level5.tnt");
+  queue_push_head(env->games, "level6.tnt");
+  queue_push_head(env->games, "level7.tnt");
+  queue_push_head(env->games, "level8.tnt");
+  queue_push_head(env->games, "level9.tnt");
+  queue_push_head(env->games, "level10.tnt");
   return env;
 }
 
@@ -219,14 +210,6 @@ void render(SDL_Window *win, SDL_Renderer *ren,
     SDL_RenderCopy(ren, env->text[j + game_nb_rows(env->g)], NULL, &rect);
   }
 
-  /*render game_over*/
-  if (game_is_over(env->g)){
-    rect.w = w;
-    rect.h = h / game_nb_rows(env->g);
-    rect.x = w / 2 - rect.w / 2;
-    rect.y = h / 2 - rect.h / 2;
-    SDL_RenderCopy(ren, env->game_over_text, NULL, &rect);
-  }
 }
 
 /* **************************************************************** */
@@ -280,8 +263,14 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
     }else if (buttonid ==1 ) {
         SDL_Log("selection was %s", buttons[buttonid].text);
         game_delete(env->g);
-        env->g = game_default();
-        game_play_move(env->g, 0,0, TENT);
+        if (queue_is_empty(env->games)){
+          printf("For more levels, please send a 100 euro check\n");
+          return true;
+        }else{
+          char* file_name = queue_pop_tail(env->games);
+          env->g = game_load(file_name);
+          initialize_tents_text(win, ren, env);
+        }
     }else if (buttonid ==2 ) {
         SDL_Log("selection was %s", buttons[buttonid].text);
         return true;
@@ -343,17 +332,47 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
 
 void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   /*Clean all the textures of the game */
+  for (uint i = 0; i < game_nb_rows(env->g)+game_nb_cols(env->g); i++){
+    SDL_DestroyTexture(env->text[i]);
+  }
+  free(env->text);
   SDL_DestroyTexture(env->tree);
   SDL_DestroyTexture(env->water);
   SDL_DestroyTexture(env->raft);
   SDL_DestroyTexture(env->losing_water);
   SDL_DestroyTexture(env->losing_raft);
   SDL_DestroyTexture(env->background);
-  //SDL_DestroyTexture(env->text);
-  SDL_DestroyTexture(env->game_over_text);
-  //SDL_DestroyTexture(env->text_undo);
-  //SDL_DestroyTexture(env->text_redo);
+  //SDL_DestroyTexture(env->undo);
+  //SDL_DestroyTexture(env->redo);
+  //SDL_DestroyTexture(env->restart);
+  //SDL_DestroyTexture(env->solve);
   free(env);
 }
-
 /* **************************************************************** */
+
+void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren,
+            Env *env){
+  int w, h;
+  SDL_GetWindowSize(win, &w, &h);
+  SDL_Color color = {255, 255, 255, 255}; /* blue color in RGBA */
+  TTF_Font *font = TTF_OpenFont(FONT, w);
+  if (!font) ERROR("TTF_OpenFont: %s\n", FONT);
+  TTF_SetFontStyle(font,TTF_STYLE_BOLD);
+  char text_tents[2];
+  for (uint i = 0; i < game_nb_rows(env->g); i++) {
+    sprintf(text_tents, "%u", game_get_expected_nb_tents_row(env->g, i));
+    SDL_Surface *surf = TTF_RenderText_Blended(
+        font, text_tents, color);  // blended rendering for ultra nice text
+    env->text[i] = SDL_CreateTextureFromSurface(ren, surf);
+    SDL_FreeSurface(surf);
+  }
+  for (uint j = 0; j < game_nb_cols(env->g); j++) {
+    sprintf(text_tents, "%u", game_get_expected_nb_tents_col(env->g, j));
+    SDL_Surface *surf = TTF_RenderText_Blended(
+        font, text_tents, color);  // blended rendering for ultra nice text
+    env->text[game_nb_rows(env->g) + j] =
+        SDL_CreateTextureFromSurface(ren, surf);
+    SDL_FreeSurface(surf);
+  }
+  TTF_CloseFont(font);
+}
