@@ -156,16 +156,6 @@ void render(SDL_Window *win, SDL_Renderer *ren,
   rect.y = 0;
   rect.w = w;
   rect.h = h;
-  /*SDL_Rect button_undo;
-  button_undo.x = 0;
-  button_undo.y = 0;
-  button_undo.w = 1;
-  button_undo.h = 1;
-  SDL_Rect button_redo;
-  button_redo.x = 0;
-  button_redo.y = 0;
-  button_undo.w = 0;
-  button_undo.h = 0;*/
   /* render background texture */
   SDL_SetRenderDrawColor(ren, 255, 255, 255, SDL_ALPHA_OPAQUE); /* white */
   SDL_RenderCopy(ren, env->background, &rect, NULL);            /* stretch it */
@@ -187,8 +177,6 @@ void render(SDL_Window *win, SDL_Renderer *ren,
   rect.w = env->cell_size * game_nb_cols(env->g);
   rect.h = env->cell_size * game_nb_rows(env->g);
   SDL_RenderFillRect(ren, &rect);
-  //SDL_RenderFillRect(ren, &button_undo);
-  //SDL_RenderFillRect(ren, &button_redo);
   /* render the tents, water and trees */
   for (uint i = 0; i < game_nb_rows(env->g); i++) {
     for (uint j = 0; j < game_nb_cols(env->g); j++) {
@@ -250,7 +238,7 @@ void render(SDL_Window *win, SDL_Renderer *ren,
   rect.w = BUTTON_SIZE;
   rect.h = BUTTON_SIZE;
   rect.y = env->grid_beginning_y - (int)(BUTTON_SIZE*1.5);
-  //undo 
+  //undo
   rect.x = env->grid_beginning_x + env->cell_size*game_nb_cols(env->g)/2 - (int)(1.5*BUTTON_SIZE);
   SDL_RenderCopy(ren, env->undo, NULL, &rect);
   //redo
@@ -344,6 +332,35 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
   if (e->type == SDL_MOUSEBUTTONDOWN) {
     SDL_Point mouse;
     SDL_GetMouseState(&mouse.x, &mouse.y);
+    //check if mouse is pressing one of the buttons
+    //undo the last move
+    if(mouse.x > env->grid_beginning_x + env->cell_size*game_nb_cols(env->g)/2 - (int)(1.5*BUTTON_SIZE) &&
+      mouse.x < (env->grid_beginning_x + env->cell_size*game_nb_cols(env->g)/2 - (int)(1.5*BUTTON_SIZE)+BUTTON_SIZE)){
+      if(mouse.y > env->grid_beginning_y - (int)(BUTTON_SIZE*1.5) && mouse.y < (env->grid_beginning_y - (int)(BUTTON_SIZE*1.5))+BUTTON_SIZE){
+        game_undo(env->g);
+      }
+    }
+    //redo the last move
+    if(mouse.x > env->grid_beginning_x + env->cell_size*game_nb_cols(env->g)/2 + (int)(0.5*BUTTON_SIZE) &&
+      mouse.x < (env->grid_beginning_x + env->cell_size*game_nb_cols(env->g)/2 + (int)(0.5*BUTTON_SIZE)+BUTTON_SIZE)){
+      if(mouse.y > env->grid_beginning_y - (int)(BUTTON_SIZE*1.5) && mouse.y < (env->grid_beginning_y - (int)(BUTTON_SIZE*1.5))+BUTTON_SIZE){
+        game_redo(env->g);
+      }
+    }
+    //restart the game from the beginning
+    if(mouse.x > env->grid_beginning_x + env->cell_size*game_nb_cols(env->g) - (int)(3.5*BUTTON_SIZE) &&
+      mouse.x < (env->grid_beginning_x + env->cell_size*game_nb_cols(env->g) - (int)(3.5*BUTTON_SIZE)+BUTTON_SIZE)){
+      if(mouse.y > env->grid_beginning_y - (int)(BUTTON_SIZE*1.5) && mouse.y < (env->grid_beginning_y - (int)(BUTTON_SIZE*1.5))+BUTTON_SIZE){
+        game_restart(env->g);
+      }
+    }
+    //solve the game
+    if(mouse.x > env->grid_beginning_x + env->cell_size*game_nb_cols(env->g) - (int)(1.5*BUTTON_SIZE) &&
+      mouse.x < (env->grid_beginning_x + env->cell_size*game_nb_cols(env->g) - (int)(1.5*BUTTON_SIZE)+BUTTON_SIZE)){
+      if(mouse.y > env->grid_beginning_y - (int)(BUTTON_SIZE*1.5) && mouse.y < (env->grid_beginning_y - (int)(BUTTON_SIZE*1.5))+BUTTON_SIZE){
+        game_solve(env->g);
+      }
+    }
     // check if mouse is in the grid
     if (mouse.x < env->grid_beginning_x ||
         mouse.x >
@@ -383,12 +400,8 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
       game_redo(env->g);
     }
   }
-  /*if(mouse.x = button_undo.x && mouse.y = button_undo.y){
-    game_undo(g);
-  }
-  if(mouse.x = button_redo.x && mouse.y = button_redo.y){
-    game_redo(g);
-  } */
+
+
   return false;
 }
 
