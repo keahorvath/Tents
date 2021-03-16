@@ -4,11 +4,11 @@
 #include <SDL.h>
 #include <SDL_image.h>  // required to load transparent texture from PNG
 #include <SDL_ttf.h>    // required to use TTF fonts
+#include <dirent.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <dirent.h>
-#include <limits.h>
 #include "game.h"
 #include "game_aux.h"
 #include "game_ext.h"
@@ -28,14 +28,13 @@
 #define SOLVE "solve.png"
 #define FONT "Calibri.ttf"
 #define FONT_NIVEAU "Eastman-Grotesque-Bold-Italic-trial.otf"
-#define FONT_RATIO 0.7  // ratio of font size to cell size
-#define GRID_RATIO 0.75 //ratio of grid size to window size
+#define FONT_RATIO 0.7   // ratio of font size to cell size
+#define GRID_RATIO 0.75  // ratio of grid size to window size
 #define BUTTON_SIZE 30
 #define FONT_SIZE 16
 
 /* **************************************************************** */
-static void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren,
-            Env *env);
+static void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren, Env *env);
 
 struct Env_t {
   SDL_Texture *tree;
@@ -47,7 +46,7 @@ struct Env_t {
   SDL_Texture **text;
   SDL_Texture *undo;
   SDL_Texture *redo;
-  SDL_Texture *restart; 
+  SDL_Texture *restart;
   SDL_Texture *solve;
   SDL_Texture *wrapping_text;
   SDL_Texture *diagadj_text;
@@ -106,31 +105,36 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   initialize_tents_text(win, ren, env);
 
   /* render wrapping and diagadj text */
-  SDL_Color color = {0, 0, 0, 255}; //black
-  TTF_Font* font = TTF_OpenFont(FONT, FONT_SIZE);
+  SDL_Color color = {0, 0, 0, 255};  // black
+  TTF_Font *font = TTF_OpenFont(FONT, FONT_SIZE);
   if (!font) ERROR("TTF_OpenFont: %s\n", FONT);
   TTF_SetFontStyle(font, TTF_STYLE_BOLD);
-  if (game_is_wrapping(env->g)){
-    SDL_Surface* surf = TTF_RenderText_Blended(font, "WRAPPING : ON", color);  // blended rendering for ultra nice text
+  if (game_is_wrapping(env->g)) {
+    SDL_Surface *surf = TTF_RenderText_Blended(
+        font, "WRAPPING : ON", color);  // blended rendering for ultra nice text
     env->wrapping_text = SDL_CreateTextureFromSurface(ren, surf);
     SDL_FreeSurface(surf);
-  }else{
-    SDL_Surface* surf = TTF_RenderText_Blended(font, "WRAPPING : OFF", color);  // blended rendering for ultra nice text
+  } else {
+    SDL_Surface *surf =
+        TTF_RenderText_Blended(font, "WRAPPING : OFF",
+                               color);  // blended rendering for ultra nice text
     env->wrapping_text = SDL_CreateTextureFromSurface(ren, surf);
     SDL_FreeSurface(surf);
   }
-  
-  if (game_is_diagadj(env->g)){
-    SDL_Surface* surf = TTF_RenderText_Blended(font, "DIAGADJ : ON", color);  // blended rendering for ultra nice text
+
+  if (game_is_diagadj(env->g)) {
+    SDL_Surface *surf = TTF_RenderText_Blended(
+        font, "DIAGADJ : ON", color);  // blended rendering for ultra nice text
     env->diagadj_text = SDL_CreateTextureFromSurface(ren, surf);
     SDL_FreeSurface(surf);
-  }else{
-    SDL_Surface* surf = TTF_RenderText_Blended(font, "DIAGADJ : OFF", color);  // blended rendering for ultra nice text
+  } else {
+    SDL_Surface *surf = TTF_RenderText_Blended(
+        font, "DIAGADJ : OFF", color);  // blended rendering for ultra nice text
     env->diagadj_text = SDL_CreateTextureFromSurface(ren, surf);
     SDL_FreeSurface(surf);
   }
   TTF_CloseFont(font);
-  
+
   env->games = queue_new();
   queue_push_head(env->games, "level1.tnt");
   queue_push_head(env->games, "level2.tnt");
@@ -163,13 +167,15 @@ void render(SDL_Window *win, SDL_Renderer *ren,
   uint space_avail_per_cell_x = w / game_nb_cols(env->g);
   uint space_avail_per_cell_y = h / game_nb_rows(env->g);
   if (space_avail_per_cell_x > space_avail_per_cell_y) {
-    env->cell_size = (int)(GRID_RATIO*h/ (game_nb_rows(env->g)+1));
-    env->grid_beginning_x = w / 2 - env->cell_size * (game_nb_cols(env->g)+1) / 2;
-    env->grid_beginning_y = (int)((1-GRID_RATIO)*h/2);
+    env->cell_size = (int)(GRID_RATIO * h / (game_nb_rows(env->g) + 1));
+    env->grid_beginning_x =
+        w / 2 - env->cell_size * (game_nb_cols(env->g) + 1) / 2;
+    env->grid_beginning_y = (int)((1 - GRID_RATIO) * h / 2);
   } else {
-    env->cell_size = (int)(GRID_RATIO*w/ (game_nb_cols(env->g)+1));
-    env->grid_beginning_x = (int)((1-GRID_RATIO)*w/2);
-    env->grid_beginning_y = h / 2 - env->cell_size * (game_nb_rows(env->g)+1) / 2;
+    env->cell_size = (int)(GRID_RATIO * w / (game_nb_cols(env->g) + 1));
+    env->grid_beginning_x = (int)((1 - GRID_RATIO) * w / 2);
+    env->grid_beginning_y =
+        h / 2 - env->cell_size * (game_nb_rows(env->g) + 1) / 2;
   }
 
   rect.x = env->grid_beginning_x;
@@ -218,47 +224,53 @@ void render(SDL_Window *win, SDL_Renderer *ren,
   }
 
   /*render the nb_tents text*/
-  rect.w = (int)(FONT_RATIO/2*env->cell_size);
-  rect.h = (int)(FONT_RATIO*env->cell_size);
+  rect.w = (int)(FONT_RATIO / 2 * env->cell_size);
+  rect.h = (int)(FONT_RATIO * env->cell_size);
   for (uint i = 0; i < (game_nb_rows(env->g)); i++) {
     rect.x = env->grid_beginning_x + game_nb_cols(env->g) * env->cell_size +
-             (int)((1- FONT_RATIO/2)/2*env->cell_size);
-    rect.y = env->grid_beginning_y + env->cell_size * i + (int)((1-FONT_RATIO)/2*env->cell_size);
+             (int)((1 - FONT_RATIO / 2) / 2 * env->cell_size);
+    rect.y = env->grid_beginning_y + env->cell_size * i +
+             (int)((1 - FONT_RATIO) / 2 * env->cell_size);
 
     SDL_RenderCopy(ren, env->text[i], NULL, &rect);
   }
   for (uint j = 0; j < (game_nb_cols(env->g)); j++) {
     rect.y = env->grid_beginning_y + game_nb_rows(env->g) * env->cell_size +
-             (int)((1 - FONT_RATIO)/2*env->cell_size);
-    rect.x = env->grid_beginning_x + env->cell_size * j + (int)((1- FONT_RATIO/2)/2*env->cell_size);
+             (int)((1 - FONT_RATIO) / 2 * env->cell_size);
+    rect.x = env->grid_beginning_x + env->cell_size * j +
+             (int)((1 - FONT_RATIO / 2) / 2 * env->cell_size);
     SDL_RenderCopy(ren, env->text[j + game_nb_rows(env->g)], NULL, &rect);
   }
 
   /*render buttons*/
   rect.w = BUTTON_SIZE;
   rect.h = BUTTON_SIZE;
-  rect.y = env->grid_beginning_y - (int)(BUTTON_SIZE*1.5);
-  //undo
-  rect.x = env->grid_beginning_x + env->cell_size*game_nb_cols(env->g)/2 - (int)(1.5*BUTTON_SIZE);
+  rect.y = env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5);
+  // undo
+  rect.x = env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) / 2 -
+           (int)(1.5 * BUTTON_SIZE);
   SDL_RenderCopy(ren, env->undo, NULL, &rect);
-  //redo
-  rect.x = env->grid_beginning_x + env->cell_size*game_nb_cols(env->g)/2 + (int)(0.5*BUTTON_SIZE);
+  // redo
+  rect.x = env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) / 2 +
+           (int)(0.5 * BUTTON_SIZE);
   SDL_RenderCopy(ren, env->redo, NULL, &rect);
-  //restart
-  rect.x = env->grid_beginning_x + env->cell_size*game_nb_cols(env->g) - (int)(3.5*BUTTON_SIZE);
+  // restart
+  rect.x = env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) -
+           (int)(3.5 * BUTTON_SIZE);
   SDL_RenderCopy(ren, env->restart, NULL, &rect);
-  //solve
-  rect.x = env->grid_beginning_x + env->cell_size*game_nb_cols(env->g) - (int)(1.5*BUTTON_SIZE);
+  // solve
+  rect.x = env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) -
+           (int)(1.5 * BUTTON_SIZE);
   SDL_RenderCopy(ren, env->solve, NULL, &rect);
 
   /*render wrapping and diagadj texts*/
   SDL_QueryTexture(env->wrapping_text, NULL, NULL, &rect.w, &rect.h);
   rect.x = env->grid_beginning_x;
-  rect.y = env->grid_beginning_y - (int)(3*rect.h);
+  rect.y = env->grid_beginning_y - (int)(3 * rect.h);
   SDL_RenderCopy(ren, env->wrapping_text, NULL, &rect);
   SDL_QueryTexture(env->diagadj_text, NULL, NULL, &rect.w, &rect.h);
   rect.x = env->grid_beginning_x;
-  rect.y = env->grid_beginning_y - (int)(1.5*rect.h);
+  rect.y = env->grid_beginning_y - (int)(1.5 * rect.h);
   SDL_RenderCopy(ren, env->diagadj_text, NULL, &rect);
 }
 
@@ -268,62 +280,62 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
   if (e->type == SDL_QUIT) {
     return true;
   }
-  if (game_is_over(env->g)){
-
+  if (game_is_over(env->g)) {
     const SDL_MessageBoxButtonData buttons[] = {
-        { /* .flags, .buttonid, .text */        0, 0, "Restart" },
-        { SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "Next Level" },
-        { SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 2, "Quit" },
+        {/* .flags, .buttonid, .text */ 0, 0, "Restart"},
+        {SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "Next Level"},
+        {SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 2, "Quit"},
     };
     const SDL_MessageBoxColorScheme colorScheme = {
-        { /* .colors (.r, .g, .b) */
-            /* [SDL_MESSAGEBOX_COLOR_BACKGROUND] */
-            { 46,   88,   185 },
-            /* [SDL_MESSAGEBOX_COLOR_TEXT] */
-            {   255, 255,   255 },
-            /* [SDL_MESSAGEBOX_COLOR_BUTTON_BORDER] */
-            { 255, 255,   255 },
-            /* [SDL_MESSAGEBOX_COLOR_BUTTON_BACKGROUND] */
-            {   0,   122, 153 },
-            /* [SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED] */
-            { 0,   153, 255 }
-        }
-    };
+        {/* .colors (.r, .g, .b) */
+         /* [SDL_MESSAGEBOX_COLOR_BACKGROUND] */
+         {46, 88, 185},
+         /* [SDL_MESSAGEBOX_COLOR_TEXT] */
+         {255, 255, 255},
+         /* [SDL_MESSAGEBOX_COLOR_BUTTON_BORDER] */
+         {255, 255, 255},
+         /* [SDL_MESSAGEBOX_COLOR_BUTTON_BACKGROUND] */
+         {0, 122, 153},
+         /* [SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED] */
+         {0, 153, 255}}};
     const SDL_MessageBoxData messageboxdata = {
-        SDL_MESSAGEBOX_INFORMATION, /* .flags */
-        win, /* .window */
-        "Congratulations", /* .title */
+        SDL_MESSAGEBOX_INFORMATION,                   /* .flags */
+        win,                                          /* .window */
+        "Congratulations",                            /* .title */
         "Congratulations! Trump found his new home!", /* .message */
-        SDL_arraysize(buttons), /* .numbuttons */
-        buttons, /* .buttons */
-        &colorScheme /* .colorScheme */
+        SDL_arraysize(buttons),                       /* .numbuttons */
+        buttons,                                      /* .buttons */
+        &colorScheme                                  /* .colorScheme */
     };
     int buttonid;
     if (SDL_ShowMessageBox(&messageboxdata, &buttonid) < 0) {
-        SDL_Log("error displaying message box");
-        return false ;
+      SDL_Log("error displaying message box");
+      return false;
     }
     while (buttonid == -1) {
       return false;
-    }if (buttonid ==0 ) {
-        SDL_Log("selection was %s", buttons[buttonid].text);
-        game_restart(env->g);
-        return false;
+    }
+    if (buttonid == 0) {
+      SDL_Log("selection was %s", buttons[buttonid].text);
+      game_restart(env->g);
+      return false;
 
-    }else if (buttonid ==1 ) {
-        SDL_Log("selection was %s", buttons[buttonid].text);
-        game_delete(env->g);
-        if (queue_is_empty(env->games)){
-          printf("For more levels, please send a 100 euro check to Amira Mastouri, Kea Horvath, Marvin Beites and Alexandre Leymarie.\n");
-          return true;
-        }else{
-          char* file_name = queue_pop_tail(env->games);
-          env->g = game_load(file_name);
-          initialize_tents_text(win, ren, env);
-        }
-    }else if (buttonid ==2 ) {
-        SDL_Log("selection was %s", buttons[buttonid].text);
+    } else if (buttonid == 1) {
+      SDL_Log("selection was %s", buttons[buttonid].text);
+      game_delete(env->g);
+      if (queue_is_empty(env->games)) {
+        printf(
+            "For more levels, please send a 100 euro check to Amira Mastouri, "
+            "Kea Horvath, Marvin Beites and Alexandre Leymarie.\n");
         return true;
+      } else {
+        char *file_name = queue_pop_tail(env->games);
+        env->g = game_load(file_name);
+        initialize_tents_text(win, ren, env);
+      }
+    } else if (buttonid == 2) {
+      SDL_Log("selection was %s", buttons[buttonid].text);
+      return true;
     }
   }
 
@@ -332,32 +344,56 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
   if (e->type == SDL_MOUSEBUTTONDOWN) {
     SDL_Point mouse;
     SDL_GetMouseState(&mouse.x, &mouse.y);
-    //check if mouse is pressing one of the buttons
-    //undo the last move
-    if(mouse.x > env->grid_beginning_x + env->cell_size*game_nb_cols(env->g)/2 - (int)(1.5*BUTTON_SIZE) &&
-      mouse.x < (env->grid_beginning_x + env->cell_size*game_nb_cols(env->g)/2 - (int)(1.5*BUTTON_SIZE)+BUTTON_SIZE)){
-      if(mouse.y > env->grid_beginning_y - (int)(BUTTON_SIZE*1.5) && mouse.y < (env->grid_beginning_y - (int)(BUTTON_SIZE*1.5))+BUTTON_SIZE){
+    // check if mouse is pressing one of the buttons
+    // undo the last move
+    if (mouse.x > env->grid_beginning_x +
+                      env->cell_size * game_nb_cols(env->g) / 2 -
+                      (int)(1.5 * BUTTON_SIZE) &&
+        mouse.x <
+            (env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) / 2 -
+             (int)(1.5 * BUTTON_SIZE) + BUTTON_SIZE)) {
+      if (mouse.y > env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5) &&
+          mouse.y < (env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5)) +
+                        BUTTON_SIZE) {
         game_undo(env->g);
       }
     }
-    //redo the last move
-    if(mouse.x > env->grid_beginning_x + env->cell_size*game_nb_cols(env->g)/2 + (int)(0.5*BUTTON_SIZE) &&
-      mouse.x < (env->grid_beginning_x + env->cell_size*game_nb_cols(env->g)/2 + (int)(0.5*BUTTON_SIZE)+BUTTON_SIZE)){
-      if(mouse.y > env->grid_beginning_y - (int)(BUTTON_SIZE*1.5) && mouse.y < (env->grid_beginning_y - (int)(BUTTON_SIZE*1.5))+BUTTON_SIZE){
+    // redo the last move
+    if (mouse.x > env->grid_beginning_x +
+                      env->cell_size * game_nb_cols(env->g) / 2 +
+                      (int)(0.5 * BUTTON_SIZE) &&
+        mouse.x <
+            (env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) / 2 +
+             (int)(0.5 * BUTTON_SIZE) + BUTTON_SIZE)) {
+      if (mouse.y > env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5) &&
+          mouse.y < (env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5)) +
+                        BUTTON_SIZE) {
         game_redo(env->g);
       }
     }
-    //restart the game from the beginning
-    if(mouse.x > env->grid_beginning_x + env->cell_size*game_nb_cols(env->g) - (int)(3.5*BUTTON_SIZE) &&
-      mouse.x < (env->grid_beginning_x + env->cell_size*game_nb_cols(env->g) - (int)(3.5*BUTTON_SIZE)+BUTTON_SIZE)){
-      if(mouse.y > env->grid_beginning_y - (int)(BUTTON_SIZE*1.5) && mouse.y < (env->grid_beginning_y - (int)(BUTTON_SIZE*1.5))+BUTTON_SIZE){
+    // restart the game from the beginning
+    if (mouse.x > env->grid_beginning_x +
+                      env->cell_size * game_nb_cols(env->g) -
+                      (int)(3.5 * BUTTON_SIZE) &&
+        mouse.x <
+            (env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) -
+             (int)(3.5 * BUTTON_SIZE) + BUTTON_SIZE)) {
+      if (mouse.y > env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5) &&
+          mouse.y < (env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5)) +
+                        BUTTON_SIZE) {
         game_restart(env->g);
       }
     }
-    //solve the game
-    if(mouse.x > env->grid_beginning_x + env->cell_size*game_nb_cols(env->g) - (int)(1.5*BUTTON_SIZE) &&
-      mouse.x < (env->grid_beginning_x + env->cell_size*game_nb_cols(env->g) - (int)(1.5*BUTTON_SIZE)+BUTTON_SIZE)){
-      if(mouse.y > env->grid_beginning_y - (int)(BUTTON_SIZE*1.5) && mouse.y < (env->grid_beginning_y - (int)(BUTTON_SIZE*1.5))+BUTTON_SIZE){
+    // solve the game
+    if (mouse.x > env->grid_beginning_x +
+                      env->cell_size * game_nb_cols(env->g) -
+                      (int)(1.5 * BUTTON_SIZE) &&
+        mouse.x <
+            (env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) -
+             (int)(1.5 * BUTTON_SIZE) + BUTTON_SIZE)) {
+      if (mouse.y > env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5) &&
+          mouse.y < (env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5)) +
+                        BUTTON_SIZE) {
         game_solve(env->g);
       }
     }
@@ -391,16 +427,16 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
     }
   }
 
-  //allow to undo or redo the last move by pressing the corresponding key on the board
-  else if(e->type == SDL_KEYDOWN){
-    if(e->key.keysym.sym == SDLK_u){
+  // allow to undo or redo the last move by pressing the corresponding key on
+  // the board
+  else if (e->type == SDL_KEYDOWN) {
+    if (e->key.keysym.sym == SDLK_u) {
       game_undo(env->g);
     }
-    if(e->key.keysym.sym == SDLK_r){
+    if (e->key.keysym.sym == SDLK_r) {
       game_redo(env->g);
     }
   }
-
 
   return false;
 }
@@ -409,7 +445,7 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
 
 void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   /*Clean all the textures of the game */
-  for (uint i = 0; i < game_nb_rows(env->g)+game_nb_cols(env->g); i++){
+  for (uint i = 0; i < game_nb_rows(env->g) + game_nb_cols(env->g); i++) {
     SDL_DestroyTexture(env->text[i]);
   }
   free(env->text);
@@ -427,14 +463,13 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
 }
 /* **************************************************************** */
 
-void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren,
-            Env *env){
+void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
   SDL_Color color = {255, 255, 255, 255}; /* blue color in RGBA */
   TTF_Font *font = TTF_OpenFont(FONT, w);
   if (!font) ERROR("TTF_OpenFont: %s\n", FONT);
-  TTF_SetFontStyle(font,TTF_STYLE_BOLD);
+  TTF_SetFontStyle(font, TTF_STYLE_BOLD);
   char text_tents[2];
   for (uint i = 0; i < game_nb_rows(env->g); i++) {
     sprintf(text_tents, "%u", game_get_expected_nb_tents_row(env->g, i));
