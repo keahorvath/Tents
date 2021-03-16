@@ -19,6 +19,10 @@
 #define L_WATER "losing_water.png"
 #define L_RAFT "losing_raft.jpg"
 #define BACKGROUND "blue_background.jpg"
+#define UNDO "undo.png"
+#define REDO "redo.png"
+#define RESTART "restart.png"
+#define SOLVE "solve.png"
 #define FONT "Calibri.ttf"
 #define FONT_RATIO 0.7  // ratio of font size to cell size
 #define GRID_RATIO 0.75 //ratio of grid size to window size
@@ -34,8 +38,10 @@ struct Env_t {
   SDL_Texture *background;
   SDL_Texture **text;
   SDL_Texture *game_over_text;
-  SDL_Texture *text_undo;
-  SDL_Texture *text_redo;
+  SDL_Texture *undo;
+  SDL_Texture *redo;
+  SDL_Texture *restart; 
+  SDL_Texture *solve;
   int grid_beginning_x;
   int grid_beginning_y;
   int cell_size;
@@ -243,19 +249,18 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
             env->grid_beginning_y + env->cell_size * game_nb_rows(env->g)) {
       return false;
     }
-    SDL_MouseButtonEvent b = e->button;
     // convert mouse position to cell in grid
     uint row, col;
     row = (uint)(mouse.y - env->grid_beginning_y) / env->cell_size;
     col = (uint)(mouse.x - env->grid_beginning_x) / env->cell_size;
-    if (b.button == SDL_BUTTON_LEFT) {
+    if (e->button.button == SDL_BUTTON_LEFT) {
       if (game_get_square(env->g, row, col) == TENT ||
           game_get_square(env->g, row, col) == GRASS) {
         game_play_move(env->g, row, col, EMPTY);
       } else if (game_get_square(env->g, row, col) == EMPTY) {
         game_play_move(env->g, row, col, TENT);
       }
-    } else if (b.button == SDL_BUTTON_RIGHT) {
+    } else if (e->button.button == SDL_BUTTON_RIGHT) {
       if (game_get_square(env->g, row, col) == TENT ||
           game_get_square(env->g, row, col) == GRASS) {
         game_play_move(env->g, row, col, EMPTY);
@@ -264,11 +269,19 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
       }
     }
   }
+  else if(e->type == SDL_KEYDOWN){
+    if(e->key.keysym.sym == SDLK_u){
+      game_undo(env->g);
+    }
+    if(e->key.keysym.sym == SDLK_r){
+      game_redo(env->g);
+    }
+  }
   /*if(mouse.x = button_undo.x && mouse.y = button_undo.y){
-    game_undo();
+    game_undo(g);
   }
   if(mouse.x = button_redo.x && mouse.y = button_redo.y){
-    game_redo();
+    game_redo(g);
   } */
   return false;
 }
