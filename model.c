@@ -29,6 +29,8 @@
 #define FONT "Calibri.ttf"
 #define FONT_RATIO 0.7  // ratio of font size to cell size
 #define GRID_RATIO 0.75 //ratio of grid size to window size
+#define BUTTON_SIZE 30
+#define FONT_SIZE 16
 
 /* **************************************************************** */
 static void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren,
@@ -46,6 +48,8 @@ struct Env_t {
   SDL_Texture *redo;
   SDL_Texture *restart; 
   SDL_Texture *solve;
+  SDL_Texture *wrapping_text;
+  SDL_Texture *diagadj_text;
   int grid_beginning_x;
   int grid_beginning_y;
   int cell_size;
@@ -85,16 +89,47 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   if (!env->losing_raft) ERROR("IMG_LoadTexture: %s\n", L_RAFT);
   env->background = IMG_LoadTexture(ren, BACKGROUND);
   if (!env->background) ERROR("IMG_LoadTexture: %s\n", BACKGROUND);
-
+  env->solve = IMG_LoadTexture(ren, SOLVE);
+  if (!env->solve) ERROR("IMG_LoadTexture: %s\n", SOLVE);
+  env->restart = IMG_LoadTexture(ren, RESTART);
+  if (!env->restart) ERROR("IMG_LoadTexture: %s\n", RESTART);
+  env->undo = IMG_LoadTexture(ren, UNDO);
+  if (!env->undo) ERROR("IMG_LoadTexture: %s\n", UNDO);
+  env->redo = IMG_LoadTexture(ren, REDO);
+  if (!env->redo) ERROR("IMG_LoadTexture: %s\n", REDO);
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
 
   env->text = (SDL_Texture **)malloc(
       sizeof(SDL_Texture *) * (game_nb_cols(env->g) + game_nb_rows(env->g)));
-
   initialize_tents_text(win, ren, env);
-  //SDL_Surface* undo = TTF_RenderText_Blended(font, "Undo", color);
-  //SDL_Surface* redo = TTF_RenderText_Blended(front, "Redo", color);
+
+  /* render wrapping and diagadj text */
+  SDL_Color color = {0, 0, 0, 255}; //black
+  TTF_Font* font = TTF_OpenFont(FONT, FONT_SIZE);
+  if (!font) ERROR("TTF_OpenFont: %s\n", FONT);
+  TTF_SetFontStyle(font, TTF_STYLE_BOLD);
+  if (game_is_wrapping(env->g)){
+    SDL_Surface* surf = TTF_RenderText_Blended(font, "WRAPPING : ON", color);  // blended rendering for ultra nice text
+    env->wrapping_text = SDL_CreateTextureFromSurface(ren, surf);
+    SDL_FreeSurface(surf);
+  }else{
+    SDL_Surface* surf = TTF_RenderText_Blended(font, "WRAPPING : OFF", color);  // blended rendering for ultra nice text
+    env->wrapping_text = SDL_CreateTextureFromSurface(ren, surf);
+    SDL_FreeSurface(surf);
+  }
+  
+  if (game_is_diagadj(env->g)){
+    SDL_Surface* surf = TTF_RenderText_Blended(font, "DIAGADJ : ON", color);  // blended rendering for ultra nice text
+    env->diagadj_text = SDL_CreateTextureFromSurface(ren, surf);
+    SDL_FreeSurface(surf);
+  }else{
+    SDL_Surface* surf = TTF_RenderText_Blended(font, "DIAGADJ : OFF", color);  // blended rendering for ultra nice text
+    env->diagadj_text = SDL_CreateTextureFromSurface(ren, surf);
+    SDL_FreeSurface(surf);
+  }
+  TTF_CloseFont(font);
+  
   env->games = queue_new();
   queue_push_head(env->games, "level1.tnt");
   queue_push_head(env->games, "level2.tnt");
@@ -210,6 +245,32 @@ void render(SDL_Window *win, SDL_Renderer *ren,
     SDL_RenderCopy(ren, env->text[j + game_nb_rows(env->g)], NULL, &rect);
   }
 
+  /*render buttons*/
+  rect.w = BUTTON_SIZE;
+  rect.h = BUTTON_SIZE;
+  rect.y = env->grid_beginning_y - (int)(BUTTON_SIZE*1.5);
+  //undo 
+  rect.x = env->grid_beginning_x + env->cell_size*game_nb_cols(env->g)/2 - (int)(1.5*BUTTON_SIZE);
+  SDL_RenderCopy(ren, env->undo, NULL, &rect);
+  //redo
+  rect.x = env->grid_beginning_x + env->cell_size*game_nb_cols(env->g)/2 + (int)(0.5*BUTTON_SIZE);
+  SDL_RenderCopy(ren, env->redo, NULL, &rect);
+  //restart
+  rect.x = env->grid_beginning_x + env->cell_size*game_nb_cols(env->g) - (int)(3.5*BUTTON_SIZE);
+  SDL_RenderCopy(ren, env->restart, NULL, &rect);
+  //solve
+  rect.x = env->grid_beginning_x + env->cell_size*game_nb_cols(env->g) - (int)(1.5*BUTTON_SIZE);
+  SDL_RenderCopy(ren, env->solve, NULL, &rect);
+
+  /*render wrapping and diagadj texts*/
+  SDL_QueryTexture(env->wrapping_text, NULL, NULL, &rect.w, &rect.h);
+  rect.x = env->grid_beginning_x;
+  rect.y = env->grid_beginning_y - (int)(3*rect.h);
+  SDL_RenderCopy(ren, env->wrapping_text, NULL, &rect);
+  SDL_QueryTexture(env->diagadj_text, NULL, NULL, &rect.w, &rect.h);
+  rect.x = env->grid_beginning_x;
+  rect.y = env->grid_beginning_y - (int)(1.5*rect.h);
+  SDL_RenderCopy(ren, env->diagadj_text, NULL, &rect);
 }
 
 /* **************************************************************** */
@@ -344,10 +405,10 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   SDL_DestroyTexture(env->losing_water);
   SDL_DestroyTexture(env->losing_raft);
   SDL_DestroyTexture(env->background);
-  //SDL_DestroyTexture(env->undo);
-  //SDL_DestroyTexture(env->redo);
-  //SDL_DestroyTexture(env->restart);
-  //SDL_DestroyTexture(env->solve);
+  SDL_DestroyTexture(env->undo);
+  SDL_DestroyTexture(env->redo);
+  SDL_DestroyTexture(env->restart);
+  SDL_DestroyTexture(env->solve);
   free(env);
 }
 /* **************************************************************** */
