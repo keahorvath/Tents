@@ -276,8 +276,16 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
 /* **************************************************************** */
 
 void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
-  /* PUT YOUR CODE HERE TO CLEAN MEMORY */
-
+  SDL_DestroyTexture(env->tree);
+  SDL_DestroyTexture(env->water);
+  SDL_DestroyTexture(env->raft);
+  SDL_DestroyTexture(env->losing_water);
+  SDL_DestroyTexture(env->losing_raft);
+  SDL_DestroyTexture(env->background);
+  SDL_DestroyTexture(env->text);
+  SDL_DestroyTexture(env->game_over_text);
+  SDL_DestroyTexture(env->text_undo);
+  SDL_DestroyTexture(env->text_redo);
   free(env);
 }
 
