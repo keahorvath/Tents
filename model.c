@@ -264,7 +264,7 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
         SDL_Log("selection was %s", buttons[buttonid].text);
         game_delete(env->g);
         if (queue_is_empty(env->games)){
-          printf("For more levels, please send a 100 euro check\n");
+          printf("For more levels, please send a 100 euro check to Amira Mastouri, Kea Horvath, Marvin Beites and Alexandre Leymarie.\n");
           return true;
         }else{
           char* file_name = queue_pop_tail(env->games);
