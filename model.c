@@ -289,6 +289,7 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
 /* **************************************************************** */
 
 void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
+  /*Clean all the textures of the game */
   SDL_DestroyTexture(env->tree);
   SDL_DestroyTexture(env->water);
   SDL_DestroyTexture(env->raft);
