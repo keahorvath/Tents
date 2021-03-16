@@ -235,6 +235,59 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
   if (e->type == SDL_QUIT) {
     return true;
   }
+  if (game_is_over(env->g)){
+
+    const SDL_MessageBoxButtonData buttons[] = {
+        { /* .flags, .buttonid, .text */        0, 0, "Restart" },
+        { SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "Next Level" },
+        { SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 2, "Quit" },
+    };
+    const SDL_MessageBoxColorScheme colorScheme = {
+        { /* .colors (.r, .g, .b) */
+            /* [SDL_MESSAGEBOX_COLOR_BACKGROUND] */
+            { 46,   88,   185 },
+            /* [SDL_MESSAGEBOX_COLOR_TEXT] */
+            {   255, 255,   255 },
+            /* [SDL_MESSAGEBOX_COLOR_BUTTON_BORDER] */
+            { 255, 255,   255 },
+            /* [SDL_MESSAGEBOX_COLOR_BUTTON_BACKGROUND] */
+            {   0,   122, 153 },
+            /* [SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED] */
+            { 0,   153, 255 }
+        }
+    };
+    const SDL_MessageBoxData messageboxdata = {
+        SDL_MESSAGEBOX_INFORMATION, /* .flags */
+        win, /* .window */
+        "Congratulations", /* .title */
+        "Congratulations! Trump found his new home!", /* .message */
+        SDL_arraysize(buttons), /* .numbuttons */
+        buttons, /* .buttons */
+        &colorScheme /* .colorScheme */
+    };
+    int buttonid;
+    if (SDL_ShowMessageBox(&messageboxdata, &buttonid) < 0) {
+        SDL_Log("error displaying message box");
+        return false ;
+    }
+    while (buttonid == -1) {
+      return false;
+    }if (buttonid ==0 ) {
+        SDL_Log("selection was %s", buttons[buttonid].text);
+        game_restart(env->g);
+        return false;
+
+    }else if (buttonid ==1 ) {
+        SDL_Log("selection was %s", buttons[buttonid].text);
+        game_delete(env->g);
+        env->g = game_default();
+        game_play_move(env->g, 0,0, TENT);
+    }else if (buttonid ==2 ) {
+        SDL_Log("selection was %s", buttons[buttonid].text);
+        return true;
+    }
+  }
+
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
   if (e->type == SDL_MOUSEBUTTONDOWN) {
@@ -296,10 +349,10 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   SDL_DestroyTexture(env->losing_water);
   SDL_DestroyTexture(env->losing_raft);
   SDL_DestroyTexture(env->background);
-  SDL_DestroyTexture(env->text);
+  //SDL_DestroyTexture(env->text);
   SDL_DestroyTexture(env->game_over_text);
-  SDL_DestroyTexture(env->text_undo);
-  SDL_DestroyTexture(env->text_redo);
+  //SDL_DestroyTexture(env->text_undo);
+  //SDL_DestroyTexture(env->text_redo);
   free(env);
 }
 
