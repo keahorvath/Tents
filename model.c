@@ -27,6 +27,7 @@
 #define RESTART "restart.png"
 #define SOLVE "solve.png"
 #define FONT "Calibri.ttf"
+#define FONT_NIVEAU "Eastman-Grotesque-Bold-Italic-trial.otf"
 #define FONT_RATIO 0.7  // ratio of font size to cell size
 #define GRID_RATIO 0.75 //ratio of grid size to window size
 #define BUTTON_SIZE 30
