@@ -394,6 +394,13 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
       if (mouse.y > env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5) &&
           mouse.y < (env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5)) +
                         BUTTON_SIZE) {
+        for (uint i = 0; i < game_nb_rows(env->g); i++){
+          for (uint j = 0; j < game_nb_cols(env->g); j++){
+            if (game_get_square(env->g, i, j) == TENT || game_get_square(env->g, i, j) == GRASS){
+              game_set_square(env->g, i, j, EMPTY);
+            }
+          }
+        }
         game_solve(env->g);
       }
     }

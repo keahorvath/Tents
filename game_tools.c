@@ -20,7 +20,7 @@ static uint nb_possible_tent_placements_col(cgame g, uint j);
 
 game game_load(char *filename) {
   FILE *f;
-  // Open the file and you can modifed the file because of the "r"
+  // Open the file
   f = fopen(filename, "r");
   if (f != NULL) {
     unsigned int nb_rows, nb_cols, is_wrapping, is_diagadj;
@@ -45,7 +45,7 @@ game game_load(char *filename) {
           (indice % (nb_cols) == 0)) {
         fseek(f, 1, SEEK_CUR);  // skip the character '\n '
       }
-      // Determine the type of object in function of the character
+      // Determine the type of object(according to the character)
       i = fscanf(f, "%c", &s);
       if ((i) && (s == ' ')) {
         square[indice] = EMPTY;
@@ -71,7 +71,7 @@ game game_load(char *filename) {
 }
 
 void game_save(cgame g, char *filename) {
-  // Open a file you can only write
+  // Open a file
   FILE *f = fopen(filename, "w");
   if (f == NULL) {
     fprintf(stderr, "file couldn't open!\n");
@@ -105,6 +105,16 @@ void game_save(cgame g, char *filename) {
   fclose(f);
 }
 
+/**
+ * @brief The recursive function that goes with function game_solve and game_nb_solutioos
+ * @details This function checks that playing a move in a square is a regular
+ * move (see @ref index).
+ * @param g the game
+ * @param count_solutions true if called by game_nb_solutions, false if called by game_solve
+ * @param p_nb_sol_found pointer to the number of solutions found
+ * @return the number of solutions found
+ * @pre @p g must be a valid pointer toward a game structure.
+ **/
 uint game_solve_rec(game g, bool count_solutions, uint *p_nb_sol_found) {
   if (game_is_over(g)) {
     return 1;
@@ -125,7 +135,9 @@ uint game_solve_rec(game g, bool count_solutions, uint *p_nb_sol_found) {
       }
       if (game_get_square(g, i, j) == EMPTY) {
         game_play_move(g, i, j, TENT);
+        printf("place tent in %u %u\n", i, j);
         nb_moves = game_fill(g);
+        game_print(g);
         if (nb_moves == -1) {
           game_play_move(g, i, j, GRASS);
           continue;
@@ -160,8 +172,9 @@ bool game_solve(game g) {
     fprintf(stderr, "Function called on NULL pointer\n");
     exit(EXIT_FAILURE);
   }
-  // All the moves correspond to fill all the game g
   uint nb_moves = game_fill(g);
+  printf("first fill:\n");
+  game_print(g);
   if (nb_moves == -1) {
     return false;
   }
@@ -203,13 +216,27 @@ uint game_nb_solutions(game g) {
   return nb_solution_found;
 }
 
+/**
+ * @brief Checks in a more detailed manner if a given move in a square is regular
+ * @details This function checks that playing a move in a square is a regular
+ * move (see @ref index).
+ * @param g the game
+ * @param i row index
+ * @param j column index
+ * @param s the square value
+ * @return either REGULAR, LOSING or ILLEGAL depending on the move
+ * @pre @p g must be a valid pointer toward a game structure.
+ * @pre @p i < game width
+ * @pre @p j < game height
+ * @pre @p s must be either EMPTY, GRASS, TENT or TREE.
+ **/
 int game_extra_check_move(cgame g, uint i, uint j, square s) {
-  // Name extra check moves
   if (game_check_move(g, i, j, s) == LOSING) {
     return LOSING;
   } else if (game_check_move(g, i, j, s) == ILLEGAL) {
     return ILLEGAL;
   }
+  //First we find the coordinates of the cells around (depends on wrapping)
   uint above_i = game_nb_rows(g);
   uint below_i = game_nb_rows(g);
   uint left_j = game_nb_cols(g);
@@ -236,6 +263,22 @@ int game_extra_check_move(cgame g, uint i, uint j, square s) {
   }
   uint sec_size_hor = size_of_section(g, i, j, false);
   uint sec_size_vert = size_of_section(g, i, j, true);
+  /* If in the given row (or column) in which the cell is,
+  there is the same number of possible placements than the number of tents we have to place,
+  then, if the size of the section in which the cell is is odd, we can make some deductions:
+  - if the cell is in an "odd" position, then it has to contain a tent
+  - if the cell is in an "even" position, then it has to contain grass
+  for example:
+  x  --   x  -- x: 5
+  There are 5 possible tent placements and we have to place 5 tents
+  So we can make 4 deductions:
+  - the first section in even, so we can't deduct anything
+  - the second one is odd, so we know that the cells in position 1 and 3 of that section have to be tents,
+  and the cell in position 2 has to be grass
+  - the third section is even so we can't deduct anything
+  - the fourth section is odd so we can place a tent
+  The same goes for columns
+  */
   if (nb_possible_tent_placements_row(g, i) ==
       (game_get_expected_nb_tents_row(g, i) -
        game_get_current_nb_tents_row(g, i))) {
@@ -265,45 +308,98 @@ int game_extra_check_move(cgame g, uint i, uint j, square s) {
       }
     }
   }
-  if (!game_is_diagadj(g)) {
+  /*
+  If the game isn't diagadj, we can make some more deductions
+  We can look at the row above (or below) or the column on the left (or right)
+
+  For example:
+  0:x  -    x*x:4
+  1:  x- x -x--:1
+  We can see that row 0 still has 3 tents to place and there are only 3 possible tent placements 
+  (since in a section of 4, there can be a maximum of 2 tents and in a section of 2 there can only be 1 tent)
+  We can therefore make some deductions:
+  - in the first section of row 0, there has to be a tent, so either way, the cell in row 1 col 1 cannot be a tent
+  (a tent will always see it)
+  - in the second section (size 4) of row 0, there has to be 2 tents
+  no matter how you place them, they will always see row 1 col 4 and row 1 col 6 so these cells have to be grass
+  */
+  if (s == TENT && !game_is_diagadj(g)) {
     if (above_i != game_nb_rows(g)) {
       if (nb_possible_tent_placements_row(g, above_i) ==
           (game_get_expected_nb_tents_row(g, above_i) -
            game_get_current_nb_tents_row(g, above_i))) {
         if (game_get_square(g, above_i, j) == EMPTY) {
-          if (s == TENT) {
-            return LOSING;
-          }
+          return LOSING;
         }
       }
-    } else if (below_i != game_nb_rows(g)) {
+    }
+    if (below_i != game_nb_rows(g)) {
       if (nb_possible_tent_placements_row(g, below_i) ==
           (game_get_expected_nb_tents_row(g, below_i) -
            game_get_current_nb_tents_row(g, below_i))) {
         if (game_get_square(g, below_i, j) == EMPTY) {
-          if (s == TENT) {
-            return LOSING;
-          }
+          return LOSING;
         }
       }
-    } else if (left_j != game_nb_cols(g)) {
+    }
+    if (left_j != game_nb_cols(g)) {
       if (nb_possible_tent_placements_col(g, left_j) ==
           (game_get_expected_nb_tents_col(g, left_j) -
-           game_get_current_nb_tents_row(g, left_j))) {
+           game_get_current_nb_tents_col(g, left_j))) {
         if (game_get_square(g, i, left_j) == EMPTY) {
-          if (s == TENT) {
-            return LOSING;
-          }
+          return LOSING;
         }
       }
-    } else if (right_j != game_nb_cols(g)) {
+    }
+    if (right_j != game_nb_cols(g)) {
       if (nb_possible_tent_placements_col(g, right_j) ==
           (game_get_expected_nb_tents_col(g, right_j) -
-           game_get_current_nb_tents_row(g, right_j))) {
+           game_get_current_nb_tents_col(g, right_j))) {
         if (game_get_square(g, i, right_j) == EMPTY) {
-          if (s == TENT) {
-            return LOSING;
-          }
+          return LOSING;
+        }
+      }
+    }
+  }
+  //check number 3
+  if (s == TENT && !game_is_diagadj(g)) {
+    if (above_i != game_nb_rows(g) && left_j != game_nb_cols(g) && right_j != game_nb_cols(g)) {
+      if (nb_possible_tent_placements_row(g, above_i)+1 ==
+          (game_get_expected_nb_tents_row(g, above_i) -
+           game_get_current_nb_tents_row(g, above_i))) {
+        if (game_get_square(g, above_i, left_j) == EMPTY && size_of_section(g, above_i, left_j, false) == 1 && game_get_square(g, above_i, right_j) == EMPTY && size_of_section(g, above_i, right_j, false) == 1){
+          printf("above\n");
+          return LOSING;
+        }
+      }
+    }
+    if (below_i != game_nb_rows(g) && left_j != game_nb_cols(g) && right_j != game_nb_cols(g)) {
+      if (nb_possible_tent_placements_row(g, below_i)+1 ==
+          (game_get_expected_nb_tents_row(g, below_i) -
+           game_get_current_nb_tents_row(g, below_i))) {
+        if (game_get_square(g, below_i, left_j) == EMPTY && size_of_section(g, below_i, left_j, false) == 1 && game_get_square(g, below_i, right_j) == EMPTY && size_of_section(g, below_i, right_j, false) == 1){
+          printf("below\n");
+          return LOSING;
+        }
+      }
+    }
+    if (left_j != game_nb_cols(g) && above_i != game_nb_rows(g) && below_i != game_nb_rows(g)) {
+      if (nb_possible_tent_placements_col(g, left_j)+1 ==
+          (game_get_expected_nb_tents_col(g, left_j) -
+           game_get_current_nb_tents_col(g, left_j))) {
+        if (game_get_square(g, above_i, left_j) == EMPTY && size_of_section(g, above_i, left_j, true) == 1 && game_get_square(g, below_i, left_j) == EMPTY && size_of_section(g, below_i, left_j, true) == 1){
+          printf("left\n");
+          return LOSING;
+        }
+      }
+    }
+    if (right_j != game_nb_cols(g) && above_i != game_nb_rows(g) && below_i != game_nb_rows(g)) {
+      if (nb_possible_tent_placements_col(g, right_j)+1 ==
+          (game_get_expected_nb_tents_col(g, right_j) -
+           game_get_current_nb_tents_col(g, right_j))) {
+        if (game_get_square(g, above_i, right_j) == EMPTY && size_of_section(g, above_i, right_j, true) == 1 && game_get_square(g, below_i, right_j) == EMPTY && size_of_section(g, below_i, right_j, true) == 1){
+          printf("right\n");
+          return LOSING;
         }
       }
     }
@@ -311,6 +407,14 @@ int game_extra_check_move(cgame g, uint i, uint j, square s) {
   return REGULAR;
 }
 
+/**
+ * @brief Fills the game to the maximum
+ * @details This function checks each cell: if grass is losing, it places a tent,
+ * if tent is losing, it places grass
+ * @param g the game
+ * @return the total number of moves that have been made
+ * @pre @p g must be a valid pointer toward a game structure.
+ **/
 int game_fill(game g) {
   if (g == NULL) {
     fprintf(stderr, "Function called on NULL pointer\n");
@@ -326,10 +430,12 @@ int game_fill(game g) {
           int tent_move = game_extra_check_move(g, i, j, TENT);
           int grass_move = game_extra_check_move(g, i, j, GRASS);
           if (tent_move == LOSING && grass_move == REGULAR) {
+            printf("placing grass in %u %u\n", i, j);
             game_play_move(g, i, j, GRASS);
             nb_moves++;
             total_nb_moves++;
           } else if (grass_move == LOSING && tent_move == REGULAR) {
+            printf("placing tent in %u %u\n", i, j);
             game_play_move(g, i, j, TENT);
             nb_moves++;
             total_nb_moves++;
@@ -343,9 +449,20 @@ int game_fill(game g) {
       }
     }
   }
+  printf("done\n");
   return total_nb_moves;
 }
 
+/**
+ * @brief Gives the size of the section that the cell is in (in a given direction)
+ * @details Counts the number of cells that are empty around the cell
+ * @param g the game
+ * @param i row index
+ * @param j column index
+ * @param vertical the direction of the section
+ * @return the total number of moves that have been made
+ * @pre @p g must be a valid pointer toward a game structure.
+ **/
 uint size_of_section(cgame g, uint i, uint j, bool vertical) {
   if (g == NULL) {
     fprintf(stderr, "Function called on NULL pointer\n");
@@ -368,6 +485,14 @@ uint size_of_section(cgame g, uint i, uint j, bool vertical) {
          nb_empty_cells_to_the_left(g, i, j);
 }
 
+/**
+ * @brief Gives the number of empty cells above the given cell
+ * @param g the game
+ * @param i row index
+ * @param j column index
+ * @return the number of empty cells above
+ * @pre @p g must be a valid pointer toward a game structure.
+ **/
 uint nb_empty_cells_above(cgame g, uint i, uint j) {
   uint nb = 0;
   uint current_i = i;
@@ -390,6 +515,14 @@ uint nb_empty_cells_above(cgame g, uint i, uint j) {
   return nb;
 }
 
+/**
+ * @brief Gives the number of empty cells below the given cell
+ * @param g the game
+ * @param i row index
+ * @param j column index
+ * @return the number of empty cells below
+ * @pre @p g must be a valid pointer toward a game structure.
+ **/
 uint nb_empty_cells_below(cgame g, uint i, uint j) {
   uint nb = 0;
   uint current_i = i;
@@ -412,6 +545,14 @@ uint nb_empty_cells_below(cgame g, uint i, uint j) {
   return nb;
 }
 
+/**
+ * @brief Gives the number of empty cells to the left of the given cell
+ * @param g the game
+ * @param i row index
+ * @param j column index
+ * @return the number of empty cells to the left 
+ * @pre @p g must be a valid pointer toward a game structure.
+ **/
 uint nb_empty_cells_to_the_right(cgame g, uint i, uint j) {
   uint cpt = 0;
   uint nb = 0;
@@ -432,6 +573,15 @@ uint nb_empty_cells_to_the_right(cgame g, uint i, uint j) {
   }
   return nb;
 }
+
+/**
+ * @brief Gives the number of empty cells to the right of the given cell
+ * @param g the game
+ * @param i row index
+ * @param j column index
+ * @return the number of empty cells to the right 
+ * @pre @p g must be a valid pointer toward a game structure.
+ **/
 uint nb_empty_cells_to_the_left(cgame g, uint i, uint j) {
   uint cpt = 0;
   uint nb = 0;
@@ -454,6 +604,13 @@ uint nb_empty_cells_to_the_left(cgame g, uint i, uint j) {
   return nb;
 }
 
+/**
+ * @brief Gives the number of possible tent placements in the row
+ * @param g the game
+ * @param i row index
+ * @return the number of possible tent placements in the row
+ * @pre @p g must be a valid pointer toward a game structure.
+ **/
 uint nb_possible_tent_placements_row(cgame g, uint i) {
   if (g == NULL) {
     fprintf(stderr, "Function called on NULL pointer\n");
@@ -472,6 +629,13 @@ uint nb_possible_tent_placements_row(cgame g, uint i) {
   return nb;
 }
 
+/**
+ * @brief Gives the number of possible tent placements in the column
+ * @param g the game
+ * @param j column index
+ * @return the number of possible tent placements in the column
+ * @pre @p g must be a valid pointer toward a game structure.
+ **/
 uint nb_possible_tent_placements_col(cgame g, uint j) {
   if (g == NULL) {
     fprintf(stderr, "Function called on NULL pointer\n");
