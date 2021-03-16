@@ -322,6 +322,8 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
       }
     }
   }
+
+  //allow to undo or redo the last move by pressing the corresponding key on the board
   else if(e->type == SDL_KEYDOWN){
     if(e->key.keysym.sym == SDLK_u){
       game_undo(env->g);
