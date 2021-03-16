@@ -20,6 +20,7 @@ static uint nb_possible_tent_placements_col(cgame g, uint j);
 
 game game_load(char *filename) {
   FILE *f;
+  // Open the file and you can modifed the file because of the "r"
   f = fopen(filename, "r");
   if (f != NULL) {
     unsigned int nb_rows, nb_cols, is_wrapping, is_diagadj;
@@ -44,6 +45,7 @@ game game_load(char *filename) {
           (indice % (nb_cols) == 0)) {
         fseek(f, 1, SEEK_CUR);  // skip the character '\n '
       }
+      // Determine the type of object in function of the character
       i = fscanf(f, "%c", &s);
       if ((i) && (s == ' ')) {
         square[indice] = EMPTY;
@@ -69,6 +71,7 @@ game game_load(char *filename) {
 }
 
 void game_save(cgame g, char *filename) {
+  // Open a file you can only write
   FILE *f = fopen(filename, "w");
   if (f == NULL) {
     fprintf(stderr, "file couldn't open!\n");
@@ -157,6 +160,7 @@ bool game_solve(game g) {
     fprintf(stderr, "Function called on NULL pointer\n");
     exit(EXIT_FAILURE);
   }
+  // All the moves correspond to fill all the game g
   uint nb_moves = game_fill(g);
   if (nb_moves == -1) {
     return false;
@@ -200,6 +204,7 @@ uint game_nb_solutions(game g) {
 }
 
 int game_extra_check_move(cgame g, uint i, uint j, square s) {
+  // Name extra check moves
   if (game_check_move(g, i, j, s) == LOSING) {
     return LOSING;
   } else if (game_check_move(g, i, j, s) == ILLEGAL) {
