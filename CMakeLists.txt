@@ -49,7 +49,7 @@ target_link_libraries(game_test_marbeites game)
 target_link_libraries(game_test_alleymarie game)
 
 ## copy useful data files in build dir
-foreach(file "level1.tnt" "level2.tnt" "level3.tnt" "level4.tnt" "level5.tnt" "level6.tnt" "level7.tnt" "level8.tnt" "level9.tnt" "level10.tnt" "tree.png" "water.png" "raft.jpg" "blue_background.jpg" "Calibri.ttf" "losing_raft.jpg" "losing_water.png" "restart.png" "redo.png" "undo.png" "solve.png")
+foreach(file "Walkway_Bold.ttf" "level1.tnt" "level2.tnt" "level3.tnt" "level4.tnt" "level5.tnt" "level6.tnt" "level7.tnt" "level8.tnt" "level9.tnt" "level10.tnt" "tree.png" "water.png" "happy_trump.jpg" "background.jpg" "Calibri.ttf" "angry_trump.jpg" "losing_water.png" "restart.png" "redo.png" "undo.png" "solve.png")
   file(COPY ${file} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endforeach(file)
 

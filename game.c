@@ -5,13 +5,8 @@
 #include "game_aux.h"
 #include "game_ext.h"
 #include "queue.h"
+#include "extra_functions.h"
 
-// Declaration of the functions that aren't given in the .h files
-static uint *make_array_of_all_adjacent_cells(cgame g, uint i, uint j);
-static uint *make_array_of_ortho_adjacent_cells(cgame g, uint i, uint j);
-static void test_pointer(cgame g);
-static void test_i_value(cgame g, uint i);
-static void test_j_value(cgame g, uint j);
 
 /**
  * @brief The structure that stores the game state.
@@ -49,6 +44,10 @@ struct move {
  * @brief The structure that stores the move.
  **/
 typedef struct move move;
+
+// Declaration of the functions that aren't given in the .h files
+static move *create_move(square s, uint i, uint j);
+static void free_Moves(queue *queue);
 
 /**
  * @brief stores a move in a structure allocated dynamically.
@@ -137,7 +136,7 @@ game game_new_empty(void) {
   g->diagadj = false;
   g->undo_hist = queue_new();
   g->redo_hist = queue_new();
-  // pose all the expected tents in the game for each column and each row//
+  // put all the expected tents in the game for each column and each row//
   for (int i = 0; i < DEFAULT_SIZE; i++) {
     game_set_expected_nb_tents_row(g, i, 0);
     game_set_expected_nb_tents_col(g, i, 0);
@@ -498,17 +497,6 @@ int game_check_move(cgame g, uint i, uint j, square s) {
   return REGULAR;
 }
 
-/**
- * @brief Creates an array containing all of the given cell's adjacent cells
- *(including diagonals)
- * @param g the game
- * @param i row index
- * @param j column index
- * @return the array containing the width and height of the cells
- * @pre @p g must be a valid pointer toward a game structure.
- * @pre @p i < game width
- * @pre @p j < game height
- **/
 uint *make_array_of_all_adjacent_cells(cgame g, uint i, uint j) {
   test_pointer(g);
   test_i_value(g, i);
@@ -558,17 +546,6 @@ uint *make_array_of_all_adjacent_cells(cgame g, uint i, uint j) {
   return array;
 }
 
-/**
- * @brief Creates an array containing all of the given cell's orthogonally
- *adjacent cells
- * @param g the game
- * @param i row index
- * @param j column index
- * @return the array containing the width and height of the cells
- * @pre @p g must be a valid pointer toward a game structure.
- * @pre @p i < game width
- * @pre @p j < game height
- **/
 uint *make_array_of_ortho_adjacent_cells(cgame g, uint i, uint j) {
   test_pointer(g);
   test_i_value(g, i);
@@ -658,15 +635,6 @@ bool game_is_over(cgame g) {
   return true;
 }
 
-/**
- * @brief Fills a row with grass.
- * @details This function only puts grass on empty squares, without modifying
- * the other squares.
- * @param g the game
- * @param i row index
- * @pre @p g must be a valid pointer toward a game structure.
- * @pre @p i < game width
- */
 void game_fill_grass_row(game g, uint i) {
   test_pointer(g);
   test_i_value(g, i);
@@ -682,15 +650,6 @@ void game_fill_grass_row(game g, uint i) {
   free_Moves(g->redo_hist);
 }
 
-/**
- * @brief Fills a column with grass.
- * @details This function only puts grass on empty squares, without modifying
- * the other squares.
- * @param g the game
- * @param j column index
- * @pre @p g must be a valid pointer toward a game structure.
- * @pre @p j < game height
- */
 void game_fill_grass_col(game g, uint j) {
   test_pointer(g);
   test_j_value(g, j);
@@ -848,10 +807,6 @@ void game_redo(game g) {
   return;
 }
 
-/**
- * @brief Checks if the given game is NULL and exits the program if it is
- * @param g the game
- **/
 void test_pointer(cgame g) {
   if (g == NULL) {
     fprintf(stderr, "function called on NULL pointer\n");
@@ -859,12 +814,6 @@ void test_pointer(cgame g) {
   }
 }
 
-/**
- * @brief Checks if the given i value is bigger than the nb rows in game
- * and exits program if it is
- * @param g the game
- * @param i row index
- **/
 void test_i_value(cgame g, uint i) {
   if (i >= game_nb_rows(g)) {
     fprintf(stderr, "row number is invalid\n");
@@ -872,12 +821,6 @@ void test_i_value(cgame g, uint i) {
   }
 }
 
-/**
- * @brief Checks if the given j value is bigger than the nb columns in game
- * and exits program if it is
- * @param g the game
- * @param j column index
- **/
 void test_j_value(cgame g, uint j) {
   if (j >= game_nb_cols(g)) {
     fprintf(stderr, "column number is invalid\n");
