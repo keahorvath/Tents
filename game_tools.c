@@ -6,6 +6,7 @@
 #include "game_aux.h"
 #include "game_ext.h"
 #include "queue.h"
+#include "extra_functions.h"
 
 static uint game_solve_rec(game g, bool count_solution, uint *p_nb_sol);
 static int game_fill(game g);
@@ -17,6 +18,10 @@ static uint nb_empty_cells_below(cgame g, uint i, uint j);
 static uint size_of_section(cgame g, uint i, uint j, bool vertical);
 static uint nb_possible_tent_placements_row(cgame g, uint i);
 static uint nb_possible_tent_placements_col(cgame g, uint j);
+static uint* make_array_of_all_trees(cgame g);
+static uint game_nb_trees(cgame g);
+static uint fill_according_to_trees(game g);
+
 
 game game_load(char *filename) {
   FILE *f;
@@ -130,36 +135,49 @@ uint game_solve_rec(game g, bool count_solutions, uint *p_nb_sol_found) {
       break;
     }
     for (uint j = 0; j < game_nb_cols(g); j++) {
-      if (stop == true) {
-        break;
-      }
       if (game_get_square(g, i, j) == EMPTY) {
         game_play_move(g, i, j, TENT);
-        printf("place tent in %u %u\n", i, j);
+        //printf("place tent in %u %u\n", i, j);
         nb_moves = game_fill(g);
-        game_print(g);
         if (nb_moves == -1) {
+          game_undo(g);
+          //printf("Can't be tent in %u %u\n", i, j);
           game_play_move(g, i, j, GRASS);
-          continue;
+          nb_moves = game_fill(g);
+          //printf("game after putting grass in %u %u\n", i, j);
+          if (nb_moves == -1){
+            //printf("also no grass in %u %u\n", i, j);
+            stop = true;
+            break;
+          }
+          if (game_is_over(g)){
+            *p_nb_sol_found += 1;
+            if (!count_solutions) {
+              return true;
+            }
+          }
+          game_solve_rec(g, count_solutions, p_nb_sol_found);
+          while (game_get_square(g, i, j) != EMPTY){
+            game_undo(g);
+          }
+          stop = true;
+          break;
         }
-        nb_sol_before = game_solve_rec(g, count_solutions, p_nb_sol_found);
-        if (game_is_over(g)) {
+        if (game_is_over(g)){
           *p_nb_sol_found += 1;
           if (!count_solutions) {
             return true;
           }
         }
-        uint test = 0;
-        while (game_get_square(g, i, j) != EMPTY) {
-          test += 1;
-          game_undo(g);
-        }
-        if (count_solutions) {
-          if (game_extra_check_move(g, i, j, GRASS) == REGULAR) {
-            game_play_move(g, i, j, GRASS);
-          } else {
-            stop = true;
+        nb_sol_before = game_solve_rec(g, count_solutions, p_nb_sol_found);
+        if (game_is_over(g)){
+          *p_nb_sol_found += 1;
+          if (!count_solutions) {
+            return true;
           }
+        }
+        while (game_get_square(g, i, j) != EMPTY){
+          game_undo(g);
         }
       }
     }
@@ -168,10 +186,7 @@ uint game_solve_rec(game g, bool count_solutions, uint *p_nb_sol_found) {
 }
 
 bool game_solve(game g) {
-  if (g == NULL) {
-    fprintf(stderr, "Function called on NULL pointer\n");
-    exit(EXIT_FAILURE);
-  }
+  test_pointer(g);
   uint nb_moves = game_fill(g);
   printf("first fill:\n");
   game_print(g);
@@ -193,10 +208,7 @@ bool game_solve(game g) {
 }
 
 uint game_nb_solutions(game g) {
-  if (g == NULL) {
-    fprintf(stderr, "Function called on NULL pointer\n");
-    exit(EXIT_FAILURE);
-  }
+  test_pointer(g);
   uint nb_moves = game_fill(g);
   if (nb_moves == -1) {
     return 0;
@@ -404,6 +416,7 @@ int game_extra_check_move(cgame g, uint i, uint j, square s) {
       }
     }
   }
+
   return REGULAR;
 }
 
@@ -430,12 +443,12 @@ int game_fill(game g) {
           int tent_move = game_extra_check_move(g, i, j, TENT);
           int grass_move = game_extra_check_move(g, i, j, GRASS);
           if (tent_move == LOSING && grass_move == REGULAR) {
-            printf("placing grass in %u %u\n", i, j);
+            //printf("placing grass in %u %u\n", i, j);
             game_play_move(g, i, j, GRASS);
             nb_moves++;
             total_nb_moves++;
           } else if (grass_move == LOSING && tent_move == REGULAR) {
-            printf("placing tent in %u %u\n", i, j);
+            //printf("placing tent in %u %u\n", i, j);
             game_play_move(g, i, j, TENT);
             nb_moves++;
             total_nb_moves++;
@@ -448,11 +461,183 @@ int game_fill(game g) {
         }
       }
     }
+    if (!game_is_over(g)){
+      uint cpt = fill_according_to_trees(g);
+      nb_moves += cpt;
+      total_nb_moves += cpt;
+    }
   }
-  printf("done\n");
   return total_nb_moves;
 }
 
+uint* make_array_of_all_trees(cgame g){
+  test_pointer(g);
+  uint *array = (uint *)malloc(sizeof(uint) * game_nb_trees(g)*2); 
+  if (array == NULL){
+    fprintf(stderr, "Not enough memory\n");
+    exit(EXIT_FAILURE);
+  } 
+  uint cpt = 0;
+  for (uint i = 0; i < game_nb_rows(g); i++){
+    for (uint j = 0; j < game_nb_cols(g); j++){
+      if (game_get_square(g, i, j) == TREE){
+        array[cpt] = i;
+        array[cpt+1] = j;
+        cpt += 2;
+      }
+    }
+  }
+  return array;
+}
+
+uint game_nb_trees(cgame g){
+  test_pointer(g);
+  uint cpt = 0;
+  for (uint i = 0; i < game_nb_rows(g); i++){
+    for (uint j = 0; j < game_nb_cols(g); j++){
+      if (game_get_square(g, i, j) == TREE){
+        cpt++;
+      }
+    }
+  }
+  return cpt;
+}
+
+uint nb_trees_around_cell(cgame g, uint i, uint j){
+  test_pointer(g);
+  test_i_value(g, i);
+  test_j_value(g, j);
+  uint* cells_around = make_array_of_ortho_adjacent_cells(g, i, j);
+  uint cell_i, cell_j;
+  uint ind = 1;
+  uint nb_trees = 0;
+  while (cells_around[ind - 1] < game_nb_rows(g)) {
+    cell_i = cells_around[ind - 1];
+    cell_j = cells_around[ind]; 
+    if (game_get_square(g, cell_i, cell_j) == TREE){
+      nb_trees++;
+    } 
+    ind+=2;
+  }
+  free(cells_around);
+  return nb_trees;
+}
+
+uint fill_according_to_trees(game g){
+  uint nb_moves = 0;
+  uint cpt = 1; //counts how many trees were added in that round
+  uint* trees = make_array_of_all_trees(g);
+  uint *taken_trees = (uint *)malloc(sizeof(uint) * game_nb_trees(g)*2);
+  if (taken_trees == NULL){
+    fprintf(stderr, "Not enough memory\n");
+    exit(EXIT_FAILURE);
+  } 
+  uint *taken_tents = (uint *)malloc(sizeof(uint) * game_nb_trees(g)*2); 
+  if (taken_tents == NULL){
+    fprintf(stderr, "Not enough memory\n");
+    exit(EXIT_FAILURE);
+  } 
+  uint nb_taken = 0;
+  while (cpt != 0){
+    cpt = 0;
+    bool already_has_a_tent = false;
+    for (uint i = 0; i < game_nb_trees(g)*2; i+=2){
+      if (i%2 == 1){
+        continue;
+      }
+      //first check if the tree is already taken
+      already_has_a_tent = false;
+      //printf("taken trees:\n");
+      for (uint nb = 0; nb < nb_taken*2; nb+=2){
+        //printf("%u %u\n", taken_trees[nb], taken_trees[nb+1]);
+        if (trees[i] == taken_trees[nb] && trees[i+1] == taken_trees[nb+1]){
+          already_has_a_tent = true;
+          break;
+        }
+      }
+      if (already_has_a_tent){
+        continue;
+      }
+      uint* adj_cells_tree = make_array_of_ortho_adjacent_cells(g, trees[i], trees[i+1]);
+      uint ind = 1;
+      uint cell_i, cell_j;
+      uint nb_tent_placements = 0;
+      uint possible_placement_i, possible_placement_j;
+      uint nb_tents_avail = 0;
+      uint nb_tents_not_avail = 0;
+      while (adj_cells_tree[ind - 1] < game_nb_rows(g)) {
+        cell_i = adj_cells_tree[ind - 1];
+        cell_j = adj_cells_tree[ind];
+        if (game_get_square(g, cell_i, cell_j) == TENT){
+          bool is_taken = false;
+          for (uint nb = 0; nb < nb_taken*2; nb+=2){
+            if (cell_i == taken_tents[nb] && cell_j == taken_tents[nb+1]){
+              is_taken = true;
+              nb_tents_not_avail++;
+              break;
+            }
+          }
+          if (!is_taken){
+            nb_tent_placements++;
+            nb_tents_avail++;
+            possible_placement_i = cell_i;
+            possible_placement_j = cell_j;
+          }
+        }else if (game_get_square(g, cell_i, cell_j) == EMPTY){
+          nb_tent_placements++;
+          possible_placement_i = cell_i;
+          possible_placement_j = cell_j;
+        }
+        ind += 2;
+      }
+      if (nb_tent_placements == 1){
+        if (game_get_square(g, possible_placement_i, possible_placement_j) == EMPTY){
+          nb_moves++;
+          //printf("playing tent: %u %u\n", possible_placement_i, possible_placement_j);
+          game_play_move(g, possible_placement_i, possible_placement_j, TENT);
+        }
+        taken_tents[nb_taken*2] = possible_placement_i;
+        taken_tents[nb_taken*2+1] = possible_placement_j;
+        taken_trees[nb_taken*2] = trees[i];
+        taken_trees[nb_taken*2+1] = trees[i+1];
+        nb_taken++;
+        cpt++;
+      }else if (nb_tents_avail == 1 && nb_tents_not_avail == 0){
+        ind = 1;
+        while (adj_cells_tree[ind - 1] < game_nb_rows(g)) {
+          cell_i = adj_cells_tree[ind - 1];
+          cell_j = adj_cells_tree[ind];
+          if (game_get_square(g, cell_i, cell_j) == TENT && nb_trees_around_cell(g, cell_i, cell_j) == 1){
+            uint ind2 = 1;
+            taken_tents[nb_taken*2] = cell_i;
+            taken_tents[nb_taken*2+1] = cell_j;
+            taken_trees[nb_taken*2] = trees[i];
+            taken_trees[nb_taken*2+1] = trees[i+1];
+            nb_taken++;
+            cpt++;
+            while (adj_cells_tree[ind2 - 1] < game_nb_rows(g)) {
+              uint cell_i2 = adj_cells_tree[ind2 - 1];
+              uint cell_j2 = adj_cells_tree[ind2];
+              if (game_get_square(g, cell_i2, cell_j2) == EMPTY && nb_trees_around_cell(g, cell_i2, cell_j2) == 1){
+                nb_moves++;
+                //printf("playing grass in %u %u \n", cell_i2, cell_j2);
+                game_play_move(g, cell_i2, cell_j2, GRASS);
+              }
+              ind2 += 2;
+            }
+            break;
+          }
+          ind += 2;
+        }
+      }
+      free(adj_cells_tree);
+    }
+  }
+  free(taken_tents);
+  free(taken_trees);
+  free(trees);    
+  return nb_moves;
+}
 /**
  * @brief Gives the size of the section that the cell is in (in a given direction)
  * @details Counts the number of cells that are empty around the cell
