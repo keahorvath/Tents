@@ -26,12 +26,13 @@
 #define REDO "redo.png"
 #define RESTART "restart.png"
 #define SOLVE "solve.png"
-#define FONT "Calibri.ttf"
+#define FONT "Walkway_Oblique_Black.ttf"
 #define FONT_NIVEAU "Eastman-Grotesque-Bold-Italic-trial.otf"
 #define FONT_RATIO 0.7   // ratio of font size to cell size
 #define GRID_RATIO 0.75  // ratio of grid size to window size
 #define BUTTON_SIZE 30
 #define FONT_SIZE 16
+#define TEXT_COLOR {65, 65, 143, 255}
 
 /* **************************************************************** */
 static void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren, Env *env);
@@ -473,7 +474,7 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
 void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
-  SDL_Color color = {255, 255, 255, 255}; /* blue color in RGBA */
+  SDL_Color color = TEXT_COLOR; /* blue color in RGBA */
   TTF_Font *font = TTF_OpenFont(FONT, w);
   if (!font) ERROR("TTF_OpenFont: %s\n", FONT);
   TTF_SetFontStyle(font, TTF_STYLE_BOLD);
