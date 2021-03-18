@@ -128,6 +128,8 @@ uint game_solve_rec(game g, bool count_solutions, uint *p_nb_sol_found) {
   if (count_solutions == true) {
     game_fill(g);
   }
+  printf("game after first fill\n");
+  game_print(g);
   uint nb_moves;
   bool stop = false;
   uint nb_sol_before = 0;
@@ -136,55 +138,48 @@ uint game_solve_rec(game g, bool count_solutions, uint *p_nb_sol_found) {
       break;
     }
     for (uint j = 0; j < game_nb_cols(g); j++) {
+      if (stop == true) {
+        break;
+      }
       if (game_get_square(g, i, j) == EMPTY) {
+        game_print(g);
+        printf("play tent in %u %u \n", i, j);
         game_play_move(g, i, j, TENT);
-        // printf("place tent in %u %u\n", i, j);
         nb_moves = game_fill(g);
+        game_print(g);
         if (nb_moves == -1) {
-          game_undo(g);
-          // printf("Can't be tent in %u %u\n", i, j);
+          printf("replacing with grass in %u %u \n", i, j);
+
           game_play_move(g, i, j, GRASS);
-          nb_moves = game_fill(g);
-          // printf("game after putting grass in %u %u\n", i, j);
-          if (nb_moves == -1) {
-            // printf("also no grass in %u %u\n", i, j);
-            stop = true;
-            break;
-          }
-          if (game_is_over(g)) {
-            *p_nb_sol_found += 1;
-            if (!count_solutions) {
-              return true;
-            }
-          }
-          game_solve_rec(g, count_solutions, p_nb_sol_found);
-          while (game_get_square(g, i, j) != EMPTY) {
-            game_undo(g);
-          }
-          stop = true;
-          break;
-        }
-        if (game_is_over(g)) {
-          *p_nb_sol_found += 1;
-          if (!count_solutions) {
-            return true;
-          }
+          continue;
         }
         nb_sol_before = game_solve_rec(g, count_solutions, p_nb_sol_found);
         if (game_is_over(g)) {
+          printf("SOLUTION\n");
+          game_print(g);
           *p_nb_sol_found += 1;
           if (!count_solutions) {
             return true;
           }
         }
+        uint test = 0;
         while (game_get_square(g, i, j) != EMPTY) {
+          test += 1;
           game_undo(g);
+        }
+        if (count_solutions) {
+          if (game_extra_check_move(g, i, j, GRASS) == REGULAR) {
+            game_play_move(g, i, j, GRASS);
+          } else {
+            stop = true;
+          }
         }
       }
     }
   }
   return *p_nb_sol_found + nb_sol_before;
 }
+
 
 bool game_solve(game g) {
   test_pointer(g);
@@ -380,89 +375,41 @@ int game_extra_check_move(cgame g, uint i, uint j, square s) {
   }
   // check number 3
   if (s == TENT && !game_is_diagadj(g)) {
-<<<<<<< HEAD
     if (above_i != game_nb_rows(g) && left_j != game_nb_cols(g) && right_j != game_nb_cols(g)) {
       if (nb_possible_tent_placements_row(g, above_i) ==
           (game_get_expected_nb_tents_row(g, above_i) -
            game_get_current_nb_tents_row(g, above_i) + 1)) {
         if (game_get_square(g, above_i, left_j) == EMPTY && size_of_section(g, above_i, left_j, false) == 1 && game_get_square(g, above_i, right_j) == EMPTY && size_of_section(g, above_i, right_j, false) == 1){
-=======
-    if (above_i != game_nb_rows(g) && left_j != game_nb_cols(g) &&
-        right_j != game_nb_cols(g)) {
-      if (nb_possible_tent_placements_row(g, above_i) + 1 ==
-          (game_get_expected_nb_tents_row(g, above_i) -
-           game_get_current_nb_tents_row(g, above_i))) {
-        if (game_get_square(g, above_i, left_j) == EMPTY &&
-            size_of_section(g, above_i, left_j, false) == 1 &&
-            game_get_square(g, above_i, right_j) == EMPTY &&
-            size_of_section(g, above_i, right_j, false) == 1) {
->>>>>>> daeac93a681435dc41ad5d9d3e995a44c6f1abde
           printf("above\n");
           return LOSING;
         }
       }
     }
-<<<<<<< HEAD
     if (below_i != game_nb_rows(g) && left_j != game_nb_cols(g) && right_j != game_nb_cols(g)) {
       if (nb_possible_tent_placements_row(g, below_i) ==
           (game_get_expected_nb_tents_row(g, below_i) -
            game_get_current_nb_tents_row(g, below_i)+1)) {
         if (game_get_square(g, below_i, left_j) == EMPTY && size_of_section(g, below_i, left_j, false) == 1 && game_get_square(g, below_i, right_j) == EMPTY && size_of_section(g, below_i, right_j, false) == 1){
-=======
-    if (below_i != game_nb_rows(g) && left_j != game_nb_cols(g) &&
-        right_j != game_nb_cols(g)) {
-      if (nb_possible_tent_placements_row(g, below_i) + 1 ==
-          (game_get_expected_nb_tents_row(g, below_i) -
-           game_get_current_nb_tents_row(g, below_i))) {
-        if (game_get_square(g, below_i, left_j) == EMPTY &&
-            size_of_section(g, below_i, left_j, false) == 1 &&
-            game_get_square(g, below_i, right_j) == EMPTY &&
-            size_of_section(g, below_i, right_j, false) == 1) {
->>>>>>> daeac93a681435dc41ad5d9d3e995a44c6f1abde
           printf("below\n");
           return LOSING;
         }
       }
     }
-<<<<<<< HEAD
     if (left_j != game_nb_cols(g) && above_i != game_nb_rows(g) && below_i != game_nb_rows(g)) {
       if (nb_possible_tent_placements_col(g, left_j) ==
           (game_get_expected_nb_tents_col(g, left_j) -
            game_get_current_nb_tents_col(g, left_j)+1)) {
         if (game_get_square(g, above_i, left_j) == EMPTY && size_of_section(g, above_i, left_j, true) == 1 && game_get_square(g, below_i, left_j) == EMPTY && size_of_section(g, below_i, left_j, true) == 1){
-=======
-    if (left_j != game_nb_cols(g) && above_i != game_nb_rows(g) &&
-        below_i != game_nb_rows(g)) {
-      if (nb_possible_tent_placements_col(g, left_j) + 1 ==
-          (game_get_expected_nb_tents_col(g, left_j) -
-           game_get_current_nb_tents_col(g, left_j))) {
-        if (game_get_square(g, above_i, left_j) == EMPTY &&
-            size_of_section(g, above_i, left_j, true) == 1 &&
-            game_get_square(g, below_i, left_j) == EMPTY &&
-            size_of_section(g, below_i, left_j, true) == 1) {
->>>>>>> daeac93a681435dc41ad5d9d3e995a44c6f1abde
           printf("left\n");
           return LOSING;
         }
       }
     }
-<<<<<<< HEAD
     if (right_j != game_nb_cols(g) && above_i != game_nb_rows(g) && below_i != game_nb_rows(g)) {
       if (nb_possible_tent_placements_col(g, right_j) ==
           (game_get_expected_nb_tents_col(g, right_j) -
            game_get_current_nb_tents_col(g, right_j)+1)) {
         if (game_get_square(g, above_i, right_j) == EMPTY && size_of_section(g, above_i, right_j, true) == 1 && game_get_square(g, below_i, right_j) == EMPTY && size_of_section(g, below_i, right_j, true) == 1){
-=======
-    if (right_j != game_nb_cols(g) && above_i != game_nb_rows(g) &&
-        below_i != game_nb_rows(g)) {
-      if (nb_possible_tent_placements_col(g, right_j) + 1 ==
-          (game_get_expected_nb_tents_col(g, right_j) -
-           game_get_current_nb_tents_col(g, right_j))) {
-        if (game_get_square(g, above_i, right_j) == EMPTY &&
-            size_of_section(g, above_i, right_j, true) == 1 &&
-            game_get_square(g, below_i, right_j) == EMPTY &&
-            size_of_section(g, below_i, right_j, true) == 1) {
->>>>>>> daeac93a681435dc41ad5d9d3e995a44c6f1abde
           printf("right\n");
           return LOSING;
         }
@@ -496,20 +443,12 @@ int game_fill(game g) {
           int tent_move = game_extra_check_move(g, i, j, TENT);
           int grass_move = game_extra_check_move(g, i, j, GRASS);
           if (tent_move == LOSING && grass_move == REGULAR) {
-<<<<<<< HEAD
             printf("placing grass in %u %u\n", i, j);
-=======
-            // printf("placing grass in %u %u\n", i, j);
->>>>>>> daeac93a681435dc41ad5d9d3e995a44c6f1abde
             game_play_move(g, i, j, GRASS);
             nb_moves++;
             total_nb_moves++;
           } else if (grass_move == LOSING && tent_move == REGULAR) {
-<<<<<<< HEAD
             printf("placing tent in %u %u\n", i, j);
-=======
-            // printf("placing tent in %u %u\n", i, j);
->>>>>>> daeac93a681435dc41ad5d9d3e995a44c6f1abde
             game_play_move(g, i, j, TENT);
             nb_moves++;
             total_nb_moves++;
@@ -659,12 +598,7 @@ uint fill_according_to_trees(game g) {
         if (game_get_square(g, possible_placement_i, possible_placement_j) ==
             EMPTY) {
           nb_moves++;
-<<<<<<< HEAD
           printf("playing tent: %u %u\n", possible_placement_i, possible_placement_j);
-=======
-          // printf("playing tent: %u %u\n", possible_placement_i,
-          // possible_placement_j);
->>>>>>> daeac93a681435dc41ad5d9d3e995a44c6f1abde
           game_play_move(g, possible_placement_i, possible_placement_j, TENT);
         }
         taken_tents[nb_taken * 2] = possible_placement_i;

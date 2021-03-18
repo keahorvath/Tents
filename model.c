@@ -36,6 +36,7 @@
 
 /* **************************************************************** */
 static void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren, Env *env);
+static bool mouse_is_in_grid(Env *env, int x, int y);
 
 struct Env_t {
   SDL_Texture *tree;
@@ -339,7 +340,6 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
       return true;
     }
   }
-
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
   if (e->type == SDL_MOUSEBUTTONDOWN) {
@@ -405,36 +405,47 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
         game_solve(env->g);
       }
     }
-    // check if mouse is in the grid
-    if (mouse.x < env->grid_beginning_x ||
-        mouse.x >
-            env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) ||
-        mouse.y < env->grid_beginning_y ||
-        mouse.y >
-            env->grid_beginning_y + env->cell_size * game_nb_rows(env->g)) {
-      return false;
-    }
+
     // convert mouse position to cell in grid
-    uint row, col;
-    row = (uint)(mouse.y - env->grid_beginning_y) / env->cell_size;
-    col = (uint)(mouse.x - env->grid_beginning_x) / env->cell_size;
-    if (e->button.button == SDL_BUTTON_LEFT) {
-      if (game_get_square(env->g, row, col) == TENT ||
-          game_get_square(env->g, row, col) == GRASS) {
-        game_play_move(env->g, row, col, EMPTY);
-      } else if (game_get_square(env->g, row, col) == EMPTY) {
-        game_play_move(env->g, row, col, TENT);
-      }
-    } else if (e->button.button == SDL_BUTTON_RIGHT) {
-      if (game_get_square(env->g, row, col) == TENT ||
-          game_get_square(env->g, row, col) == GRASS) {
-        game_play_move(env->g, row, col, EMPTY);
-      } else if (game_get_square(env->g, row, col) == EMPTY) {
-        game_play_move(env->g, row, col, GRASS);
+    if (mouse_is_in_grid(env, mouse.x, mouse.y)){
+      uint row, col;
+      row = (uint)(mouse.y - env->grid_beginning_y) / env->cell_size;
+      col = (uint)(mouse.x - env->grid_beginning_x) / env->cell_size;
+      if (e->button.button == SDL_BUTTON_LEFT) {
+        if (game_get_square(env->g, row, col) == TENT ||
+            game_get_square(env->g, row, col) == GRASS) {
+          game_play_move(env->g, row, col, EMPTY);
+        } else if (game_get_square(env->g, row, col) == EMPTY) {
+          game_play_move(env->g, row, col, TENT);
+        }
+      } else if (e->button.button == SDL_BUTTON_RIGHT) {
+        if (game_get_square(env->g, row, col) == TENT ||
+            game_get_square(env->g, row, col) == GRASS) {
+          game_play_move(env->g, row, col, EMPTY);
+        } else if (game_get_square(env->g, row, col) == EMPTY) {
+          game_play_move(env->g, row, col, GRASS);
+        }
       }
     }
   }
-
+  else if (e->type == SDL_MOUSEMOTION){
+    SDL_Point mouse;
+    SDL_GetMouseState(&mouse.x, &mouse.y);
+    if (mouse_is_in_grid(env, mouse.x, mouse.y)){
+      uint row, col;
+      row = (uint)(mouse.y - env->grid_beginning_y) / env->cell_size;
+      col = (uint)(mouse.x - env->grid_beginning_x) / env->cell_size;
+      if (e->button.button == SDL_BUTTON_LEFT) {
+        if (game_get_square(env->g, row, col) == EMPTY) {
+          game_play_move(env->g, row, col, TENT);
+        }
+      }else if (e->button.button == SDL_BUTTON(SDL_BUTTON_RIGHT)){ //bug avec SDL_BUTTON_RIGHT tout seul ->confirmé par internet
+        if (game_get_square(env->g, row, col) == EMPTY) {
+          game_play_move(env->g, row, col, GRASS);
+        }  
+      }
+    }
+  }
   // allow to undo or redo the last move by pressing the corresponding key on
   // the board
   else if (e->type == SDL_KEYDOWN) {
@@ -471,6 +482,18 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   free(env);
 }
 /* **************************************************************** */
+
+bool mouse_is_in_grid(Env *env, int x, int y){
+    if (x < env->grid_beginning_x ||
+        x >
+            env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) ||
+        y < env->grid_beginning_y ||
+        y >
+            env->grid_beginning_y + env->cell_size * game_nb_rows(env->g)) {
+      return false;
+    }
+    return true;
+}
 
 void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   int w, h;
