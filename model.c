@@ -37,6 +37,8 @@
 /* **************************************************************** */
 static void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren, Env *env);
 static bool mouse_is_in_grid(Env *env, int x, int y);
+static bool final_message_box (SDL_Window *win ,Env *env );
+
 
 struct Env_t {
   SDL_Texture *tree;
@@ -283,6 +285,7 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
     return true;
   }
   if (game_is_over(env->g)) {
+    SDL_RenderPresent(ren);
     const SDL_MessageBoxButtonData buttons[] = {
         {/* .flags, .buttonid, .text */ 0, 0, "Restart"},
         {SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "Next Level"},
@@ -324,13 +327,14 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
 
     } else if (buttonid == 1) {
       SDL_Log("selection was %s", buttons[buttonid].text);
-      game_delete(env->g);
+      //game_delete(env->g);
       if (queue_is_empty(env->games)) {
         printf(
             "For more levels, please send a 100 euro check to Amira Mastouri, "
             "Kea Horvath, Marvin Beites and Alexandre Leymarie.\n");
-        return true;
+        return final_message_box(win ,env);
       } else {
+        game_delete(env->g);
         char *file_name = queue_pop_tail(env->games);
         env->g = game_load(file_name);
         initialize_tents_text(win, ren, env);
@@ -479,6 +483,7 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   SDL_DestroyTexture(env->restart);
   SDL_DestroyTexture(env->solve);
   queue_clear(env->games);
+  game_delete(env->g);
   free(env);
 }
 /* **************************************************************** */
@@ -519,4 +524,52 @@ void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren, Env *env) {
     SDL_FreeSurface(surf);
   }
   TTF_CloseFont(font);
+}
+
+
+bool final_message_box (SDL_Window *win , Env *env){
+  const SDL_MessageBoxButtonData buttons[] = {
+        {/* .flags, .buttonid, .text */ 0, 0, "Restart"},
+        {SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 1, "Quit"},
+    };
+    const SDL_MessageBoxColorScheme colorScheme = {
+        {/* .colors (.r, .g, .b) */
+         /* [SDL_MESSAGEBOX_COLOR_BACKGROUND] */
+         {46, 88, 185},
+         /* [SDL_MESSAGEBOX_COLOR_TEXT] */
+         {255, 255, 255},
+         /* [SDL_MESSAGEBOX_COLOR_BUTTON_BORDER] */
+         {255, 255, 255},
+         /* [SDL_MESSAGEBOX_COLOR_BUTTON_BACKGROUND] */
+         {0, 122, 153},
+         /* [SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED] */
+         {0, 153, 255}}};
+    const SDL_MessageBoxData messageboxdata = {
+        SDL_MESSAGEBOX_INFORMATION,                   /* .flags */
+        win,                                          /* .window */
+        "Ouuuupss !",                            /* .title */
+        "For more levels, please send a 100 euro check to Amira Mastouri \n"
+          "Kea Horvath, Marvin Beites and Alexandre Leymarie.\n", /* .message */
+        SDL_arraysize(buttons),                       /* .numbuttons */
+        buttons,                                      /* .buttons */
+        &colorScheme                                  /* .colorScheme */
+    };
+    int buttonid;
+    if (SDL_ShowMessageBox(&messageboxdata, &buttonid) < 0) {
+      SDL_Log("error displaying message box");
+      return false;
+    }
+    while (buttonid == -1) {
+      return false;
+    }
+    if (buttonid == 0) {
+      SDL_Log("selection was %s", buttons[buttonid].text);
+      //game_restart(env->g);
+      return false;
+
+    } else if (buttonid == 1) {
+      SDL_Log("selection was %s", buttons[buttonid].text);
+      return true;      
+    }
+    return false;
 }
