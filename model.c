@@ -32,8 +32,7 @@
 #define GRID_RATIO 0.75  // ratio of grid size to window size
 #define BUTTON_SIZE 30
 #define FONT_SIZE 16
-#define TEXT_COLOR \
-  { 65, 65, 143, 255 }
+#define TEXT_COLOR {65, 65, 143, 255}
 
 /* **************************************************************** */
 static void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren, Env *env);
@@ -396,10 +395,9 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
       if (mouse.y > env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5) &&
           mouse.y < (env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5)) +
                         BUTTON_SIZE) {
-        for (uint i = 0; i < game_nb_rows(env->g); i++) {
-          for (uint j = 0; j < game_nb_cols(env->g); j++) {
-            if (game_get_square(env->g, i, j) == TENT ||
-                game_get_square(env->g, i, j) == GRASS) {
+        for (uint i = 0; i < game_nb_rows(env->g); i++){
+          for (uint j = 0; j < game_nb_cols(env->g); j++){
+            if (game_get_square(env->g, i, j) == TENT || game_get_square(env->g, i, j) == GRASS){
               game_set_square(env->g, i, j, EMPTY);
             }
           }
@@ -469,6 +467,7 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   SDL_DestroyTexture(env->redo);
   SDL_DestroyTexture(env->restart);
   SDL_DestroyTexture(env->solve);
+  queue_clear(env->games);
   free(env);
 }
 /* **************************************************************** */
