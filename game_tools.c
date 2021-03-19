@@ -26,55 +26,55 @@ game game_load(char *filename) {
   FILE *f;
   // Open the file
   f = fopen(filename, "r");
-  if (f != NULL) {
-    unsigned int nb_rows, nb_cols, is_wrapping, is_diagadj;
-    int i = fscanf(f, "%u%*c%u%*c%u%*c%u%*c", &nb_rows, &nb_cols, &is_wrapping,
-                   &is_diagadj);
-    unsigned int nb_tents_row[nb_rows];
-    unsigned int nb_tents_col[nb_cols];
-    // load row line
-    for (int indice = 0; indice < nb_rows; indice++) {
-      i = fscanf(f, "%u%*c", nb_tents_row + indice);
+  if (f == NULL){
+    fprintf(stderr, "Couldn't open file!\n");
+    exit(EXIT_FAILURE);
+  }
+  unsigned int nb_rows, nb_cols, is_wrapping, is_diagadj;
+  int i = fscanf(f, "%u%*c%u%*c%u%*c%u%*c", &nb_rows, &nb_cols, &is_wrapping,
+                  &is_diagadj);
+  unsigned int nb_tents_row[nb_rows];
+  unsigned int nb_tents_col[nb_cols];
+  // load row line
+  for (int indice = 0; indice < nb_rows; indice++) {
+    i = fscanf(f, "%u%*c", nb_tents_row + indice);
+  }
+  // load column line
+  for (int indice = 0; indice < nb_cols; indice++) {
+    i = fscanf(f, "%u%*c", nb_tents_col + indice);
+  }
+  fseek(f, 1, SEEK_CUR);  // skip the character '\n '
+  // load the grill of the game
+  square square[nb_rows * nb_cols];
+  for (int indice = 0; indice < nb_rows * nb_cols; indice++) {
+    char s;
+    if ((indice != 0) && (indice != (nb_rows * nb_cols - 1)) &&
+        (indice % (nb_cols) == 0)) {
+      fseek(f, 1, SEEK_CUR);  // skip the character '\n '
     }
-    // load column line
-    for (int indice = 0; indice < nb_cols; indice++) {
-      i = fscanf(f, "%u%*c", nb_tents_col + indice);
+    // Determine the type of object(according to the character)
+    i = fscanf(f, "%c", &s);
+    if ((i) && (s == ' ')) {
+      square[indice] = EMPTY;
     }
-    fseek(f, 1, SEEK_CUR);  // skip the character '\n '
-    // load the grill of the game
-    square square[nb_rows * nb_cols];
-    for (int indice = 0; indice < nb_rows * nb_cols; indice++) {
-      char s;
-      if ((indice != 0) && (indice != (nb_rows * nb_cols - 1)) &&
-          (indice % (nb_cols) == 0)) {
-        fseek(f, 1, SEEK_CUR);  // skip the character '\n '
-      }
-      // Determine the type of object(according to the character)
-      i = fscanf(f, "%c", &s);
-      if ((i) && (s == ' ')) {
-        square[indice] = EMPTY;
-      }
-      if ((i) && (s == 'x')) {
-        square[indice] = TREE;
-      }
-      if ((i) && (s == '*')) {
-        square[indice] = TENT;
-      }
-      if ((i) && (s == '-')) {
-        square[indice] = GRASS;
-      }
+    if ((i) && (s == 'x')) {
+      square[indice] = TREE;
     }
-    game g = game_new_ext(nb_rows, nb_cols, square, nb_tents_row, nb_tents_col,
-                          is_wrapping, is_diagadj);
-    if (g == NULL) {
-      fclose(f);
-      return NULL;
+    if ((i) && (s == '*')) {
+      square[indice] = TENT;
     }
+    if ((i) && (s == '-')) {
+      square[indice] = GRASS;
+    }
+  }
+  game g = game_new_ext(nb_rows, nb_cols, square, nb_tents_row, nb_tents_col,
+                        is_wrapping, is_diagadj);
+  if (g == NULL) {
     fclose(f);
-    return g;
+    return NULL;
   }
   fclose(f);
-  return NULL;
+  return g;
 }
 
 void game_save(cgame g, char *filename) {

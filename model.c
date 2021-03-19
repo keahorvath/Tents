@@ -22,6 +22,10 @@
 #define L_WATER "losing_water.png"
 #define L_RAFT "angry_trump.jpg"
 #define BACKGROUND "background.jpg"
+#define MAIN_MENU "main_menu.jpg"
+#define HELP_BUTTON "help.png"
+#define PLAY_BUTTON "play.png"
+#define EXIT_BUTTON "exit.png"
 #define UNDO "undo.png"
 #define REDO "redo.png"
 #define RESTART "restart.png"
@@ -38,9 +42,22 @@
 static void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren, Env *env);
 static bool mouse_is_in_grid(Env *env, int x, int y);
 static bool final_message_box (SDL_Window *win ,Env *env );
-
+static void render_menu(SDL_Window *win, SDL_Renderer *ren, Env *env);
+static void render_game(SDL_Window *win, SDL_Renderer *ren, Env *env);
+static bool process_menu(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e);
+static bool process_game(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e);
+typedef enum {
+  MENU = 0, /**< main menu screen  */
+  GAME = 1,  /**< in game screen */
+  HELP = 2,  /**< help (rules) screen */
+} screen;
 
 struct Env_t {
+  screen current_screen;
+  SDL_Texture *main_menu;
+  SDL_Texture *help_button;
+  SDL_Texture *play_button;
+  SDL_Texture *exit_button;
   SDL_Texture *tree;
   SDL_Texture *water;
   SDL_Texture *raft;
@@ -81,6 +98,14 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
+  env->main_menu = IMG_LoadTexture(ren, MAIN_MENU);
+  if (!env->main_menu) ERROR("IMG_LoadTexture: %s\n", MAIN_MENU);
+  env->help_button = IMG_LoadTexture(ren, HELP_BUTTON);
+  if (!env->help_button) ERROR("IMG_LoadTexture: %s\n", HELP_BUTTON);
+  env->play_button = IMG_LoadTexture(ren, PLAY_BUTTON);
+  if (!env->play_button) ERROR("IMG_LoadTexture: %s\n", PLAY_BUTTON);
+  env->exit_button = IMG_LoadTexture(ren, EXIT_BUTTON);
+  if (!env->exit_button) ERROR("IMG_LoadTexture: %s\n", EXIT_BUTTON);
   env->tree = IMG_LoadTexture(ren, PALM_TREE);
   if (!env->tree) ERROR("IMG_LoadTexture: %s\n", PALM_TREE);
   env->water = IMG_LoadTexture(ren, WATER);
@@ -101,6 +126,8 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   if (!env->undo) ERROR("IMG_LoadTexture: %s\n", UNDO);
   env->redo = IMG_LoadTexture(ren, REDO);
   if (!env->redo) ERROR("IMG_LoadTexture: %s\n", REDO);
+
+  env->current_screen = MENU;
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
 
@@ -157,6 +184,20 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
 
 void render(SDL_Window *win, SDL_Renderer *ren,
             Env *env) { /* PUT YOUR CODE HERE TO RENDER TEXTURES, ... */
+  if (env->current_screen == MENU){
+    render_menu(win, ren, env);
+  }else if (env->current_screen == GAME){
+    render_game(win, ren, env);
+  }
+    /*
+  }else if (env->current_screen == HELP){
+    render_help(win, ren, env);
+  }
+*/
+}
+
+/* **************************************************************** */
+void render_menu(SDL_Window *win, SDL_Renderer *ren, Env *env){
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
   SDL_Rect rect;
@@ -166,7 +207,37 @@ void render(SDL_Window *win, SDL_Renderer *ren,
   rect.h = h;
   /* render background texture */
   SDL_SetRenderDrawColor(ren, 255, 255, 255, SDL_ALPHA_OPAQUE); /* white */
-  SDL_RenderCopy(ren, env->background, &rect, NULL);            /* stretch it */
+  SDL_RenderCopy(ren, env->main_menu, NULL, NULL);            /* stretch it */
+
+  rect.w = (int)(w/12) ;
+  rect.h = (int)(w/12);
+  rect.y = (int)(h - h*1/5);
+  // play button
+  rect.x = (int)(w - w *9/10);
+  SDL_RenderCopy(ren, env->play_button, NULL, &rect);
+  // help button
+  rect.x = (int)(w - w *7/10);
+  SDL_RenderCopy(ren, env->help_button, NULL, &rect);
+  // exit button
+  SDL_QueryTexture(env->exit_button, NULL, NULL, &rect.w, &rect.h);
+  rect.w = w/6;
+  rect.h = h/10;
+  rect.y = (int)(h - h*1/6);
+  rect.x = (int)(w - w*2.5/10);
+  SDL_RenderCopy(ren, env->exit_button, NULL, &rect);
+}
+
+void render_game(SDL_Window *win, SDL_Renderer *ren, Env *env){
+  int w, h;
+  SDL_GetWindowSize(win, &w, &h);
+  SDL_Rect rect;
+  rect.x = 0;
+  rect.y = 0;
+  rect.w = w;
+  rect.h = h;
+  /* render background texture */
+  SDL_SetRenderDrawColor(ren, 255, 255, 255, SDL_ALPHA_OPAQUE); /* white */
+  SDL_RenderCopy(ren, env->background, NULL, NULL);            /* stretch it */
 
   uint space_avail_per_cell_x = w / game_nb_cols(env->g);
   uint space_avail_per_cell_y = h / game_nb_rows(env->g);
@@ -278,15 +349,39 @@ void render(SDL_Window *win, SDL_Renderer *ren,
   SDL_RenderCopy(ren, env->diagadj_text, NULL, &rect);
 }
 
-/* **************************************************************** */
-
 bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
   if (e->type == SDL_QUIT) {
     return true;
   }
+  if (env->current_screen == MENU){
+    return process_menu(win, ren, env, e);
+  }else if (env->current_screen == GAME){
+    return process_game(win, ren, env, e);
+  }
+  return true;
+}
+
+bool process_menu(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
+  int w, h;
+  SDL_GetWindowSize(win, &w, &h);
+  if (e->type == SDL_MOUSEBUTTONDOWN) {
+    SDL_Point mouse;
+    SDL_GetMouseState(&mouse.x, &mouse.y);
+    // check if mouse is pressing one of the buttons
+    // start game
+    if (mouse.x < w-w*9/10+w/12 && mouse.x > w-w*9/10 && mouse.y < h-h*1/5+w/12 && mouse.y > h-h*1/5){
+      env->current_screen = GAME;
+      return false;
+    }
+  }
+  return false;
+}
+
+bool process_game(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
   if (game_is_over(env->g)) {
     render(win, ren, env);
     SDL_RenderPresent(ren);
+    SDL_Delay(DELAY);
     const SDL_MessageBoxButtonData buttons[] = {
         {/* .flags, .buttonid, .text */ 0, 0, "Restart"},
         {SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "Next Level"},
@@ -463,8 +558,9 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
   }
 
   return false;
-}
 
+
+}
 /* **************************************************************** */
 
 void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
