@@ -285,6 +285,7 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
     return true;
   }
   if (game_is_over(env->g)) {
+    render(win, ren, env);
     SDL_RenderPresent(ren);
     const SDL_MessageBoxButtonData buttons[] = {
         {/* .flags, .buttonid, .text */ 0, 0, "Restart"},
