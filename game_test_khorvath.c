@@ -493,6 +493,7 @@ bool test_game_save(void) {
       return false;
     }
   }
+  fclose(f);
   game_delete(g);
   return true;
 }

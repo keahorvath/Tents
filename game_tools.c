@@ -67,10 +67,13 @@ game game_load(char *filename) {
     game g = game_new_ext(nb_rows, nb_cols, square, nb_tents_row, nb_tents_col,
                           is_wrapping, is_diagadj);
     if (g == NULL) {
+      fclose(f);
       return NULL;
     }
+    fclose(f);
     return g;
   }
+  fclose(f);
   return NULL;
 }
 
