@@ -551,6 +551,8 @@ bool process_game(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
         char *file_name = queue_pop_tail(env->games);
         env->g = game_load(file_name);
         create_tents_text(win, ren, env);
+        env->current_level++;
+        create_level_text(win, ren, env);
       }
     } else if (buttonid == 2) {
       SDL_Log("selection was %s", buttons[buttonid].text);
