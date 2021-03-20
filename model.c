@@ -26,6 +26,8 @@
 #define HELP_BUTTON "help.png"
 #define PLAY_BUTTON "play.png"
 #define EXIT_BUTTON "exit.png"
+#define MENU_BUTTON "home_button.png"
+#define HELP_BUTTON_J "help_button_j.png"
 #define UNDO "undo.png"
 #define REDO "redo.png"
 #define RESTART "restart.png"
@@ -58,6 +60,8 @@ struct Env_t {
   SDL_Texture *help_button;
   SDL_Texture *play_button;
   SDL_Texture *exit_button;
+  SDL_Texture *menu_button;
+  SDL_Texture *help_button_j;
   SDL_Texture *tree;
   SDL_Texture *water;
   SDL_Texture *raft;
@@ -106,6 +110,10 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   if (!env->play_button) ERROR("IMG_LoadTexture: %s\n", PLAY_BUTTON);
   env->exit_button = IMG_LoadTexture(ren, EXIT_BUTTON);
   if (!env->exit_button) ERROR("IMG_LoadTexture: %s\n", EXIT_BUTTON);
+  env->menu_button = IMG_LoadTexture(ren, MENU_BUTTON);
+  if (!env->menu_button) ERROR("IMG_LoadTexture: %s\n", MENU_BUTTON);
+  env->help_button_j = IMG_LoadTexture(ren, HELP_BUTTON_J);
+  if (!env->help_button_j) ERROR("IMG_LoadTexture: %s\n", HELP_BUTTON_J);
   env->tree = IMG_LoadTexture(ren, PALM_TREE);
   if (!env->tree) ERROR("IMG_LoadTexture: %s\n", PALM_TREE);
   env->water = IMG_LoadTexture(ren, WATER);
@@ -347,6 +355,21 @@ void render_game(SDL_Window *win, SDL_Renderer *ren, Env *env){
   rect.x = env->grid_beginning_x;
   rect.y = env->grid_beginning_y - (int)(1.5 * rect.h);
   SDL_RenderCopy(ren, env->diagadj_text, NULL, &rect);
+
+  //menu 
+  rect.w = 2*BUTTON_SIZE*h/SCREEN_HEIGHT;
+  rect.h = 2*BUTTON_SIZE*h/SCREEN_HEIGHT;
+  rect.x = BUTTON_SIZE;
+  rect.y = h-2.5*BUTTON_SIZE*h/SCREEN_HEIGHT;
+  SDL_RenderCopy(ren, env->menu_button, NULL, &rect);
+
+  //help 
+  rect.x = w-BUTTON_SIZE*4;
+  rect.w = 2*BUTTON_SIZE*h/SCREEN_HEIGHT;
+  rect.h = 2*BUTTON_SIZE*h/SCREEN_HEIGHT;
+  SDL_RenderCopy(ren, env->help_button_j, NULL, &rect);
+
+
 }
 
 bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
@@ -505,7 +528,25 @@ bool process_game(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
         game_solve(env->g);
       }
     }
+    //go to the menu
+    if (mouse.x > BUTTON_SIZE &&
+        mouse.x < BUTTON_SIZE +2*BUTTON_SIZE*h/SCREEN_HEIGHT) {
+      if (mouse.y >h-2.5*BUTTON_SIZE*h/SCREEN_HEIGHT &&
+          mouse.y < h-2.5*BUTTON_SIZE*h/SCREEN_HEIGHT +
+                        2*BUTTON_SIZE*h/SCREEN_HEIGHT) {
+        env->current_screen = MENU;
+      }
+    }
 
+    //go to help page 
+    if (mouse.x > w-BUTTON_SIZE*4 &&
+        mouse.x < w-BUTTON_SIZE*4 +2*BUTTON_SIZE*h/SCREEN_HEIGHT) {
+      if (mouse.y >h-2.5*BUTTON_SIZE*h/SCREEN_HEIGHT &&
+          mouse.y < h-2.5*BUTTON_SIZE*h/SCREEN_HEIGHT +
+                        2*BUTTON_SIZE*h/SCREEN_HEIGHT) {
+        env->current_screen = MENU;
+      }
+    }
     // convert mouse position to cell in grid
     if (mouse_is_in_grid(env, mouse.x, mouse.y)){
       uint row, col;
@@ -569,6 +610,15 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
     SDL_DestroyTexture(env->text[i]);
   }
   free(env->text);
+  SDL_DestroyTexture(env->main_menu);
+  SDL_DestroyTexture(env->help_button);
+  SDL_DestroyTexture(env->help_button_j);
+  SDL_DestroyTexture(env->play_button);
+  SDL_DestroyTexture(env->exit_button);
+  SDL_DestroyTexture(env->menu_button);
+  SDL_DestroyTexture(env->wrapping_text);
+  SDL_DestroyTexture(env->diagadj_text);
+
   SDL_DestroyTexture(env->tree);
   SDL_DestroyTexture(env->water);
   SDL_DestroyTexture(env->raft);
