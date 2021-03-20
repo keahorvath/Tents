@@ -24,13 +24,12 @@
 #define BACK_BUTTON "back_button.png"
 
 /* game screen */
+#define GAME_SCREEN "game_screen.jpg"
 #define PALM_TREE "tree.png"
 #define WATER "water.png"
 #define RAFT "happy_trump.jpg"
 #define L_WATER "losing_water.png"
 #define L_RAFT "angry_trump.jpg"
-#define GAME_SCREEN "game_screen.jpg"
-
 
 #define HOME_BUTTON "home_button.png"
 #define HELP_BUTTON_J "help_button_j.png"
@@ -39,15 +38,19 @@
 #define RESTART "restart.png"
 #define SOLVE "solve.png"
 #define FONT "Walkway_Oblique_Black.ttf"
-#define FONT_NIVEAU "Eastman-Grotesque-Bold-Italic-trial.otf"
+#define FONT_LEVEL "Roboto-Regular.ttf"
+
+#define LEVEL_SIZE 50
 #define FONT_RATIO 0.7   // ratio of font size to cell size
-#define GRID_RATIO 0.75  // ratio of grid size to window size
 #define BUTTON_SIZE 30
 #define FONT_SIZE 16
 #define TEXT_COLOR {65, 65, 143, 255}
+#define ABOVE_GRID_RATIO 0.2
+#define LEFT_FROM_GRID_RATIO 0.1
 
 /* **************************************************************** */
-static void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren, Env *env);
+static void create_tents_text(SDL_Window *win, SDL_Renderer *ren, Env *env);
+static void create_level_text(SDL_Window *win, SDL_Renderer *ren, Env *env);
 static bool mouse_is_in_grid(Env *env, int x, int y);
 static bool final_message_box (SDL_Window *win ,Env *env );
 static void render_home(SDL_Window *win, SDL_Renderer *ren, Env *env);
@@ -66,6 +69,8 @@ typedef enum {
 struct Env_t {
   screen current_screen;
   screen previous_screen;
+  uint current_level;
+  
   SDL_Texture *home_screen;
   SDL_Texture *help_button;
   SDL_Texture *play_button;
@@ -74,21 +79,28 @@ struct Env_t {
   SDL_Texture *help_screen;
   SDL_Texture *back_button;
 
-  SDL_Texture *home_button;
-  SDL_Texture *help_button_j;
+  SDL_Texture *game_screen;
+  bool restricted_by_height;
+  int grid_width;
   SDL_Texture *tree;
   SDL_Texture *water;
   SDL_Texture *raft;
   SDL_Texture *losing_water;
   SDL_Texture *losing_raft;
-  SDL_Texture *game_screen;
-  SDL_Texture **text;
   SDL_Texture *undo;
   SDL_Texture *redo;
   SDL_Texture *restart;
   SDL_Texture *solve;
+  int small_button_size;
+  SDL_Texture *home_button;
+  SDL_Texture *help_button_j;
+  int side_button_size;
+  SDL_Texture *current_level_text;
+  float level_ratio;
+  SDL_Texture **text;
   SDL_Texture *wrapping_text;
   SDL_Texture *diagadj_text;
+  float wrap_diag_ratio;
   int grid_beginning_x;
   int grid_beginning_y;
   int cell_size;
@@ -100,8 +112,6 @@ struct Env_t {
 
 Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   Env *env = malloc(sizeof(struct Env_t));
-  PRINT("Left click to place a tent, right click to place water.\n");
-
   // create the game
   if (argc == 2) {
     env->g = game_load(argv[1]);
@@ -158,18 +168,24 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   env->redo = IMG_LoadTexture(ren, REDO);
   if (!env->redo) ERROR("IMG_LoadTexture: %s\n", REDO);
 
+  env->current_level = 0;
   env->current_screen = HOME;
   env->previous_screen = HOME;
+  env->restricted_by_height = true;
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
 
+  /* level text */
+  create_level_text(win, ren, env);
+  
+  /* nb_tents text */
   env->text = (SDL_Texture **)malloc(
       sizeof(SDL_Texture *) * (game_nb_cols(env->g) + game_nb_rows(env->g)));
-  initialize_tents_text(win, ren, env);
+  create_tents_text(win, ren, env);
 
-  /* render wrapping and diagadj text */
-  SDL_Color color = {0, 0, 0, 255};  // black
-  TTF_Font *font = TTF_OpenFont(FONT, FONT_SIZE);
+  /* wrapping and diagadj text */
+  SDL_Color color = TEXT_COLOR;  // black
+  TTF_Font *font = TTF_OpenFont(FONT_LEVEL, FONT_SIZE);
   if (!font) ERROR("TTF_OpenFont: %s\n", FONT);
   TTF_SetFontStyle(font, TTF_STYLE_BOLD);
   if (game_is_wrapping(env->g)) {
@@ -184,7 +200,9 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
     env->wrapping_text = SDL_CreateTextureFromSurface(ren, surf);
     SDL_FreeSurface(surf);
   }
-
+  SDL_Rect rect;
+  SDL_QueryTexture(env->wrapping_text, NULL, NULL, &rect.w, &rect.h);
+  env->wrap_diag_ratio = rect.w / rect.h;
   if (game_is_diagadj(env->g)) {
     SDL_Surface *surf = TTF_RenderText_Blended(
         font, "DIAGADJ : ON", color);  // blended rendering for ultra nice text
@@ -277,29 +295,49 @@ void render_game(SDL_Window *win, SDL_Renderer *ren, Env *env){
   rect.y = 0;
   rect.w = w;
   rect.h = h;
+
   /* render background texture */
   SDL_SetRenderDrawColor(ren, 255, 255, 255, SDL_ALPHA_OPAQUE); /* white */
   SDL_RenderCopy(ren, env->game_screen, NULL, NULL);            /* stretch it */
 
-  uint space_avail_per_cell_x = w / game_nb_cols(env->g);
-  uint space_avail_per_cell_y = h / game_nb_rows(env->g);
+  uint space_avail_per_cell_x = (int)((w-w*2*LEFT_FROM_GRID_RATIO) / (game_nb_cols(env->g)+1)); //A RAJOUTER:2*BUTTON_SIZE
+  uint space_avail_per_cell_y = (int)((h-h*ABOVE_GRID_RATIO) / (game_nb_rows(env->g)+1));
   if (space_avail_per_cell_x > space_avail_per_cell_y) {
-    env->cell_size = (int)(GRID_RATIO * h / (game_nb_rows(env->g) + 1));
+    env->restricted_by_height = true;
+    env->cell_size = (int)((1-ABOVE_GRID_RATIO)*h / (game_nb_rows(env->g) + 1));
     env->grid_beginning_x =
         w / 2 - env->cell_size * (game_nb_cols(env->g) + 1) / 2;
-    env->grid_beginning_y = (int)((1 - GRID_RATIO) * h / 2);
+    env->grid_beginning_y = (int)(ABOVE_GRID_RATIO*h);
   } else {
-    env->cell_size = (int)(GRID_RATIO * w / (game_nb_cols(env->g) + 1));
-    env->grid_beginning_x = (int)((1 - GRID_RATIO) * w / 2);
-    env->grid_beginning_y =
-        h / 2 - env->cell_size * (game_nb_rows(env->g) + 1) / 2;
+    env->restricted_by_height = false;
+    env->cell_size = (int)((w-w*2*LEFT_FROM_GRID_RATIO) / (game_nb_cols(env->g) + 1)); 
+    env->grid_beginning_x = (int)(w*LEFT_FROM_GRID_RATIO);
+    env->grid_beginning_y = h / 2 - env->cell_size * (game_nb_rows(env->g) + 1) / 2;
   }
+  env->grid_width = env->cell_size*game_nb_cols(env->g);
+  /* render current level text */
+  if (env->restricted_by_height){
+    rect.h = (int)(ABOVE_GRID_RATIO*h/3);
+    rect.w = (int)(rect.h*env->level_ratio);
+  }else{
+    rect.h = (int)(env->grid_beginning_y/3);
+    rect.w = (int)(rect.h*env->level_ratio);
+    if (rect.w > env->grid_width*3/4){
+      rect.w = (int)(env->grid_width*3/4);
+      rect.h = (int)rect.w/env->level_ratio;
+    }
+  }
+  rect.x = (int)(w/2 - rect.w/2);
+  rect.y = (int)(rect.h/2);
+  SDL_RenderCopy(ren, env->current_level_text, NULL, &rect);
 
+  /* render grid background */
   rect.x = env->grid_beginning_x;
   rect.y = env->grid_beginning_y;
-  rect.w = env->cell_size * game_nb_cols(env->g);
+  rect.w = env->grid_width;
   rect.h = env->cell_size * game_nb_rows(env->g);
   SDL_RenderFillRect(ren, &rect);
+
   /* render the tents, water and trees */
   for (uint i = 0; i < game_nb_rows(env->g); i++) {
     for (uint j = 0; j < game_nb_cols(env->g); j++) {
@@ -344,7 +382,7 @@ void render_game(SDL_Window *win, SDL_Renderer *ren, Env *env){
   rect.w = (int)(FONT_RATIO / 2 * env->cell_size);
   rect.h = (int)(FONT_RATIO * env->cell_size);
   for (uint i = 0; i < (game_nb_rows(env->g)); i++) {
-    rect.x = env->grid_beginning_x + game_nb_cols(env->g) * env->cell_size +
+    rect.x = env->grid_beginning_x + env->grid_width +
              (int)((1 - FONT_RATIO / 2) / 2 * env->cell_size);
     rect.y = env->grid_beginning_y + env->cell_size * i +
              (int)((1 - FONT_RATIO) / 2 * env->cell_size);
@@ -360,50 +398,48 @@ void render_game(SDL_Window *win, SDL_Renderer *ren, Env *env){
   }
 
   /*render buttons*/
-  rect.w = BUTTON_SIZE;
-  rect.h = BUTTON_SIZE;
-  rect.y = env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5);
+  rect.w = (int)(env->grid_width*1/14);
+  rect.h = (int)(env->grid_width*1/14);
+  env->small_button_size = rect.w;
+  rect.y = env->grid_beginning_y - (int)(rect.w + rect.w*1/4);
   // undo
-  rect.x = env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) / 2 -
-           (int)(1.5 * BUTTON_SIZE);
+  rect.x = env->grid_beginning_x + env->grid_width / 2 - (int)(1.5 * rect.w);
   SDL_RenderCopy(ren, env->undo, NULL, &rect);
   // redo
-  rect.x = env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) / 2 +
-           (int)(0.5 * BUTTON_SIZE);
+  rect.x = env->grid_beginning_x + env->grid_width / 2 + (int)(0.5 * rect.w);
   SDL_RenderCopy(ren, env->redo, NULL, &rect);
   // restart
-  rect.x = env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) -
-           (int)(3.5 * BUTTON_SIZE);
+  rect.x = env->grid_beginning_x + env->grid_width - (int)(3.5 * rect.w);
   SDL_RenderCopy(ren, env->restart, NULL, &rect);
   // solve
-  rect.x = env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) -
-           (int)(1.5 * BUTTON_SIZE);
+  rect.x = env->grid_beginning_x + env->grid_width - (int)(1.5 * rect.w);
   SDL_RenderCopy(ren, env->solve, NULL, &rect);
 
   /*render wrapping and diagadj texts*/
-  SDL_QueryTexture(env->wrapping_text, NULL, NULL, &rect.w, &rect.h);
+  rect.w = (int)(env->grid_width/4);
+  rect.h = (int)(rect.w/env->wrap_diag_ratio);
   rect.x = env->grid_beginning_x;
-  rect.y = env->grid_beginning_y - (int)(3 * rect.h);
+  rect.y = (int)(env->grid_beginning_y - rect.h*2.4);
   SDL_RenderCopy(ren, env->wrapping_text, NULL, &rect);
-  SDL_QueryTexture(env->diagadj_text, NULL, NULL, &rect.w, &rect.h);
   rect.x = env->grid_beginning_x;
-  rect.y = env->grid_beginning_y - (int)(1.5 * rect.h);
+  rect.y = (int)(env->grid_beginning_y - rect.h*1.3);
   SDL_RenderCopy(ren, env->diagadj_text, NULL, &rect);
 
-  //home button 
-  rect.w = 2*BUTTON_SIZE*h/SCREEN_HEIGHT;
-  rect.h = 2*BUTTON_SIZE*h/SCREEN_HEIGHT;
-  rect.x = BUTTON_SIZE;
-  rect.y = h-2.5*BUTTON_SIZE*h/SCREEN_HEIGHT;
+  /* render home and help buttons */
+  if (env->restricted_by_height){
+    rect.w = (int)w/15;
+    rect.h =(int)w/15;
+  }else{
+    rect.w = (int)h/15;
+    rect.h = (int)h/15;  
+  }
+  env->side_button_size = rect.w;
+  rect.x = (int)rect.w*0.5;
+  rect.y = (int)(h-1.5*rect.w);
   SDL_RenderCopy(ren, env->home_button, NULL, &rect);
 
-  //help button
-  rect.x = w-BUTTON_SIZE*4;
-  rect.w = 2*BUTTON_SIZE*h/SCREEN_HEIGHT;
-  rect.h = 2*BUTTON_SIZE*h/SCREEN_HEIGHT;
+  rect.x = (int)(w - rect.w*1.5);
   SDL_RenderCopy(ren, env->help_button_j, NULL, &rect);
-
-
 }
 
 bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
@@ -514,7 +550,7 @@ bool process_game(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
         game_delete(env->g);
         char *file_name = queue_pop_tail(env->games);
         env->g = game_load(file_name);
-        initialize_tents_text(win, ren, env);
+        create_tents_text(win, ren, env);
       }
     } else if (buttonid == 2) {
       SDL_Log("selection was %s", buttons[buttonid].text);
@@ -528,54 +564,34 @@ bool process_game(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
     SDL_GetMouseState(&mouse.x, &mouse.y);
     // check if mouse is pressing one of the buttons
     // undo the last move
-    if (mouse.x > env->grid_beginning_x +
-                      env->cell_size * game_nb_cols(env->g) / 2 -
-                      (int)(1.5 * BUTTON_SIZE) &&
-        mouse.x <
-            (env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) / 2 -
-             (int)(1.5 * BUTTON_SIZE) + BUTTON_SIZE)) {
-      if (mouse.y > env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5) &&
-          mouse.y < (env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5)) +
-                        BUTTON_SIZE) {
+    if (mouse.x > env->grid_beginning_x + env->grid_width / 2 - (1.5 * env->small_button_size) &&
+        mouse.x < env->grid_beginning_x + env->grid_width / 2 - (0.5 * env->small_button_size)) {
+      if (mouse.y > env->grid_beginning_y - (env->small_button_size*5/4) &&
+          mouse.y < env->grid_beginning_y - (env->small_button_size*1/4)) {
         game_undo(env->g);
       }
     }
     // redo the last move
-    if (mouse.x > env->grid_beginning_x +
-                      env->cell_size * game_nb_cols(env->g) / 2 +
-                      (int)(0.5 * BUTTON_SIZE) &&
-        mouse.x <
-            (env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) / 2 +
-             (int)(0.5 * BUTTON_SIZE) + BUTTON_SIZE)) {
-      if (mouse.y > env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5) &&
-          mouse.y < (env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5)) +
-                        BUTTON_SIZE) {
+    if (mouse.x > env->grid_beginning_x + env->grid_width / 2 + (0.5 * env->small_button_size) &&
+        mouse.x < env->grid_beginning_x + env->grid_width / 2 + (1.5 * env->small_button_size)) {
+      if (mouse.y > env->grid_beginning_y - (env->small_button_size*5/4) &&
+          mouse.y < env->grid_beginning_y - (env->small_button_size*1/4)) {
         game_redo(env->g);
       }
     }
     // restart the game from the beginning
-    if (mouse.x > env->grid_beginning_x +
-                      env->cell_size * game_nb_cols(env->g) -
-                      (int)(3.5 * BUTTON_SIZE) &&
-        mouse.x <
-            (env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) -
-             (int)(3.5 * BUTTON_SIZE) + BUTTON_SIZE)) {
-      if (mouse.y > env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5) &&
-          mouse.y < (env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5)) +
-                        BUTTON_SIZE) {
+    if (mouse.x > env->grid_beginning_x + env->grid_width - (3.5 * env->small_button_size) &&
+        mouse.x < env->grid_beginning_x + env->grid_width - (2.5 * env->small_button_size)) {
+      if (mouse.y > env->grid_beginning_y - (env->small_button_size*5/4) &&
+          mouse.y < env->grid_beginning_y - (env->small_button_size*1/4)) {
         game_restart(env->g);
       }
     }
     // solve the game
-    if (mouse.x > env->grid_beginning_x +
-                      env->cell_size * game_nb_cols(env->g) -
-                      (int)(1.5 * BUTTON_SIZE) &&
-        mouse.x <
-            (env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) -
-             (int)(1.5 * BUTTON_SIZE) + BUTTON_SIZE)) {
-      if (mouse.y > env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5) &&
-          mouse.y < (env->grid_beginning_y - (int)(BUTTON_SIZE * 1.5)) +
-                        BUTTON_SIZE) {
+    if (mouse.x > env->grid_beginning_x + env->grid_width - (1.5 * env->small_button_size) &&
+        mouse.x < env->grid_beginning_x + env->grid_width -  (0.5 * env->small_button_size)) {
+      if (mouse.y > env->grid_beginning_y - (env->small_button_size*5/4) &&
+          mouse.y < env->grid_beginning_y - (env->small_button_size*1/4)) {
         for (uint i = 0; i < game_nb_rows(env->g); i++){
           for (uint j = 0; j < game_nb_cols(env->g); j++){
             if (game_get_square(env->g, i, j) == TENT || game_get_square(env->g, i, j) == GRASS){
@@ -587,22 +603,19 @@ bool process_game(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
       }
     }
     //go to the home page
-    if (mouse.x > BUTTON_SIZE &&
-        mouse.x < BUTTON_SIZE +2*BUTTON_SIZE*h/SCREEN_HEIGHT) {
-      if (mouse.y >h-2.5*BUTTON_SIZE*h/SCREEN_HEIGHT &&
-          mouse.y < h-2.5*BUTTON_SIZE*h/SCREEN_HEIGHT +
-                        2*BUTTON_SIZE*h/SCREEN_HEIGHT) {
+    if (mouse.x > env->side_button_size*0.5 &&
+        mouse.x < env->side_button_size*1.5){
+      if (mouse.y > (h-1.5*env->side_button_size) &&
+          mouse.y < (h-0.5*env->side_button_size)) {
         env->current_screen = HOME;
         env->previous_screen = GAME;
       }
     }
-
     //go to help page 
-    if (mouse.x > w-BUTTON_SIZE*4 &&
-        mouse.x < w-BUTTON_SIZE*4 +2*BUTTON_SIZE*h/SCREEN_HEIGHT) {
-      if (mouse.y >h-2.5*BUTTON_SIZE*h/SCREEN_HEIGHT &&
-          mouse.y < h-2.5*BUTTON_SIZE*h/SCREEN_HEIGHT +
-                        2*BUTTON_SIZE*h/SCREEN_HEIGHT) {
+    if (mouse.x > (w-env->side_button_size*1.5) &&
+        mouse.x < (w-env->side_button_size*0.5)){
+      if (mouse.y > (h-1.5*env->side_button_size) &&
+          mouse.y < (h-0.5*env->side_button_size)) {
         env->current_screen = HELP;
         env->previous_screen = GAME;
       }
@@ -704,7 +717,7 @@ bool mouse_is_in_grid(Env *env, int x, int y){
   return true;
 }
 
-void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren, Env *env) {
+void create_tents_text(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
   SDL_Color color = TEXT_COLOR; /* blue color in RGBA */
@@ -728,6 +741,25 @@ void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren, Env *env) {
     SDL_FreeSurface(surf);
   }
   TTF_CloseFont(font);
+}
+
+void create_level_text(SDL_Window *win, SDL_Renderer *ren, Env *env){
+  int w, h;
+  SDL_GetWindowSize(win, &w, &h);
+  SDL_Rect rect;
+  int font_size = (int)(h*ABOVE_GRID_RATIO*1/3);
+  SDL_Color color = TEXT_COLOR;
+  TTF_Font *font = TTF_OpenFont(FONT_LEVEL, font_size);
+  if (!font) ERROR("TTF_OpenFont: %s\n", FONT_LEVEL);
+  TTF_SetFontStyle(font, TTF_STYLE_NORMAL);
+  char level_text[10];
+  sprintf(level_text, "LEVEL %u", env->current_level);
+  SDL_Surface *surf = TTF_RenderText_Blended(
+      font, level_text, color); 
+  env->current_level_text = SDL_CreateTextureFromSurface(ren, surf);
+  TTF_CloseFont(font);
+  SDL_QueryTexture(env->current_level_text, NULL, NULL, &rect.w, &rect.h);
+  env->level_ratio = rect.w / rect.h;
 }
 
 bool final_message_box (SDL_Window *win , Env *env){
