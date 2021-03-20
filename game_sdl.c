@@ -8,7 +8,7 @@
 #include "game_aux.h"
 #include "game_ext.h"
 #include "game_tools.h"
-#include "model.h"
+#include "graphic_mode.h"
 #include "queue.h"
 
 int main(int argc, char* argv[]) {

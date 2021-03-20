@@ -26,7 +26,7 @@ message(STATUS "SDL2 all libraries: ${SDL2_ALL_LIBS}")
 
 ## compilation rules
 include_directories(${SDL2_ALL_INC})
-add_executable(game_sdl game_sdl.c model.c)
+add_executable(game_sdl game_sdl.c graphic_mode.c)
 target_link_libraries(game_sdl ${SDL2_ALL_LIBS} m game)
 
 #définit le nom du programme ainsi que ses sources
@@ -49,7 +49,20 @@ target_link_libraries(game_test_marbeites game)
 target_link_libraries(game_test_alleymarie game)
 
 ## copy useful data files in build dir
-foreach(file "back_button.png" "help_screen.png" "exit.png" "play.png" "help.png" "home_screen.png" "Walkway_Oblique_Black.ttf" "Walkway_Bold.ttf" "level1.tnt" "level2.tnt" "level3.tnt" "level4.tnt" "level5.tnt" "level6.tnt" "level7.tnt" "level8.tnt" "level9.tnt" "level10.tnt" "tree.png" "water.png" "happy_trump.jpg" "background.jpg" "Calibri.ttf" "angry_trump.jpg" "losing_water.png" "restart.png" "redo.png" "undo.png" "solve.png""home_button.png""help_button_j.png")
+#images
+foreach(file "images" "images/game_screen.jpg" "images/help_screen.png" "images/home_screen.png" "images/tree.png" "images/water.png" "images/happy_trump.jpg" "images/angry_trump.jpg" "images/losing_water.png")
+  file(COPY ${file} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endforeach(file)
+#games
+foreach(file "games" "games/level1.tnt" "games/level2.tnt" "games/level3.tnt" "games/level4.tnt" "games/level5.tnt" "games/level6.tnt" "games/level7.tnt" "games/level8.tnt" "games/level9.tnt" "games/level10.tnt")
+  file(COPY ${file} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endforeach(file)
+#buttons
+foreach(file "buttons" "buttons/back_button.png" "buttons/exit.png" "buttons/play.png" "buttons/help.png" "buttons/restart.png" "buttons/redo.png" "buttons/undo.png" "buttons/solve.png" "buttons/home_button.png" "buttons/help_button_j.png")
+  file(COPY ${file} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endforeach(file)
+#fonts
+foreach(file "Walkway_Oblique_Black.ttf" "Walkway_Bold.ttf" "Calibri.ttf")
   file(COPY ${file} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endforeach(file)
 

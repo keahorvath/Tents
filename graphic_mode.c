@@ -1,4 +1,4 @@
-#include "model.h"
+#include "graphic_mode.h"
 #include <SDL.h>
 #include <SDL_image.h>  // required to load transparent texture from PNG
 #include <SDL_ttf.h>    // required to use TTF fonts
@@ -29,7 +29,7 @@
 #define RAFT "happy_trump.jpg"
 #define L_WATER "losing_water.png"
 #define L_RAFT "angry_trump.jpg"
-#define BACKGROUND "background.jpg"
+#define GAME_SCREEN "game_screen.jpg"
 
 
 #define HOME_BUTTON "home_button.png"
@@ -81,7 +81,7 @@ struct Env_t {
   SDL_Texture *raft;
   SDL_Texture *losing_water;
   SDL_Texture *losing_raft;
-  SDL_Texture *background;
+  SDL_Texture *game_screen;
   SDL_Texture **text;
   SDL_Texture *undo;
   SDL_Texture *redo;
@@ -147,8 +147,8 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   if (!env->losing_water) ERROR("IMG_LoadTexture: %s\n", L_WATER);
   env->losing_raft = IMG_LoadTexture(ren, L_RAFT);
   if (!env->losing_raft) ERROR("IMG_LoadTexture: %s\n", L_RAFT);
-  env->background = IMG_LoadTexture(ren, BACKGROUND);
-  if (!env->background) ERROR("IMG_LoadTexture: %s\n", BACKGROUND);
+  env->game_screen = IMG_LoadTexture(ren, GAME_SCREEN);
+  if (!env->game_screen) ERROR("IMG_LoadTexture: %s\n", GAME_SCREEN);
   env->solve = IMG_LoadTexture(ren, SOLVE);
   if (!env->solve) ERROR("IMG_LoadTexture: %s\n", SOLVE);
   env->restart = IMG_LoadTexture(ren, RESTART);
@@ -279,7 +279,7 @@ void render_game(SDL_Window *win, SDL_Renderer *ren, Env *env){
   rect.h = h;
   /* render background texture */
   SDL_SetRenderDrawColor(ren, 255, 255, 255, SDL_ALPHA_OPAQUE); /* white */
-  SDL_RenderCopy(ren, env->background, NULL, NULL);            /* stretch it */
+  SDL_RenderCopy(ren, env->game_screen, NULL, NULL);            /* stretch it */
 
   uint space_avail_per_cell_x = w / game_nb_cols(env->g);
   uint space_avail_per_cell_y = h / game_nb_rows(env->g);
@@ -681,7 +681,7 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   SDL_DestroyTexture(env->raft);
   SDL_DestroyTexture(env->losing_water);
   SDL_DestroyTexture(env->losing_raft);
-  SDL_DestroyTexture(env->background);
+  SDL_DestroyTexture(env->game_screen);
   SDL_DestroyTexture(env->undo);
   SDL_DestroyTexture(env->redo);
   SDL_DestroyTexture(env->restart);
