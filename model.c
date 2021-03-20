@@ -1,5 +1,3 @@
-// SDL2 Demo by aurelien.esnard@u-bordeaux.fr
-
 #include "model.h"
 #include <SDL.h>
 #include <SDL_image.h>  // required to load transparent texture from PNG
@@ -15,18 +13,26 @@
 #include "game_tools.h"
 #include "queue.h"
 
-#define GAMES_DIR "games"
+/* home screen */
+#define HOME_SCREEN "home_screen.png"
+#define HELP_BUTTON "help.png"
+#define PLAY_BUTTON "play.png"
+#define EXIT_BUTTON "exit.png"
+
+/*help screen */
+#define HELP_SCREEN "help_screen.png"
+#define BACK_BUTTON "back_button.png"
+
+/* game screen */
 #define PALM_TREE "tree.png"
 #define WATER "water.png"
 #define RAFT "happy_trump.jpg"
 #define L_WATER "losing_water.png"
 #define L_RAFT "angry_trump.jpg"
 #define BACKGROUND "background.jpg"
-#define MAIN_MENU "main_menu.jpg"
-#define HELP_BUTTON "help.png"
-#define PLAY_BUTTON "play.png"
-#define EXIT_BUTTON "exit.png"
-#define MENU_BUTTON "home_button.png"
+
+
+#define HOME_BUTTON "home_button.png"
 #define HELP_BUTTON_J "help_button_j.png"
 #define UNDO "undo.png"
 #define REDO "redo.png"
@@ -44,23 +50,31 @@
 static void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren, Env *env);
 static bool mouse_is_in_grid(Env *env, int x, int y);
 static bool final_message_box (SDL_Window *win ,Env *env );
-static void render_menu(SDL_Window *win, SDL_Renderer *ren, Env *env);
+static void render_home(SDL_Window *win, SDL_Renderer *ren, Env *env);
+static void render_help(SDL_Window *win, SDL_Renderer *ren, Env *env);
 static void render_game(SDL_Window *win, SDL_Renderer *ren, Env *env);
-static bool process_menu(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e);
+static bool process_home(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e);
+static bool process_help(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e);
 static bool process_game(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e);
+
 typedef enum {
-  MENU = 0, /**< main menu screen  */
+  HOME = 0, /**< main menu screen  */
   GAME = 1,  /**< in game screen */
   HELP = 2,  /**< help (rules) screen */
 } screen;
 
 struct Env_t {
   screen current_screen;
-  SDL_Texture *main_menu;
+  screen previous_screen;
+  SDL_Texture *home_screen;
   SDL_Texture *help_button;
   SDL_Texture *play_button;
   SDL_Texture *exit_button;
-  SDL_Texture *menu_button;
+
+  SDL_Texture *help_screen;
+  SDL_Texture *back_button;
+
+  SDL_Texture *home_button;
   SDL_Texture *help_button_j;
   SDL_Texture *tree;
   SDL_Texture *water;
@@ -102,16 +116,25 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  env->main_menu = IMG_LoadTexture(ren, MAIN_MENU);
-  if (!env->main_menu) ERROR("IMG_LoadTexture: %s\n", MAIN_MENU);
+  /* home screen textures */
+  env->home_screen = IMG_LoadTexture(ren, HOME_SCREEN);
+  if (!env->home_screen) ERROR("IMG_LoadTexture: %s\n", HOME_SCREEN);
   env->help_button = IMG_LoadTexture(ren, HELP_BUTTON);
   if (!env->help_button) ERROR("IMG_LoadTexture: %s\n", HELP_BUTTON);
   env->play_button = IMG_LoadTexture(ren, PLAY_BUTTON);
   if (!env->play_button) ERROR("IMG_LoadTexture: %s\n", PLAY_BUTTON);
   env->exit_button = IMG_LoadTexture(ren, EXIT_BUTTON);
   if (!env->exit_button) ERROR("IMG_LoadTexture: %s\n", EXIT_BUTTON);
-  env->menu_button = IMG_LoadTexture(ren, MENU_BUTTON);
-  if (!env->menu_button) ERROR("IMG_LoadTexture: %s\n", MENU_BUTTON);
+
+  /* help screen textures */
+  env->help_screen = IMG_LoadTexture(ren, HELP_SCREEN);
+  if (!env->help_screen) ERROR("IMG_LoadTexture: %s\n", HELP_SCREEN);
+  env->back_button = IMG_LoadTexture(ren, BACK_BUTTON);
+  if (!env->back_button) ERROR("IMG_LoadTexture: %s\n", BACK_BUTTON);
+
+  /*game screen textures */
+  env->home_button = IMG_LoadTexture(ren, HOME_BUTTON);
+  if (!env->home_button) ERROR("IMG_LoadTexture: %s\n", HOME_BUTTON);
   env->help_button_j = IMG_LoadTexture(ren, HELP_BUTTON_J);
   if (!env->help_button_j) ERROR("IMG_LoadTexture: %s\n", HELP_BUTTON_J);
   env->tree = IMG_LoadTexture(ren, PALM_TREE);
@@ -135,7 +158,8 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   env->redo = IMG_LoadTexture(ren, REDO);
   if (!env->redo) ERROR("IMG_LoadTexture: %s\n", REDO);
 
-  env->current_screen = MENU;
+  env->current_screen = HOME;
+  env->previous_screen = HOME;
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
 
@@ -192,20 +216,17 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
 
 void render(SDL_Window *win, SDL_Renderer *ren,
             Env *env) { /* PUT YOUR CODE HERE TO RENDER TEXTURES, ... */
-  if (env->current_screen == MENU){
-    render_menu(win, ren, env);
+  if (env->current_screen == HOME){
+    render_home(win, ren, env);
   }else if (env->current_screen == GAME){
     render_game(win, ren, env);
-  }
-    /*
   }else if (env->current_screen == HELP){
     render_help(win, ren, env);
   }
-*/
 }
 
 /* **************************************************************** */
-void render_menu(SDL_Window *win, SDL_Renderer *ren, Env *env){
+void render_home(SDL_Window *win, SDL_Renderer *ren, Env *env){
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
   SDL_Rect rect;
@@ -215,7 +236,7 @@ void render_menu(SDL_Window *win, SDL_Renderer *ren, Env *env){
   rect.h = h;
   /* render background texture */
   SDL_SetRenderDrawColor(ren, 255, 255, 255, SDL_ALPHA_OPAQUE); /* white */
-  SDL_RenderCopy(ren, env->main_menu, NULL, NULL);            /* stretch it */
+  SDL_RenderCopy(ren, env->home_screen, NULL, NULL);            /* stretch it */
 
   rect.w = (int)(w/12) ;
   rect.h = (int)(w/12);
@@ -233,6 +254,19 @@ void render_menu(SDL_Window *win, SDL_Renderer *ren, Env *env){
   rect.y = (int)(h - h*1/6);
   rect.x = (int)(w - w*2.5/10);
   SDL_RenderCopy(ren, env->exit_button, NULL, &rect);
+}
+
+void render_help(SDL_Window *win, SDL_Renderer *ren, Env *env){
+  SDL_RenderCopy(ren, env->help_screen, NULL, NULL);  
+  int w, h;
+  SDL_GetWindowSize(win, &w, &h);
+  SDL_Rect rect;
+  //home button
+  rect.w = h/8;
+  rect.h = h/8;
+  rect.x = (int)(w - w*1/4);
+  rect.y = (int)(h - h*1/5);
+  SDL_RenderCopy(ren, env->back_button, NULL, &rect);
 }
 
 void render_game(SDL_Window *win, SDL_Renderer *ren, Env *env){
@@ -356,14 +390,14 @@ void render_game(SDL_Window *win, SDL_Renderer *ren, Env *env){
   rect.y = env->grid_beginning_y - (int)(1.5 * rect.h);
   SDL_RenderCopy(ren, env->diagadj_text, NULL, &rect);
 
-  //menu 
+  //home button 
   rect.w = 2*BUTTON_SIZE*h/SCREEN_HEIGHT;
   rect.h = 2*BUTTON_SIZE*h/SCREEN_HEIGHT;
   rect.x = BUTTON_SIZE;
   rect.y = h-2.5*BUTTON_SIZE*h/SCREEN_HEIGHT;
-  SDL_RenderCopy(ren, env->menu_button, NULL, &rect);
+  SDL_RenderCopy(ren, env->home_button, NULL, &rect);
 
-  //help 
+  //help button
   rect.x = w-BUTTON_SIZE*4;
   rect.w = 2*BUTTON_SIZE*h/SCREEN_HEIGHT;
   rect.h = 2*BUTTON_SIZE*h/SCREEN_HEIGHT;
@@ -376,15 +410,17 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
   if (e->type == SDL_QUIT) {
     return true;
   }
-  if (env->current_screen == MENU){
-    return process_menu(win, ren, env, e);
+  if (env->current_screen == HOME){
+    return process_home(win, ren, env, e);
   }else if (env->current_screen == GAME){
     return process_game(win, ren, env, e);
+  }else if(env->current_screen == HELP){
+    return process_help(win, ren, env, e);
   }
   return true;
 }
 
-bool process_menu(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
+bool process_home(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
   if (e->type == SDL_MOUSEBUTTONDOWN) {
@@ -394,6 +430,28 @@ bool process_menu(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
     // start game
     if (mouse.x < w-w*9/10+w/12 && mouse.x > w-w*9/10 && mouse.y < h-h*1/5+w/12 && mouse.y > h-h*1/5){
       env->current_screen = GAME;
+      env->previous_screen = HOME;
+      return false;
+    }else if (mouse.x < w-w*7/10+w/12 && mouse.x > w-w*7/10 && mouse.y < h-h*1/5+w/12 && mouse.y > h-h*1/5){
+      env->current_screen = HELP;
+      env->previous_screen = HOME;
+      return false;
+    }
+  }
+  return false;
+}
+
+bool process_help(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
+  int w, h;
+  SDL_GetWindowSize(win, &w, &h);
+  if (e->type == SDL_MOUSEBUTTONDOWN) {
+    SDL_Point mouse;
+    SDL_GetMouseState(&mouse.x, &mouse.y);
+    // check if mouse is pressing one of the buttons
+    // start game
+    if (mouse.x < w-w/4+h/8 && mouse.x > w-w/4 && mouse.y < h-h/5+h/8 && mouse.y > h-h/5){
+      env->current_screen = env->previous_screen;
+      env->previous_screen = HELP;
       return false;
     }
   }
@@ -528,13 +586,14 @@ bool process_game(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
         game_solve(env->g);
       }
     }
-    //go to the menu
+    //go to the home page
     if (mouse.x > BUTTON_SIZE &&
         mouse.x < BUTTON_SIZE +2*BUTTON_SIZE*h/SCREEN_HEIGHT) {
       if (mouse.y >h-2.5*BUTTON_SIZE*h/SCREEN_HEIGHT &&
           mouse.y < h-2.5*BUTTON_SIZE*h/SCREEN_HEIGHT +
                         2*BUTTON_SIZE*h/SCREEN_HEIGHT) {
-        env->current_screen = MENU;
+        env->current_screen = HOME;
+        env->previous_screen = GAME;
       }
     }
 
@@ -544,7 +603,8 @@ bool process_game(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
       if (mouse.y >h-2.5*BUTTON_SIZE*h/SCREEN_HEIGHT &&
           mouse.y < h-2.5*BUTTON_SIZE*h/SCREEN_HEIGHT +
                         2*BUTTON_SIZE*h/SCREEN_HEIGHT) {
-        env->current_screen = MENU;
+        env->current_screen = HELP;
+        env->previous_screen = GAME;
       }
     }
     // convert mouse position to cell in grid
@@ -580,7 +640,7 @@ bool process_game(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
         if (game_get_square(env->g, row, col) == EMPTY) {
           game_play_move(env->g, row, col, TENT);
         }
-      }else if (e->button.button == SDL_BUTTON(SDL_BUTTON_RIGHT)){ //bug avec SDL_BUTTON_RIGHT tout seul ->confirmé par internet
+      }else if (e->button.button == SDL_BUTTON(SDL_BUTTON_RIGHT)){ //bug with SDL_BUTTON_RIGHT on its own
         if (game_get_square(env->g, row, col) == EMPTY) {
           game_play_move(env->g, row, col, GRASS);
         }  
@@ -597,10 +657,7 @@ bool process_game(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
       game_redo(env->g);
     }
   }
-
   return false;
-
-
 }
 /* **************************************************************** */
 
@@ -610,12 +667,12 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
     SDL_DestroyTexture(env->text[i]);
   }
   free(env->text);
-  SDL_DestroyTexture(env->main_menu);
+  SDL_DestroyTexture(env->home_screen);
   SDL_DestroyTexture(env->help_button);
   SDL_DestroyTexture(env->help_button_j);
   SDL_DestroyTexture(env->play_button);
   SDL_DestroyTexture(env->exit_button);
-  SDL_DestroyTexture(env->menu_button);
+  SDL_DestroyTexture(env->home_button);
   SDL_DestroyTexture(env->wrapping_text);
   SDL_DestroyTexture(env->diagadj_text);
 
@@ -636,15 +693,15 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
 /* **************************************************************** */
 
 bool mouse_is_in_grid(Env *env, int x, int y){
-    if (x < env->grid_beginning_x ||
-        x >
-            env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) ||
-        y < env->grid_beginning_y ||
-        y >
-            env->grid_beginning_y + env->cell_size * game_nb_rows(env->g)) {
-      return false;
-    }
-    return true;
+  if (x < env->grid_beginning_x ||
+      x >
+          env->grid_beginning_x + env->cell_size * game_nb_cols(env->g) ||
+      y < env->grid_beginning_y ||
+      y >
+          env->grid_beginning_y + env->cell_size * game_nb_rows(env->g)) {
+    return false;
+  }
+  return true;
 }
 
 void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren, Env *env) {
@@ -672,7 +729,6 @@ void initialize_tents_text(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   }
   TTF_CloseFont(font);
 }
-
 
 bool final_message_box (SDL_Window *win , Env *env){
   const SDL_MessageBoxButtonData buttons[] = {
