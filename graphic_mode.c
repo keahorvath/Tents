@@ -300,7 +300,7 @@ void render_game(SDL_Window *win, SDL_Renderer *ren, Env *env){
   SDL_SetRenderDrawColor(ren, 255, 255, 255, SDL_ALPHA_OPAQUE); /* white */
   SDL_RenderCopy(ren, env->game_screen, NULL, NULL);            /* stretch it */
 
-  uint space_avail_per_cell_x = (int)((w-w*2*LEFT_FROM_GRID_RATIO) / (game_nb_cols(env->g)+1)); //A RAJOUTER:2*BUTTON_SIZE
+  uint space_avail_per_cell_x = (int)((w-w*2*LEFT_FROM_GRID_RATIO) / (game_nb_cols(env->g)+1)); 
   uint space_avail_per_cell_y = (int)((h-h*ABOVE_GRID_RATIO) / (game_nb_rows(env->g)+1));
   if (space_avail_per_cell_x > space_avail_per_cell_y) {
     env->restricted_by_height = true;
@@ -311,8 +311,12 @@ void render_game(SDL_Window *win, SDL_Renderer *ren, Env *env){
   } else {
     env->restricted_by_height = false;
     env->cell_size = (int)((w-w*2*LEFT_FROM_GRID_RATIO) / (game_nb_cols(env->g) + 1)); 
+    if (h/2 - env->cell_size * (game_nb_rows(env->g)+1 )/2 < h*ABOVE_GRID_RATIO){
+      env->grid_beginning_y = h - env->cell_size * (game_nb_rows(env->g) + 1);
+    }else{
+      env->grid_beginning_y = h / 2 - env->cell_size * (game_nb_rows(env->g) + 1) / 2;
+    }
     env->grid_beginning_x = (int)(w*LEFT_FROM_GRID_RATIO);
-    env->grid_beginning_y = h / 2 - env->cell_size * (game_nb_rows(env->g) + 1) / 2;
   }
   env->grid_width = env->cell_size*game_nb_cols(env->g);
   /* render current level text */
