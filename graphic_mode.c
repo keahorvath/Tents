@@ -476,6 +476,8 @@ bool process_home(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
       env->current_screen = HELP;
       env->previous_screen = HOME;
       return false;
+    }else if (mouse.x <(w - w*2.5/10)+w/6 && mouse.x > (w - w*2.5/10) && mouse.y < (h - h*1/6)+h/10 && mouse.y > (h - h*1/6)){
+      return true;
     }
   }
   return false;
