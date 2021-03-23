@@ -131,8 +131,6 @@ uint game_solve_rec(game g, bool count_solutions, uint *p_nb_sol_found) {
   if (count_solutions == true) {
     game_fill(g);
   }
-  printf("game after first fill\n");
-  game_print(g);
   uint nb_moves;
   bool stop = false;
   uint nb_sol_before = 0;
@@ -145,21 +143,14 @@ uint game_solve_rec(game g, bool count_solutions, uint *p_nb_sol_found) {
         break;
       }
       if (game_get_square(g, i, j) == EMPTY) {
-        game_print(g);
-        printf("play tent in %u %u \n", i, j);
         game_play_move(g, i, j, TENT);
         nb_moves = game_fill(g);
-        game_print(g);
         if (nb_moves == -1) {
-          printf("replacing with grass in %u %u \n", i, j);
-
           game_play_move(g, i, j, GRASS);
           continue;
         }
         nb_sol_before = game_solve_rec(g, count_solutions, p_nb_sol_found);
         if (game_is_over(g)) {
-          printf("SOLUTION\n");
-          game_print(g);
           *p_nb_sol_found += 1;
           if (!count_solutions) {
             return true;
@@ -187,8 +178,6 @@ uint game_solve_rec(game g, bool count_solutions, uint *p_nb_sol_found) {
 bool game_solve(game g) {
   test_pointer(g);
   uint nb_moves = game_fill(g);
-  printf("first fill:\n");
-  game_print(g);
   if (nb_moves == -1) {
     return false;
   }
@@ -383,7 +372,6 @@ int game_extra_check_move(cgame g, uint i, uint j, square s) {
           (game_get_expected_nb_tents_row(g, above_i) -
            game_get_current_nb_tents_row(g, above_i) + 1)) {
         if (game_get_square(g, above_i, left_j) == EMPTY && size_of_section(g, above_i, left_j, false) == 1 && game_get_square(g, above_i, right_j) == EMPTY && size_of_section(g, above_i, right_j, false) == 1){
-          printf("above\n");
           return LOSING;
         }
       }
@@ -393,7 +381,6 @@ int game_extra_check_move(cgame g, uint i, uint j, square s) {
           (game_get_expected_nb_tents_row(g, below_i) -
            game_get_current_nb_tents_row(g, below_i)+1)) {
         if (game_get_square(g, below_i, left_j) == EMPTY && size_of_section(g, below_i, left_j, false) == 1 && game_get_square(g, below_i, right_j) == EMPTY && size_of_section(g, below_i, right_j, false) == 1){
-          printf("below\n");
           return LOSING;
         }
       }
@@ -403,7 +390,6 @@ int game_extra_check_move(cgame g, uint i, uint j, square s) {
           (game_get_expected_nb_tents_col(g, left_j) -
            game_get_current_nb_tents_col(g, left_j)+1)) {
         if (game_get_square(g, above_i, left_j) == EMPTY && size_of_section(g, above_i, left_j, true) == 1 && game_get_square(g, below_i, left_j) == EMPTY && size_of_section(g, below_i, left_j, true) == 1){
-          printf("left\n");
           return LOSING;
         }
       }
@@ -413,7 +399,6 @@ int game_extra_check_move(cgame g, uint i, uint j, square s) {
           (game_get_expected_nb_tents_col(g, right_j) -
            game_get_current_nb_tents_col(g, right_j)+1)) {
         if (game_get_square(g, above_i, right_j) == EMPTY && size_of_section(g, above_i, right_j, true) == 1 && game_get_square(g, below_i, right_j) == EMPTY && size_of_section(g, below_i, right_j, true) == 1){
-          printf("right\n");
           return LOSING;
         }
       }
@@ -446,12 +431,10 @@ int game_fill(game g) {
           int tent_move = game_extra_check_move(g, i, j, TENT);
           int grass_move = game_extra_check_move(g, i, j, GRASS);
           if (tent_move == LOSING && grass_move == REGULAR) {
-            printf("placing grass in %u %u\n", i, j);
             game_play_move(g, i, j, GRASS);
             nb_moves++;
             total_nb_moves++;
           } else if (grass_move == LOSING && tent_move == REGULAR) {
-            printf("placing tent in %u %u\n", i, j);
             game_play_move(g, i, j, TENT);
             nb_moves++;
             total_nb_moves++;
@@ -470,8 +453,6 @@ int game_fill(game g) {
       total_nb_moves += cpt;
     }
   }
-  printf("end_fill:\n");
-  game_print(g);
   return total_nb_moves;
 }
 
@@ -601,7 +582,6 @@ uint fill_according_to_trees(game g) {
         if (game_get_square(g, possible_placement_i, possible_placement_j) ==
             EMPTY) {
           nb_moves++;
-          printf("playing tent: %u %u\n", possible_placement_i, possible_placement_j);
           game_play_move(g, possible_placement_i, possible_placement_j, TENT);
         }
         taken_tents[nb_taken * 2] = possible_placement_i;
