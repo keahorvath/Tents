@@ -256,7 +256,7 @@ void render_home(SDL_Window *win, SDL_Renderer *ren, Env *env){
   SDL_SetRenderDrawColor(ren, 255, 255, 255, SDL_ALPHA_OPAQUE); /* white */
   SDL_RenderCopy(ren, env->home_screen, NULL, NULL);            /* stretch it */
 
-  rect.w = (int)(w/12) ;
+  rect.w = (int)(w/6) ;
   rect.h = (int)(w/12);
   rect.y = (int)(h - h*1/5);
   // play button
@@ -468,11 +468,11 @@ bool process_home(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
     SDL_GetMouseState(&mouse.x, &mouse.y);
     // check if mouse is pressing one of the buttons
     // start game
-    if (mouse.x < w-w*9/10+w/12 && mouse.x > w-w*9/10 && mouse.y < h-h*1/5+w/12 && mouse.y > h-h*1/5){
+    if (mouse.x < w-w*9/10+w/6 && mouse.x > w-w*9/10 && mouse.y < h-h*1/5+w/12 && mouse.y > h-h*1/5){
       env->current_screen = GAME;
       env->previous_screen = HOME;
       return false;
-    }else if (mouse.x < w-w*7/10+w/12 && mouse.x > w-w*7/10 && mouse.y < h-h*1/5+w/12 && mouse.y > h-h*1/5){
+    }else if (mouse.x < w-w*7/10+w/6 && mouse.x > w-w*7/10 && mouse.y < h-h*1/5+w/12 && mouse.y > h-h*1/5){
       env->current_screen = HELP;
       env->previous_screen = HOME;
       return false;
