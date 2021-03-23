@@ -26,7 +26,7 @@ message(STATUS "SDL2 all libraries: ${SDL2_ALL_LIBS}")
 
 ## compilation rules
 include_directories(${SDL2_ALL_INC})
-add_executable(game_sdl game_sdl.c graphic_mode.c)
+add_executable(game_sdl game_sdl.c graphic_mode.c dlist.c)
 target_link_libraries(game_sdl ${SDL2_ALL_LIBS} m game)
 
 #définit le nom du programme ainsi que ses sources

@@ -11,7 +11,7 @@
 #include "game_aux.h"
 #include "game_ext.h"
 #include "game_tools.h"
-#include "queue.h"
+#include "dlist.h"
 
 /* home screen */
 #define HOME_SCREEN "home_screen.png"
@@ -104,7 +104,7 @@ struct Env_t {
   int grid_beginning_x;
   int grid_beginning_y;
   int cell_size;
-  queue *games;
+  DList games;
   game g;
 };
 
@@ -216,17 +216,17 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   }
   TTF_CloseFont(font);
 
-  env->games = queue_new();
-  queue_push_head(env->games, "level1.tnt");
-  queue_push_head(env->games, "level2.tnt");
-  queue_push_head(env->games, "level3.tnt");
-  queue_push_head(env->games, "level4.tnt");
-  queue_push_head(env->games, "level5.tnt");
-  queue_push_head(env->games, "level6.tnt");
-  queue_push_head(env->games, "level7.tnt");
-  queue_push_head(env->games, "level8.tnt");
-  queue_push_head(env->games, "level9.tnt");
-  queue_push_head(env->games, "level10.tnt");
+  env->games = dlist_create_empty();
+  env->games = dlist_prepend(env->games, "level10.tnt");
+  env->games = dlist_prepend(env->games, "level9.tnt");
+  env->games = dlist_prepend(env->games, "level8.tnt");
+  env->games = dlist_prepend(env->games, "level7.tnt");
+  env->games = dlist_prepend(env->games, "level6.tnt");
+  env->games = dlist_prepend(env->games, "level5.tnt");
+  env->games = dlist_prepend(env->games, "level4.tnt");
+  env->games = dlist_prepend(env->games, "level3.tnt");
+  env->games = dlist_prepend(env->games, "level2.tnt");
+  env->games = dlist_prepend(env->games, "level1.tnt");
   return env;
 }
 
@@ -505,8 +505,9 @@ bool process_game(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
     SDL_Delay(DELAY);
     const SDL_MessageBoxButtonData buttons[] = {
         {/* .flags, .buttonid, .text */ 0, 0, "Restart"},
-        {SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "Next Level"},
-        {SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 2, "Quit"},
+        {SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "Previous Level"},
+        {SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 2, "Next Level"},
+        {SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 3, "Quit"},
     };
     const SDL_MessageBoxColorScheme colorScheme = {
         {/* .colors (.r, .g, .b) */
@@ -541,24 +542,33 @@ bool process_game(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
       SDL_Log("selection was %s", buttons[buttonid].text);
       game_restart(env->g);
       return false;
-
     } else if (buttonid == 1) {
       SDL_Log("selection was %s", buttons[buttonid].text);
-      //game_delete(env->g);
-      if (queue_is_empty(env->games)) {
-        printf(
-            "For more levels, please send a 100 euro check to Amira Mastouri, "
-            "Kea Horvath, Marvin Beites and Alexandre Leymarie.\n");
+      if (dlist_prev(env->games) != NULL) {
+        game_delete(env->g);
+        env->games = dlist_prev(env->games);
+        char *file_name = dlist_data(env->games);
+        env->g = game_load(file_name);
+        create_tents_text(win, ren, env);
+        env->current_level--;
+        create_level_text(win, ren, env);
+      }
+    } else if (buttonid == 2) {
+      SDL_Log("selection was %s", buttons[buttonid].text);
+      if (dlist_next(env->games) == NULL) {
         return final_message_box(win ,env);
       } else {
         game_delete(env->g);
-        char *file_name = queue_pop_tail(env->games);
+        if (env->current_level != 0){
+          env->games = dlist_next(env->games);
+        }
+        char *file_name = dlist_data(env->games);
         env->g = game_load(file_name);
         create_tents_text(win, ren, env);
         env->current_level++;
         create_level_text(win, ren, env);
       }
-    } else if (buttonid == 2) {
+    } else if (buttonid == 3) {
       SDL_Log("selection was %s", buttons[buttonid].text);
       return true;
     }
@@ -705,7 +715,13 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   SDL_DestroyTexture(env->redo);
   SDL_DestroyTexture(env->restart);
   SDL_DestroyTexture(env->solve);
-  queue_clear(env->games);
+  while (dlist_next(env->games) != NULL){
+    dlist_delete_after(env->games, env->games);
+  }
+  while (dlist_prev(env->games) != NULL){
+    dlist_delete_before(env->games, env->games);
+  }
+  dlist_free(env->games);
   game_delete(env->g);
   free(env);
 }
