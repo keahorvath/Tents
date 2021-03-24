@@ -13,6 +13,7 @@
 #include "game_tools.h"
 #include "dlist.h"
 
+#define MAX_GAME_SIZE 20
 /* home screen */
 #define HOME_SCREEN "home_screen.png"
 #define HELP_BUTTON "help.png"
@@ -131,6 +132,10 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
       fprintf(stderr, "File couldn't open!\n");
       exit(EXIT_FAILURE);
     }
+    if (game_nb_rows(env->g) > MAX_GAME_SIZE || game_nb_cols(env->g) > MAX_GAME_SIZE){
+      fprintf(stderr, "Game is too big!\n");
+      exit(EXIT_FAILURE);
+    }
   } else if (argc == 1) {
     env->g = game_default();
   } else {
@@ -198,7 +203,7 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   
   /* nb_tents text */
   env->text = (SDL_Texture **)malloc(
-      sizeof(SDL_Texture *) * (game_nb_cols(env->g) + game_nb_rows(env->g)));
+      sizeof(SDL_Texture *) * (MAX_GAME_SIZE*2));
   create_tents_text(win, ren, env);
 
   /* wrapping and diagadj text */
@@ -832,11 +837,11 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   SDL_DestroyTexture(env->home_button);
   SDL_DestroyTexture(env->help_button_j);
   SDL_DestroyTexture(env->current_level_text);
+  
   for (uint i = 0; i < game_nb_rows(env->g) + game_nb_cols(env->g); i++) {
     SDL_DestroyTexture(env->text[i]);
   }
   free(env->text);
-  env->text = NULL;
   SDL_DestroyTexture(env->wrapping_text);
   SDL_DestroyTexture(env->diagadj_text);
 
