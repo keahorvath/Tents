@@ -494,7 +494,7 @@ void render_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env){
     SDL_RenderCopy(ren, env->play_button, NULL, &rect);
     // exit button
     rect.x = (int)(w * 5/8);
-    SDL_RenderCopy(ren, env->play_button, NULL, &rect);
+    SDL_RenderCopy(ren, env->exit_button, NULL, &rect);
   }else{
     // restart button
     rect.x = (int)(w * 1.25/8);
@@ -507,7 +507,7 @@ void render_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env){
     SDL_RenderCopy(ren, env->play_button, NULL, &rect);  
     // exit button
     rect.x = (int)(w * 5.75/8);
-    SDL_RenderCopy(ren, env->play_button, NULL, &rect);  
+    SDL_RenderCopy(ren, env->exit_button, NULL, &rect);  
   }
 }
 
@@ -535,7 +535,7 @@ void render_end(SDL_Window *win, SDL_Renderer *ren, Env *env){
   SDL_RenderCopy(ren, env->play_button, NULL, &rect);
   // exit button
   rect.x = (int)(w * 5/8);
-  SDL_RenderCopy(ren, env->play_button, NULL, &rect);
+  SDL_RenderCopy(ren, env->exit_button, NULL, &rect);
 }
 
 bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
