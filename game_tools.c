@@ -26,13 +26,13 @@ game game_load(char *filename) {
   FILE *f;
   // Open the file
   f = fopen(filename, "r");
-  if (f == NULL){
+  if (f == NULL) {
     fprintf(stderr, "Couldn't open file!\n");
     exit(EXIT_FAILURE);
   }
   unsigned int nb_rows, nb_cols, is_wrapping, is_diagadj;
   int i = fscanf(f, "%u%*c%u%*c%u%*c%u%*c", &nb_rows, &nb_cols, &is_wrapping,
-                  &is_diagadj);
+                 &is_diagadj);
   unsigned int nb_tents_row[nb_rows];
   unsigned int nb_tents_col[nb_cols];
   // load row line
@@ -173,7 +173,6 @@ uint game_solve_rec(game g, bool count_solutions, uint *p_nb_sol_found) {
   }
   return *p_nb_sol_found + nb_sol_before;
 }
-
 
 bool game_solve(game g) {
   test_pointer(g);
@@ -367,38 +366,54 @@ int game_extra_check_move(cgame g, uint i, uint j, square s) {
   }
   // check number 3
   if (s == TENT && !game_is_diagadj(g)) {
-    if (above_i != game_nb_rows(g) && left_j != game_nb_cols(g) && right_j != game_nb_cols(g)) {
+    if (above_i != game_nb_rows(g) && left_j != game_nb_cols(g) &&
+        right_j != game_nb_cols(g)) {
       if (nb_possible_tent_placements_row(g, above_i) ==
           (game_get_expected_nb_tents_row(g, above_i) -
            game_get_current_nb_tents_row(g, above_i) + 1)) {
-        if (game_get_square(g, above_i, left_j) == EMPTY && size_of_section(g, above_i, left_j, false) == 1 && game_get_square(g, above_i, right_j) == EMPTY && size_of_section(g, above_i, right_j, false) == 1){
+        if (game_get_square(g, above_i, left_j) == EMPTY &&
+            size_of_section(g, above_i, left_j, false) == 1 &&
+            game_get_square(g, above_i, right_j) == EMPTY &&
+            size_of_section(g, above_i, right_j, false) == 1) {
           return LOSING;
         }
       }
     }
-    if (below_i != game_nb_rows(g) && left_j != game_nb_cols(g) && right_j != game_nb_cols(g)) {
+    if (below_i != game_nb_rows(g) && left_j != game_nb_cols(g) &&
+        right_j != game_nb_cols(g)) {
       if (nb_possible_tent_placements_row(g, below_i) ==
           (game_get_expected_nb_tents_row(g, below_i) -
-           game_get_current_nb_tents_row(g, below_i)+1)) {
-        if (game_get_square(g, below_i, left_j) == EMPTY && size_of_section(g, below_i, left_j, false) == 1 && game_get_square(g, below_i, right_j) == EMPTY && size_of_section(g, below_i, right_j, false) == 1){
+           game_get_current_nb_tents_row(g, below_i) + 1)) {
+        if (game_get_square(g, below_i, left_j) == EMPTY &&
+            size_of_section(g, below_i, left_j, false) == 1 &&
+            game_get_square(g, below_i, right_j) == EMPTY &&
+            size_of_section(g, below_i, right_j, false) == 1) {
           return LOSING;
         }
       }
     }
-    if (left_j != game_nb_cols(g) && above_i != game_nb_rows(g) && below_i != game_nb_rows(g)) {
+    if (left_j != game_nb_cols(g) && above_i != game_nb_rows(g) &&
+        below_i != game_nb_rows(g)) {
       if (nb_possible_tent_placements_col(g, left_j) ==
           (game_get_expected_nb_tents_col(g, left_j) -
-           game_get_current_nb_tents_col(g, left_j)+1)) {
-        if (game_get_square(g, above_i, left_j) == EMPTY && size_of_section(g, above_i, left_j, true) == 1 && game_get_square(g, below_i, left_j) == EMPTY && size_of_section(g, below_i, left_j, true) == 1){
+           game_get_current_nb_tents_col(g, left_j) + 1)) {
+        if (game_get_square(g, above_i, left_j) == EMPTY &&
+            size_of_section(g, above_i, left_j, true) == 1 &&
+            game_get_square(g, below_i, left_j) == EMPTY &&
+            size_of_section(g, below_i, left_j, true) == 1) {
           return LOSING;
         }
       }
     }
-    if (right_j != game_nb_cols(g) && above_i != game_nb_rows(g) && below_i != game_nb_rows(g)) {
+    if (right_j != game_nb_cols(g) && above_i != game_nb_rows(g) &&
+        below_i != game_nb_rows(g)) {
       if (nb_possible_tent_placements_col(g, right_j) ==
           (game_get_expected_nb_tents_col(g, right_j) -
-           game_get_current_nb_tents_col(g, right_j)+1)) {
-        if (game_get_square(g, above_i, right_j) == EMPTY && size_of_section(g, above_i, right_j, true) == 1 && game_get_square(g, below_i, right_j) == EMPTY && size_of_section(g, below_i, right_j, true) == 1){
+           game_get_current_nb_tents_col(g, right_j) + 1)) {
+        if (game_get_square(g, above_i, right_j) == EMPTY &&
+            size_of_section(g, above_i, right_j, true) == 1 &&
+            game_get_square(g, below_i, right_j) == EMPTY &&
+            size_of_section(g, below_i, right_j, true) == 1) {
           return LOSING;
         }
       }

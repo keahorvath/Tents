@@ -2,11 +2,10 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "extra_functions.h"
 #include "game_aux.h"
 #include "game_ext.h"
 #include "queue.h"
-#include "extra_functions.h"
-
 
 /**
  * @brief The structure that stores the game state.

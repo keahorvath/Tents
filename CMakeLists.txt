@@ -62,7 +62,7 @@ foreach(file "buttons" "buttons/back_button.png" "buttons/exit.png" "buttons/pla
   file(COPY ${file} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endforeach(file)
 #fonts
-foreach(file "Walkway_Oblique_Black.ttf" "Walkway_Bold.ttf" "Calibri.ttf" "Roboto-Regular.ttf")
+foreach(file "Walkway_Bold.ttf" "Roboto-Regular.ttf")
   file(COPY ${file} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endforeach(file)
 
