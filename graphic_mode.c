@@ -51,6 +51,10 @@
 /* game_over and end screens */
 #define END_SCREEN "end_screen.jpg"
 #define GAME_OVER_SCREEN "game_over_screen.jpg"
+#define NEXT_LEVEL "next_level.png"
+#define PREVIOUS_LEVEL "previous_level.png"
+#define RESTART_GAMEOVER "restart_game_over.png"
+#define QUIT_GAMEOVER "quit_button.png"
 
 /* **************************************************************** */
 static void create_tents_text(SDL_Window *win, SDL_Renderer *ren, Env *env);
@@ -117,6 +121,10 @@ struct Env_t {
 
   SDL_Texture *game_over_screen;
   SDL_Texture *end_screen;
+  SDL_Texture *next_level_button;
+  SDL_Texture *previous_level_button;
+  SDL_Texture *restart_game_over_button;
+  SDL_Texture *quit_button;
   DList games;
   uint max_game_rows_reached, max_game_cols_reached;
   game g;
@@ -193,6 +201,14 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   if (!env->game_over_screen) ERROR("IMG_LoadTexture: %s\n", GAME_OVER_SCREEN);
   env->end_screen = IMG_LoadTexture(ren, END_SCREEN);
   if (!env->end_screen) ERROR("IMG_LoadTexture: %s\n", END_SCREEN);
+  env->next_level_button = IMG_LoadTexture(ren, NEXT_LEVEL);
+  if (!env->next_level_button) ERROR("IMG_LoadTexture: %s\n", NEXT_LEVEL);
+  env->previous_level_button = IMG_LoadTexture(ren, PREVIOUS_LEVEL);
+  if (!env->previous_level_button) ERROR("IMG_LoadTexture: %s\n", PREVIOUS_LEVEL);  
+  env->restart_game_over_button = IMG_LoadTexture(ren, RESTART_GAMEOVER);
+  if (!env->restart_game_over_button) ERROR("IMG_LoadTexture: %s\n", RESTART_GAMEOVER);
+  env->quit_button = IMG_LoadTexture(ren, QUIT_GAMEOVER);
+  if (!env->restart_game_over_button) ERROR("IMG_LoadTexture: %s\n", QUIT_GAMEOVER);
 
   env->current_level = 0;
   env->current_screen = HOME;
@@ -306,9 +322,9 @@ void render_help(SDL_Window *win, SDL_Renderer *ren, Env *env){
   SDL_GetWindowSize(win, &w, &h);
   SDL_Rect rect;
   //home button
-  rect.w = h/8;
+  rect.w = h/4;
   rect.h = h/8;
-  rect.x = (int)(w - w*1/4);
+  rect.x = (int)(w - w*1/3);
   rect.y = (int)(h - h*1/5);
   SDL_RenderCopy(ren, env->back_button, NULL, &rect);
 }
@@ -491,26 +507,28 @@ void render_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env){
   if (env->current_level == 0 || env->current_level == 1){
     // restart button
     rect.x = (int)(w * 2/8);
-    SDL_RenderCopy(ren, env->play_button, NULL, &rect);
-    // next level button
-    rect.x = (int)(w * 3.5/8);
-    SDL_RenderCopy(ren, env->play_button, NULL, &rect);
+    SDL_RenderCopy(ren, env->restart_game_over_button, NULL, &rect);
     // exit button
     rect.x = (int)(w * 5/8);
-    SDL_RenderCopy(ren, env->exit_button, NULL, &rect);
+    SDL_RenderCopy(ren, env->quit_button, NULL, &rect);
+    // next level button
+    rect.w = (int)(w*1.5/8) ;
+    rect.x = (int)(w * 3.25/8);
+    SDL_RenderCopy(ren, env->next_level_button, NULL, &rect);
   }else{
     // restart button
-    rect.x = (int)(w * 1.25/8);
-    SDL_RenderCopy(ren, env->play_button, NULL, &rect);  
+    rect.x = (int)(w * 1/8);
+    SDL_RenderCopy(ren, env->restart_game_over_button, NULL, &rect);  
+    // exit button
+    rect.x = (int)(w * 6/8);
+    SDL_RenderCopy(ren, env->quit_button, NULL, &rect);  
+    rect.w = (int)(w/6) ;
     // previous level button
-    rect.x = (int)(w * 2.75/8);
-    SDL_RenderCopy(ren, env->play_button, NULL, &rect);  
+    rect.x = (int)(w * 2.5/8);
+    SDL_RenderCopy(ren, env->previous_level_button, NULL, &rect); 
     // next button
     rect.x = (int)(w * 4.25/8);
-    SDL_RenderCopy(ren, env->play_button, NULL, &rect);  
-    // exit button
-    rect.x = (int)(w * 5.75/8);
-    SDL_RenderCopy(ren, env->exit_button, NULL, &rect);  
+    SDL_RenderCopy(ren, env->next_level_button, NULL, &rect);  
   }
 }
 
@@ -532,13 +550,14 @@ void render_end(SDL_Window *win, SDL_Renderer *ren, Env *env){
   rect.y = (int)(h*3/10);
   // restart button
   rect.x = (int)(w * 2/8);
-  SDL_RenderCopy(ren, env->play_button, NULL, &rect);
-  // previous level button
-  rect.x = (int)(w * 3.5/8);
-  SDL_RenderCopy(ren, env->play_button, NULL, &rect);
+  SDL_RenderCopy(ren, env->restart_game_over_button, NULL, &rect);
   // exit button
-  rect.x = (int)(w * 5/8);
-  SDL_RenderCopy(ren, env->exit_button, NULL, &rect);
+  rect.x = (int)(w * 5.5/8);
+  SDL_RenderCopy(ren, env->quit_button, NULL, &rect);
+  // previous level button
+  rect.w = (int)(w*2/8);
+  rect.x = (int)(w * 3.25/8);
+  SDL_RenderCopy(ren, env->previous_level_button, NULL, &rect);
 }
 
 bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
@@ -590,7 +609,7 @@ bool process_help(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
     SDL_GetMouseState(&mouse.x, &mouse.y);
     // check if mouse is pressing one of the buttons
     // start game
-    if (mouse.x < w-w/4+h/8 && mouse.x > w-w/4 && mouse.y < h-h/5+h/8 && mouse.y > h-h/5){
+    if (mouse.x < w-w/3+h/4 && mouse.x > w-w/3 && mouse.y < h-h/5+h/8 && mouse.y > h-h/5){
       env->current_screen = env->previous_screen;
       env->previous_screen = HELP;
       return false;
@@ -738,7 +757,7 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *
         game_restart(env->g);
         env->current_screen = GAME;
         return false;
-      }else if(mouse.x > w * 3.5/8 && mouse.x < w*3.5/8+w*1/8 && mouse.y > h*3/10 && mouse.y < h*3/10+w*1/16){
+      }else if(mouse.x > w * 3.25/8 && mouse.x < w*3.25/8+w*1.5/8 && mouse.y > h*3/10 && mouse.y < h*3/10+w*1/16){
         game_delete(env->g);
         if (env->current_level == 1){
           env->games = dlist_next(env->games);
@@ -760,11 +779,11 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *
         return true;
       }
     }else{
-      if (mouse.x > w * 1.25/8 && mouse.x < w*1.25/8+w*1/8 && mouse.y > h*3/10 && mouse.y < h*3/10+w*1/16){
+      if (mouse.x > w * 1/8 && mouse.x < w*1/4 && mouse.y > h*3/10 && mouse.y < h*3/10+w*1/16){
         game_restart(env->g);
         env->current_screen = GAME;
         return false;
-      }else if(mouse.x > w * 2.75/8 && mouse.x < w*2.75/8+w*1/8 && mouse.y > h*3/10 && mouse.y < h*3/10+w*1/16){
+      }else if(mouse.x > w * 2.5/8 && mouse.x < w*2.5/8+w*1/6 && mouse.y > h*3/10 && mouse.y < h*3/10+w*1/16){
         game_delete(env->g);
         env->games = dlist_prev(env->games);
         env->current_level--;
@@ -774,7 +793,7 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *
         create_tents_text(win, ren, env);
         env->current_screen = GAME;
         return false;
-      }else if(mouse.x > w * 4.25/8 && mouse.x < w*4.25/8+w*1/8 && mouse.y > h*3/10 && mouse.y < h*3/10+w*1/16){
+      }else if(mouse.x > w * 4.25/8 && mouse.x < w*4.25/8+w*1/6 && mouse.y > h*3/10 && mouse.y < h*3/10+w*1/16){
         game_delete(env->g);
         env->games = dlist_next(env->games);
         env->current_level++;
@@ -790,7 +809,7 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *
         }
         env->current_screen = GAME;
         return false;
-      }else if(mouse.x > w * 5.75/8 && mouse.x < w*5.75/8+w*1/8 && mouse.y > h*3/10 && mouse.y < h*3/10+w*1/16){
+      }else if(mouse.x > w * 6/8 && mouse.x < w*5.75/8+w*1/8 && mouse.y > h*3/10 && mouse.y < h*3/10+w*1/16){
         return true;
       }   
     }
@@ -810,7 +829,7 @@ bool process_end(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
       game_restart(env->g);
       env->current_screen = GAME;
       return false;
-    }else if(mouse.x > w * 3.5/8 && mouse.x < w*3.5/8+w*1/8 && mouse.y > h*3/10 && mouse.y < h*3/10+w*1/16){
+    }else if(mouse.x > w * 3.25/8 && mouse.x < w*3.25/8+w*2/8 && mouse.y > h*3/10 && mouse.y < h*3/10+w*1/16){
       game_delete(env->g);
       env->games = dlist_prev(env->games);
       env->current_level--;
@@ -820,7 +839,7 @@ bool process_end(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
       create_tents_text(win, ren, env);
       env->current_screen = GAME;
       return false;
-    }else if(mouse.x > w * 5/8 && mouse.x < w*5/8+w*1/8 && mouse.y > h*3/10 && mouse.y < h*3/10+w*1/16){
+    }else if(mouse.x > w * 5.5/8 && mouse.x < w*5.5/8+w*1/8 && mouse.y > h*3/10 && mouse.y < h*3/10+w*1/16){
       return true;
     }
   }
@@ -862,6 +881,10 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
 
   SDL_DestroyTexture(env->game_over_screen);
   SDL_DestroyTexture(env->end_screen);
+  SDL_DestroyTexture(env->next_level_button);
+  SDL_DestroyTexture(env->previous_level_button);
+  SDL_DestroyTexture(env->restart_game_over_button);
+  SDL_DestroyTexture(env->quit_button);
 
   while (dlist_next(env->games) != NULL){
     dlist_delete_after(env->games, env->games);

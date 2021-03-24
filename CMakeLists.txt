@@ -58,7 +58,7 @@ foreach(file "games" "games/level1.tnt" "games/level2.tnt" "games/level3.tnt" "g
   file(COPY ${file} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endforeach(file)
 #buttons
-foreach(file "buttons" "buttons/back_button.png" "buttons/exit.png" "buttons/play.png" "buttons/help.png" "buttons/restart.png" "buttons/redo.png" "buttons/undo.png" "buttons/solve.png" "buttons/home_button.png" "buttons/help_button_j.png")
+foreach(file "buttons" "buttons/back_button.png" "buttons/exit.png" "buttons/play.png" "buttons/help.png" "buttons/restart.png" "buttons/redo.png" "buttons/undo.png" "buttons/solve.png" "buttons/home_button.png" "buttons/help_button_j.png" "buttons/next_level.png" "buttons/previous_level.png" "buttons/restart_game_over.png" "buttons/quit_button.png")
   file(COPY ${file} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endforeach(file)
 #fonts
