@@ -118,6 +118,7 @@ struct Env_t {
   SDL_Texture *game_over_screen;
   SDL_Texture *end_screen;
   DList games;
+  uint max_game_rows_reached, max_game_cols_reached;
   game g;
 };
 
@@ -142,6 +143,8 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
     fprintf(stderr, "Wrong number of arguments!\n");
     exit(EXIT_FAILURE);
   }
+  env->max_game_cols_reached = game_nb_cols(env->g);
+  env->max_game_rows_reached = game_nb_rows(env->g);
 
   /* home screen textures */
   env->home_screen = IMG_LoadTexture(ren, HOME_SCREEN);
@@ -745,6 +748,12 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *
         env->g = game_load(level);
         create_level_text(win, ren, env);
         create_tents_text(win, ren, env);
+        if (game_nb_cols(env->g) > env->max_game_cols_reached){
+          env->max_game_cols_reached = game_nb_cols(env->g);
+        }
+        if (game_nb_rows(env->g) > env->max_game_rows_reached){
+          env->max_game_rows_reached = game_nb_rows(env->g);
+        }
         env->current_screen = GAME;
         return false;
       }else if(mouse.x > w * 5/8 && mouse.x < w*5/8+w*1/8 && mouse.y > h*3/10 && mouse.y < h*3/10+w*1/16){
@@ -773,6 +782,12 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *
         env->g = game_load(level);
         create_level_text(win, ren, env);
         create_tents_text(win, ren, env);
+        if (game_nb_cols(env->g) > env->max_game_cols_reached){
+          env->max_game_cols_reached = game_nb_cols(env->g);
+        }
+        if (game_nb_rows(env->g) > env->max_game_rows_reached){
+          env->max_game_rows_reached = game_nb_rows(env->g);
+        }
         env->current_screen = GAME;
         return false;
       }else if(mouse.x > w * 5.75/8 && mouse.x < w*5.75/8+w*1/8 && mouse.y > h*3/10 && mouse.y < h*3/10+w*1/16){
@@ -838,7 +853,7 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   SDL_DestroyTexture(env->help_button_j);
   SDL_DestroyTexture(env->current_level_text);
   
-  for (uint i = 0; i < game_nb_rows(env->g) + game_nb_cols(env->g); i++) {
+  for (uint i = 0; i < env->max_game_cols_reached + env->max_game_rows_reached; i++) {
     SDL_DestroyTexture(env->text[i]);
   }
   free(env->text);
