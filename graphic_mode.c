@@ -593,6 +593,9 @@ bool process_help(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
 
 bool process_game(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e){
   if (game_is_over(env->g)) {
+    render(win, ren, env);
+    SDL_RenderPresent(ren);
+    SDL_Delay(800);
     if (env->current_level == 10){
       env->current_screen = END;
       return false;
@@ -833,6 +836,7 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
     SDL_DestroyTexture(env->text[i]);
   }
   free(env->text);
+  env->text = NULL;
   SDL_DestroyTexture(env->wrapping_text);
   SDL_DestroyTexture(env->diagadj_text);
 
