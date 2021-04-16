@@ -22,17 +22,6 @@ struct game_s {
   queue *redo_hist;
 };
 
-/**
- * @brief The structure pointer that stores the game state.
- **/
-typedef struct game_s *game;
-
-/**
- * @brief The structure constant pointer that stores the game state.
- * @details That means that it is not possible to modify the game using this
- * pointer.
- **/
-typedef const struct game_s *cgame;
 
 struct move {
   square s;
