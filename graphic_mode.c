@@ -138,6 +138,28 @@ struct Env_t {
   game g;
 };
 
+#ifdef __ANDROID__
+static void copy_asset(char * src, char * dst)
+{
+    SDL_RWops * file = SDL_RWFromFile(src, "r");
+    if(!file) ERROR("[ERROR] SDL_RWFromFile: %s\n", src);
+    int size = SDL_RWsize(file);
+    PRINT("copy file %s (%d bytes) into %s\n", src, size, dst);
+    char* buf = (char*)malloc(size+1);
+    if(!buf) ERROR("[ERROR] malloc\n");
+    int r = SDL_RWread(file, buf, 1, size);
+    PRINT("read %d\n", r);
+    if(r != size) ERROR("[ERROR] fail to read all file (%d bytes)\n", r);
+    FILE* out = fopen(dst, "w+");
+    if(!out) ERROR("[ERROR] fail to create file %s\n", dst);
+    int w = fwrite(buf, 1, r, out);
+    if(r != w) ERROR("[ERROR] fail to write all file (%d bytes)\n", w);
+    fclose(out);
+    SDL_RWclose(file);
+    free(buf);
+}
+#endif
+
 /* **************************************************************** */
 
 Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
@@ -269,8 +291,18 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
     SDL_FreeSurface(surf);
   }
   TTF_CloseFont(font);
+  char *levels[] = {"games/level10.tnt","games/level9.tnt", "games/level8.tnt", "games/level7.tnt", "games/level6.tnt", "games/level5.tnt", "games/level4.tnt", "games/level3.tnt", "games/level2.tnt", "games/level1.tnt"};
+  char *levels_android[] = {"level10.tnt","level9.tnt", "level8.tnt", "level7.tnt", "level6.tnt", "level5.tnt", "level4.tnt", "level3.tnt", "level2.tnt", "level1.tnt"};
 
-  env->games = dlist_create_empty();
+  env->games = dlist_create_empty();  
+  for (uint i = 0; i < 10; i++){
+    #ifdef __ANDROID__
+    env->games = dlist_prepend(env->games, levels_android[i]);
+    #else
+    env->games = dlist_prepend(env->games, levels[i]);
+    #endif
+  }
+  /*
   env->games = dlist_prepend(env->games, "games/level10.tnt");
   env->games = dlist_prepend(env->games, "games/level9.tnt");
   env->games = dlist_prepend(env->games, "games/level8.tnt");
@@ -281,6 +313,7 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   env->games = dlist_prepend(env->games, "games/level3.tnt");
   env->games = dlist_prepend(env->games, "games/level2.tnt");
   env->games = dlist_prepend(env->games, "games/level1.tnt");
+  */
   return env;
 }
 
@@ -802,8 +835,17 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
           env->games = dlist_next(env->games);
         }
         env->current_level++;
+
         char *level = dlist_data(env->games);
+        #ifdef __ANDROID__
+        const char * dir = SDL_AndroidGetInternalStoragePath();
+        char filename[1024];
+        sprintf(filename, "%s/%s", dir, level);
+        copy_asset(level, filename);
+        env->g = game_load(filename);
+        #else
         env->g = game_load(level);
+        #endif
         create_level_text(win, ren, env);
         create_tents_text(win, ren, env);
         if (game_nb_cols(env->g) > env->max_game_cols_reached) {
@@ -833,7 +875,15 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
         env->games = dlist_prev(env->games);
         env->current_level--;
         char *level = dlist_data(env->games);
+        #ifdef __ANDROID__
+        const char * dir = SDL_AndroidGetInternalStoragePath();
+        char filename[1024];
+        sprintf(filename, "%s/%s", dir, level);
+        copy_asset(level, filename);
+        env->g = game_load(filename);
+        #else
         env->g = game_load(level);
+        #endif
         create_level_text(win, ren, env);
         create_tents_text(win, ren, env);
         env->current_screen = GAME;
@@ -845,7 +895,15 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
         env->games = dlist_next(env->games);
         env->current_level++;
         char *level = dlist_data(env->games);
+        #ifdef __ANDROID__
+        const char * dir = SDL_AndroidGetInternalStoragePath();
+        char filename[1024];
+        sprintf(filename, "%s/%s", dir, level);
+        copy_asset(level, filename);
+        env->g = game_load(filename);
+        #else
         env->g = game_load(level);
+        #endif
         create_level_text(win, ren, env);
         create_tents_text(win, ren, env);
         if (game_nb_cols(env->g) > env->max_game_cols_reached) {
@@ -888,7 +946,15 @@ bool process_end(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
       env->games = dlist_prev(env->games);
       env->current_level--;
       char *level = dlist_data(env->games);
+      #ifdef __ANDROID__
+      const char * dir = SDL_AndroidGetInternalStoragePath();
+      char filename[1024];
+      sprintf(filename, "%s/%s", dir, level);
+      copy_asset(level, filename);
+      env->g = game_load(filename);
+      #else
       env->g = game_load(level);
+      #endif
       create_level_text(win, ren, env);
       create_tents_text(win, ren, env);
       env->current_screen = GAME;
