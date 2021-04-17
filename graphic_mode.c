@@ -23,6 +23,7 @@
 
 /*help screen */
 #define HELP_SCREEN "images/help_screen.png"
+#define HELP_SCREEN_VERT "images/help_screen_small.png"
 #define BACK_BUTTON "buttons/back_button.png"
 
 /* game screen */
@@ -107,6 +108,7 @@ struct Env_t {
   SDL_Texture *exit_button;
 
   SDL_Texture *help_screen;
+  SDL_Texture *help_screen_vert;
   SDL_Texture *back_button;
 
   SDL_Texture *game_screen;
@@ -213,6 +215,8 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   /* help screen textures */
   env->help_screen = IMG_LoadTexture(ren, HELP_SCREEN);
   if (!env->help_screen) ERROR("IMG_LoadTexture: %s\n", HELP_SCREEN);
+  env->help_screen_vert = IMG_LoadTexture(ren, HELP_SCREEN_VERT);
+  if (!env->help_screen_vert) ERROR("IMG_LoadTexture: %s\n", HELP_SCREEN_VERT);
   env->back_button = IMG_LoadTexture(ren, BACK_BUTTON);
   if (!env->back_button) ERROR("IMG_LoadTexture: %s\n", BACK_BUTTON);
 
@@ -396,16 +400,26 @@ void render_home(SDL_Window *win, SDL_Renderer *ren, Env *env) {
 }
 
 void render_help(SDL_Window *win, SDL_Renderer *ren, Env *env) {
-  SDL_RenderCopy(ren, env->help_screen, NULL, NULL);
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
   SDL_Rect rect;
-  // back button
-  rect.w = w * BUTTON_WIDTH;
-  rect.h = w * BUTTON_HEIGHT;
-  rect.x = (int)(w * 2 / 3);
-  rect.y = (int)(h * 4 / 5);
-  SDL_RenderCopy(ren, env->back_button, NULL, &rect);
+  if (w > h){
+    SDL_RenderCopy(ren, env->help_screen, NULL, NULL);
+    // back button
+    rect.w = w * BUTTON_WIDTH;
+    rect.h = w * BUTTON_HEIGHT;
+    rect.x = (int)(w * 2 / 3);
+    rect.y = (int)(h * 4 / 5);
+    SDL_RenderCopy(ren, env->back_button, NULL, &rect);
+  }else{
+    SDL_RenderCopy(ren, env->help_screen_vert, NULL, NULL);
+    // back button
+    rect.w = w * 1/3;
+    rect.h = w * 1/6;
+    rect.x = (int)(w * 1/3);
+    rect.y = (int)(h - 1.2*rect.h);
+    SDL_RenderCopy(ren, env->back_button, NULL, &rect);
+  }
 }
 
 void render_game(SDL_Window *win, SDL_Renderer *ren, Env *env) {
@@ -816,14 +830,26 @@ bool process_help(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
   if (e->type == SDL_MOUSEBUTTONDOWN) {
     SDL_Point mouse;
     SDL_GetMouseState(&mouse.x, &mouse.y);
-    // check if mouse is pressing one of the buttons
-    // start game
-    if (mouse.x < w * 2 / 3 + w * BUTTON_WIDTH && mouse.x > w * 2 / 3 &&
-        mouse.y < h * 4 / 5 + w * BUTTON_HEIGHT && mouse.y > h * 4 / 5) {
-      env->current_screen = env->previous_screen;
-      env->previous_screen = HELP;
-      return false;
+    if (w > h){
+      // check if mouse is pressing one of the buttons
+      // start game
+      if (mouse.x < w * 2 / 3 + w * BUTTON_WIDTH && mouse.x > w * 2 / 3 &&
+          mouse.y < h * 4 / 5 + w * BUTTON_HEIGHT && mouse.y > h * 4 / 5) {
+        env->current_screen = env->previous_screen;
+        env->previous_screen = HELP;
+        return false;
+      }
+    }else{
+      // check if mouse is pressing one of the buttons
+      // start game
+      if (mouse.x < w * 2/3 && mouse.x > w * 1/3 &&
+          mouse.y < h - 1.2*w*1/6 + w*1/6 && mouse.y > h - 1.2*w*1/6) {
+        env->current_screen = env->previous_screen;
+        env->previous_screen = HELP;
+        return false;
+      }
     }
+
   }
   return false;
 }
@@ -1258,6 +1284,7 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   SDL_DestroyTexture(env->exit_button);
 
   SDL_DestroyTexture(env->help_screen);
+  SDL_DestroyTexture(env->help_screen_vert);
   SDL_DestroyTexture(env->back_button);
 
   SDL_DestroyTexture(env->game_screen);
