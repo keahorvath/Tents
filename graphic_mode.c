@@ -41,6 +41,9 @@
 #define SOLVE "buttons/solve.png"
 #define FONT "Walkway_Bold.ttf"
 #define FONT_LEVEL "Roboto-Regular.ttf"
+#define SWITCH_1 "images/switch1.png"
+#define SWITCH_2 "images/switch2.png"
+
 
 #define LEVEL_SIZE 50
 #define FONT_RATIO 0.7  // ratio of font size to cell size
@@ -49,7 +52,7 @@
 #define TEXT_COLOR \
   { 0, 0, 0, 255 }
 #define ABOVE_GRID_RATIO 0.2
-#define LEFT_FROM_GRID_RATIO 0.1
+#define LEFT_FROM_GRID_RATIO 0.03
 
 /* game_over and end screens */
 #define END_SCREEN "images/end_screen.jpg"
@@ -132,7 +135,9 @@ struct Env_t {
   int grid_beginning_x;
   int grid_beginning_y;
   int cell_size;
-
+  bool switch_button;
+  SDL_Texture *switch_1;
+  SDL_Texture *switch_2;
   SDL_Texture *game_over_screen;
   SDL_Texture *game_over_screen_vert;
   SDL_Texture *end_screen;
@@ -264,6 +269,12 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   env->current_screen = HOME;
   env->previous_screen = HOME;
   env->restricted_by_height = true;
+  env->switch_button = true;
+  env->switch_1 = IMG_LoadTexture(ren, SWITCH_1);
+  if (!env->switch_1) ERROR("IMG_LoadTexture: %s\n", SWITCH_1);
+  env->switch_2 = IMG_LoadTexture(ren, SWITCH_2);
+  if (!env->switch_2) ERROR("IMG_LoadTexture: %s\n", SWITCH_2);
+
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
 
@@ -429,10 +440,10 @@ void render_game(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   } else {
     env->restricted_by_height = false;
     env->cell_size =
-        (int)((w - w * 2 * LEFT_FROM_GRID_RATIO) / (game_nb_cols(env->g) + 1));
+        (int)((w - w * LEFT_FROM_GRID_RATIO) / (game_nb_cols(env->g) + 1));
     if (h / 2 - env->cell_size * (game_nb_rows(env->g) + 1) / 2 <
         h * ABOVE_GRID_RATIO) {
-      env->grid_beginning_y = h - env->cell_size * (game_nb_rows(env->g) + 1);
+      env->grid_beginning_y = h - env->cell_size * (game_nb_rows(env->g) + 3);
     } else {
       env->grid_beginning_y =
           h / 2 - env->cell_size * (game_nb_rows(env->g) + 1) / 2;
@@ -522,6 +533,47 @@ void render_game(SDL_Window *win, SDL_Renderer *ren, Env *env) {
     SDL_RenderCopy(ren, env->text[j + game_nb_rows(env->g)], NULL, &rect);
   }
 
+
+
+  #ifdef __ANDROID__
+  /*render buttons*/
+  rect.w = (int)(env->grid_width * 1 / 10);
+  rect.h = (int)(env->grid_width * 1 / 10);
+  env->small_button_size = rect.w;
+  rect.y = env->grid_beginning_y - (int)(rect.w + rect.w * 1 / 4);
+  // undo
+  rect.x = (int)(w * 1/10);
+  SDL_RenderCopy(ren, env->undo, NULL, &rect);
+  // redo
+  rect.x = (int)(w * 3/10);
+  SDL_RenderCopy(ren, env->redo, NULL, &rect);
+  // restart
+  rect.x = (int)(w * 6/10);
+  SDL_RenderCopy(ren, env->restart, NULL, &rect);
+  // solve
+  rect.x = (int)(w * 8/10);
+  SDL_RenderCopy(ren, env->solve, NULL, &rect);
+  //render switch
+  rect.w = (int)(w * 1/3);
+  rect.h = (int)(w * 1/6);
+  rect.x = (int)(w * 1/3);
+  rect.y = (int)(h - 1.5*rect.h);
+  if (env->switch_button){
+    SDL_RenderCopy(ren, env->switch_1, NULL, &rect);
+  }else{
+    SDL_RenderCopy(ren, env->switch_2, NULL, &rect);
+  }
+  #else
+  /*render wrapping and diagadj texts*/
+  rect.w = (int)(env->grid_width / 4);
+  rect.h = (int)(rect.w / env->wrap_diag_ratio);
+  rect.x = env->grid_beginning_x;
+  rect.y = (int)(env->grid_beginning_y - rect.h * 2.4);
+  SDL_RenderCopy(ren, env->wrapping_text, NULL, &rect);
+  rect.x = env->grid_beginning_x;
+  rect.y = (int)(env->grid_beginning_y - rect.h * 1.3);
+  SDL_RenderCopy(ren, env->diagadj_text, NULL, &rect);
+
   /*render buttons*/
   rect.w = (int)(env->grid_width * 1 / 14);
   rect.h = (int)(env->grid_width * 1 / 14);
@@ -539,17 +591,7 @@ void render_game(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   // solve
   rect.x = env->grid_beginning_x + env->grid_width - (int)(1.5 * rect.w);
   SDL_RenderCopy(ren, env->solve, NULL, &rect);
-
-  /*render wrapping and diagadj texts*/
-  rect.w = (int)(env->grid_width / 4);
-  rect.h = (int)(rect.w / env->wrap_diag_ratio);
-  rect.x = env->grid_beginning_x;
-  rect.y = (int)(env->grid_beginning_y - rect.h * 2.4);
-  SDL_RenderCopy(ren, env->wrapping_text, NULL, &rect);
-  rect.x = env->grid_beginning_x;
-  rect.y = (int)(env->grid_beginning_y - rect.h * 1.3);
-  SDL_RenderCopy(ren, env->diagadj_text, NULL, &rect);
-
+  #endif
   /* render home and help buttons */
   if (env->restricted_by_height) {
     rect.w = (int)w / 15;
@@ -705,6 +747,26 @@ bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
 bool process_home(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
+#ifdef __ANDROID__
+  if (e->type == SDL_FINGERDOWN) {
+    // check if mouse is pressing one of the buttons
+    // start game
+    if (e->tfinger.x * w < w*1/3+w*1/12 && e->tfinger.x * w > w * 1/12 &&
+        e->tfinger.y * h < h*1/12+h*9/12 && e->tfinger.y * h > h * 9/12) {
+      env->current_screen = GAME;
+      env->previous_screen = HOME;
+      return false;
+    }else if (e->tfinger.x * w < w*1/3+w*1/12 && e->tfinger.x * w > w * 1/12 &&
+        e->tfinger.y * h < h*1/12+h*9/12+1.5*h * 1/12 && e->tfinger.y * h > h * 9/12+1.5*h * 1/12) {
+      env->current_screen = HELP;
+      env->previous_screen = HOME;
+      return false;
+    }else if (e->tfinger.x * w < w*1/3+w*7/12 && e->tfinger.x * w > w * 7/12 &&
+        e->tfinger.y * h < h*1/12+h*9/12+1.5*h * 1/12 && e->tfinger.y * h > h * 9/12+1.5*h * 1/12) {
+      return true;
+    } 
+  }
+#else
   if (e->type == SDL_MOUSEBUTTONDOWN) {
     SDL_Point mouse;
     SDL_GetMouseState(&mouse.x, &mouse.y);
@@ -744,6 +806,7 @@ bool process_home(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
       } 
     }
   }
+#endif
   return false;
 }
 
@@ -769,7 +832,7 @@ bool process_game(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
   if (game_is_over(env->g)) {
     render(win, ren, env);
     SDL_RenderPresent(ren);
-    SDL_Delay(800);
+    SDL_Delay(600);
     if (env->current_level == 10) {
       env->current_screen = END;
       return false;
@@ -779,6 +842,106 @@ bool process_game(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
   }
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
+#ifdef __ANDROID__
+  if (e->type == SDL_FINGERDOWN) {
+    // check if mouse is pressing one of the buttons
+    // start game
+    if (e->tfinger.x * w < w*2/10 && e->tfinger.x * w > w * 1/10 &&
+        e->tfinger.y * h < w*1/10 + env->grid_beginning_y - w*1/10*5/4 && e->tfinger.y * h > env->grid_beginning_y - w*1/10*5/4 ) {
+      game_undo(env->g);
+    }
+    // redo the last move
+    else if (e->tfinger.x * w < w*4/10 && e->tfinger.x * w > w * 3/10 &&
+        e->tfinger.y * h < w*1/10 + env->grid_beginning_y - w*1/10*5/4 && e->tfinger.y * h > env->grid_beginning_y - w*1/10*5/4 ) {
+      game_redo(env->g);
+    }
+    // restart the game from the beginning
+    else if (e->tfinger.x * w < w*7/10 && e->tfinger.x * w > w * 6/10 &&
+        e->tfinger.y * h < w*1/10 + env->grid_beginning_y - w*1/10*5/4 && e->tfinger.y * h > env->grid_beginning_y - w*1/10*5/4 ) {
+      game_restart(env->g);
+    }
+    // solve the game
+    else if (e->tfinger.x * w < w*9/10 && e->tfinger.x * w > w * 8/10 &&
+        e->tfinger.y * h < w*1/10 + env->grid_beginning_y - w*1/10*5/4 && e->tfinger.y * h > env->grid_beginning_y - w*1/10*5/4 ) {
+      for (uint i = 0; i < game_nb_rows(env->g); i++) {
+        for (uint j = 0; j < game_nb_cols(env->g); j++) {
+          if (game_get_square(env->g, i, j) == TENT ||
+              game_get_square(env->g, i, j) == GRASS) {
+            game_set_square(env->g, i, j, EMPTY);
+          }
+        }
+      }
+      game_solve(env->g);
+    }
+    //switch button press
+    else if (e->tfinger.x * w < w*1/2+w*1/6 && e->tfinger.x * w > w * 1/2 &&
+        e->tfinger.y * h < w*1/6+ h - 1.5*w*1/6 && e->tfinger.y * h > h - 1.5*w*1/6){
+      if (env->switch_button){
+        env->switch_button = false;
+      }
+    }
+    else if (e->tfinger.x * w < w*1/2 && e->tfinger.x * w > w * 1/2 - w*1/6 &&
+        e->tfinger.y * h < w*1/6+ h - 1.5*w*1/6 && e->tfinger.y * h > h - 1.5*w*1/6){
+      if (!env->switch_button){
+        env->switch_button = true;
+      }
+    }
+    // go to the home page
+    if (e->tfinger.x * w > env->side_button_size * 0.5 &&
+        e->tfinger.x * w  < env->side_button_size * 1.5) {
+      if (e->tfinger.y * h > (h - 1.5 * env->side_button_size) &&
+          e->tfinger.y * h < (h - 0.5 * env->side_button_size)) {
+        env->current_screen = HOME;
+        env->previous_screen = GAME;
+      }
+    }
+    // go to help page
+    if (e->tfinger.x * w  > (w - env->side_button_size * 1.5) &&
+        e->tfinger.x * w  < (w - env->side_button_size * 0.5)) {
+      if (e->tfinger.y * h > (h - 1.5 * env->side_button_size) &&
+          e->tfinger.y * h < (h - 0.5 * env->side_button_size)) {
+        env->current_screen = HELP;
+        env->previous_screen = GAME;
+      }
+    }
+    // convert mouse position to cell in grid
+    if (mouse_is_in_grid(env, (int)(e->tfinger.x * w) , (int)(e->tfinger.y * h))) {
+      uint row, col;
+      row = (uint)(e->tfinger.y * h - env->grid_beginning_y) / env->cell_size;
+      col = (uint)(e->tfinger.x * w - env->grid_beginning_x) / env->cell_size;
+      if (env->switch_button == true) {
+        if (game_get_square(env->g, row, col) == TENT ||
+            game_get_square(env->g, row, col) == GRASS) {
+          game_play_move(env->g, row, col, EMPTY);
+        } else if (game_get_square(env->g, row, col) == EMPTY) {
+          game_play_move(env->g, row, col, TENT);
+        }
+      } else {
+        if (game_get_square(env->g, row, col) == TENT ||
+            game_get_square(env->g, row, col) == GRASS) {
+          game_play_move(env->g, row, col, EMPTY);
+        } else if (game_get_square(env->g, row, col) == EMPTY) {
+          game_play_move(env->g, row, col, GRASS);
+        }
+      }
+    }
+  } else if (e->type == SDL_FINGERMOTION) {
+    if (mouse_is_in_grid(env, (int)(e->tfinger.x * w), (int)(e->tfinger.y * h))) {
+      uint row, col;
+      row = (uint)(e->tfinger.y * h - env->grid_beginning_y) / env->cell_size;
+      col = (uint)(e->tfinger.x * w - env->grid_beginning_x) / env->cell_size;
+      if (env->switch_button == true) {
+        if (game_get_square(env->g, row, col) == EMPTY) {
+          game_play_move(env->g, row, col, TENT);
+        }
+      } else { 
+        if (game_get_square(env->g, row, col) == EMPTY) {
+          game_play_move(env->g, row, col, GRASS);
+        }
+      }
+    }
+  }
+#else
   if (e->type == SDL_MOUSEBUTTONDOWN) {
     SDL_Point mouse;
     SDL_GetMouseState(&mouse.x, &mouse.y);
@@ -900,6 +1063,7 @@ bool process_game(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
       game_redo(env->g);
     }
   }
+#endif
   return false;
 }
 
@@ -1119,6 +1283,8 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   free(env->text);
   SDL_DestroyTexture(env->wrapping_text);
   SDL_DestroyTexture(env->diagadj_text);
+  SDL_DestroyTexture(env->switch_1);
+  SDL_DestroyTexture(env->switch_2);
 
   SDL_DestroyTexture(env->game_over_screen);
   SDL_DestroyTexture(env->game_over_screen_vert);
