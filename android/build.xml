@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="sdl2-demo" default="help">
+<project name="Save-Donald" default="help">
 
   <property name="target" value="android-23" />
 
