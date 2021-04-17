@@ -16,6 +16,7 @@
 #define MAX_GAME_SIZE 20
 /* home screen */
 #define HOME_SCREEN "images/home_screen.png"
+#define HOME_SCREEN_VERT "images/home_screen_small.png"
 #define HELP_BUTTON "buttons/help.png"
 #define PLAY_BUTTON "buttons/play.png"
 #define EXIT_BUTTON "buttons/exit.png"
@@ -26,6 +27,7 @@
 
 /* game screen */
 #define GAME_SCREEN "images/game_screen.jpg"
+#define GAME_SCREEN_VERT "images/background_small.png"
 #define PALM_TREE "images/tree.png"
 #define WATER "images/water.png"
 #define RAFT "images/happy_trump.jpg"
@@ -51,7 +53,9 @@
 
 /* game_over and end screens */
 #define END_SCREEN "images/end_screen.jpg"
+#define END_SCREEN_VERT "images/end_screen_small.png"
 #define GAME_OVER_SCREEN "images/game_over_screen.jpg"
+#define GAME_OVER_SCREEN_VERT "images/game_over_screen_small.png"
 #define NEXT_LEVEL "buttons/next_level.png"
 #define PREVIOUS_LEVEL "buttons/previous_level.png"
 #define RESTART_GAMEOVER "buttons/restart_game_over.png"
@@ -94,6 +98,7 @@ struct Env_t {
   uint current_level;
 
   SDL_Texture *home_screen;
+  SDL_Texture *home_screen_vert;
   SDL_Texture *help_button;
   SDL_Texture *play_button;
   SDL_Texture *exit_button;
@@ -102,6 +107,7 @@ struct Env_t {
   SDL_Texture *back_button;
 
   SDL_Texture *game_screen;
+  SDL_Texture *game_screen_vert;
   bool restricted_by_height;
   int grid_width;
   SDL_Texture *tree;
@@ -128,7 +134,9 @@ struct Env_t {
   int cell_size;
 
   SDL_Texture *game_over_screen;
+  SDL_Texture *game_over_screen_vert;
   SDL_Texture *end_screen;
+  SDL_Texture *end_screen_vert;
   SDL_Texture *next_level_button;
   SDL_Texture *previous_level_button;
   SDL_Texture *restart_game_over_button;
@@ -188,6 +196,8 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   /* home screen textures */
   env->home_screen = IMG_LoadTexture(ren, HOME_SCREEN);
   if (!env->home_screen) ERROR("IMG_LoadTexture: %s\n", HOME_SCREEN);
+  env->home_screen_vert = IMG_LoadTexture(ren, HOME_SCREEN_VERT);
+  if (!env->home_screen_vert) ERROR("IMG_LoadTexture: %s\n", HOME_SCREEN_VERT);
   env->help_button = IMG_LoadTexture(ren, HELP_BUTTON);
   if (!env->help_button) ERROR("IMG_LoadTexture: %s\n", HELP_BUTTON);
   env->play_button = IMG_LoadTexture(ren, PLAY_BUTTON);
@@ -218,6 +228,8 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   if (!env->losing_raft) ERROR("IMG_LoadTexture: %s\n", L_RAFT);
   env->game_screen = IMG_LoadTexture(ren, GAME_SCREEN);
   if (!env->game_screen) ERROR("IMG_LoadTexture: %s\n", GAME_SCREEN);
+  env->game_screen_vert = IMG_LoadTexture(ren, GAME_SCREEN_VERT);
+  if (!env->game_screen_vert) ERROR("IMG_LoadTexture: %s\n", GAME_SCREEN_VERT);
   env->solve = IMG_LoadTexture(ren, SOLVE);
   if (!env->solve) ERROR("IMG_LoadTexture: %s\n", SOLVE);
   env->restart = IMG_LoadTexture(ren, RESTART);
@@ -230,8 +242,12 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   /* game_over and end screens */
   env->game_over_screen = IMG_LoadTexture(ren, GAME_OVER_SCREEN);
   if (!env->game_over_screen) ERROR("IMG_LoadTexture: %s\n", GAME_OVER_SCREEN);
+  env->game_over_screen_vert = IMG_LoadTexture(ren, GAME_OVER_SCREEN_VERT);
+  if (!env->game_over_screen_vert) ERROR("IMG_LoadTexture: %s\n", GAME_OVER_SCREEN_VERT);
   env->end_screen = IMG_LoadTexture(ren, END_SCREEN);
   if (!env->end_screen) ERROR("IMG_LoadTexture: %s\n", END_SCREEN);
+  env->end_screen_vert = IMG_LoadTexture(ren, END_SCREEN_VERT);
+  if (!env->end_screen_vert) ERROR("IMG_LoadTexture: %s\n", END_SCREEN_VERT);
   env->next_level_button = IMG_LoadTexture(ren, NEXT_LEVEL);
   if (!env->next_level_button) ERROR("IMG_LoadTexture: %s\n", NEXT_LEVEL);
   env->previous_level_button = IMG_LoadTexture(ren, PREVIOUS_LEVEL);
@@ -292,7 +308,9 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   }
   TTF_CloseFont(font);
   char *levels[] = {"games/level10.tnt","games/level9.tnt", "games/level8.tnt", "games/level7.tnt", "games/level6.tnt", "games/level5.tnt", "games/level4.tnt", "games/level3.tnt", "games/level2.tnt", "games/level1.tnt"};
+  #ifdef __ANDROID__
   char *levels_android[] = {"level10.tnt","level9.tnt", "level8.tnt", "level7.tnt", "level6.tnt", "level5.tnt", "level4.tnt", "level3.tnt", "level2.tnt", "level1.tnt"};
+  #endif
 
   env->games = dlist_create_empty();  
   for (uint i = 0; i < 10; i++){
@@ -302,18 +320,6 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
     env->games = dlist_prepend(env->games, levels[i]);
     #endif
   }
-  /*
-  env->games = dlist_prepend(env->games, "games/level10.tnt");
-  env->games = dlist_prepend(env->games, "games/level9.tnt");
-  env->games = dlist_prepend(env->games, "games/level8.tnt");
-  env->games = dlist_prepend(env->games, "games/level7.tnt");
-  env->games = dlist_prepend(env->games, "games/level6.tnt");
-  env->games = dlist_prepend(env->games, "games/level5.tnt");
-  env->games = dlist_prepend(env->games, "games/level4.tnt");
-  env->games = dlist_prepend(env->games, "games/level3.tnt");
-  env->games = dlist_prepend(env->games, "games/level2.tnt");
-  env->games = dlist_prepend(env->games, "games/level1.tnt");
-  */
   return env;
 }
 
@@ -345,20 +351,37 @@ void render_home(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   rect.h = h;
   /* render background texture */
   SDL_SetRenderDrawColor(ren, 255, 255, 255, SDL_ALPHA_OPAQUE);
-  SDL_RenderCopy(ren, env->home_screen, NULL, NULL);
+  if (w > h){
+    SDL_RenderCopy(ren, env->home_screen, NULL, NULL);  
+    rect.w = (int)(w * BUTTON_WIDTH);
+    rect.h = (int)(w * BUTTON_HEIGHT);
+    rect.y = (int)(h - h * 1 / 5);
+    // play button
+    rect.x = (int)(w * 1 / 10);
+    SDL_RenderCopy(ren, env->play_button, NULL, &rect);
+    // help button
+    rect.x = (int)(w * 3 / 10);
+    SDL_RenderCopy(ren, env->help_button, NULL, &rect);
+    // exit button
+    rect.x = (int)(w * 7.5 / 10);
+    SDL_RenderCopy(ren, env->exit_button, NULL, &rect);
+  }
+  else{
+    SDL_RenderCopy(ren, env->home_screen_vert, NULL, NULL); 
+    rect.w = (int)(w * 1/3);
+    rect.h = (int)(h * 1/12);
+    rect.x = (int)(w * 1/12);
+    // play button
+    rect.y = (int)(h * 9/12);
+    SDL_RenderCopy(ren, env->play_button, NULL, &rect);
+    // help button
+    rect.y = (int)(h * 9/12 + 1.5*rect.h);
+    SDL_RenderCopy(ren, env->help_button, NULL, &rect);
+    // exit button
+    rect.x = (int)(w * 7/12);
+    SDL_RenderCopy(ren, env->exit_button, NULL, &rect); 
+  }
 
-  rect.w = (int)(w * BUTTON_WIDTH);
-  rect.h = (int)(w * BUTTON_HEIGHT);
-  rect.y = (int)(h - h * 1 / 5);
-  // play button
-  rect.x = (int)(w * 1 / 10);
-  SDL_RenderCopy(ren, env->play_button, NULL, &rect);
-  // help button
-  rect.x = (int)(w * 3 / 10);
-  SDL_RenderCopy(ren, env->help_button, NULL, &rect);
-  // exit button
-  rect.x = (int)(w * 7.5 / 10);
-  SDL_RenderCopy(ren, env->exit_button, NULL, &rect);
 }
 
 void render_help(SDL_Window *win, SDL_Renderer *ren, Env *env) {
@@ -385,7 +408,12 @@ void render_game(SDL_Window *win, SDL_Renderer *ren, Env *env) {
 
   /* render background texture */
   SDL_SetRenderDrawColor(ren, 255, 255, 255, SDL_ALPHA_OPAQUE);
-  SDL_RenderCopy(ren, env->game_screen, NULL, NULL);
+  if (w > h){
+    SDL_RenderCopy(ren, env->game_screen, NULL, NULL);
+  }else{
+    SDL_RenderCopy(ren, env->game_screen_vert, NULL, NULL);
+  }
+
 
   uint space_avail_per_cell_x =
       (int)((w - w * 2 * LEFT_FROM_GRID_RATIO) / (game_nb_cols(env->g) + 1));
@@ -550,37 +578,65 @@ void render_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env) {
 
   /* render background texture */
   SDL_SetRenderDrawColor(ren, 255, 255, 255, SDL_ALPHA_OPAQUE);
-  SDL_RenderCopy(ren, env->game_over_screen, NULL, NULL);
+  if (w > h){
+    SDL_RenderCopy(ren, env->game_over_screen, NULL, NULL);
 
-  rect.w = (int)(w * BUTTON_WIDTH);
-  rect.h = (int)(w * BUTTON_HEIGHT);
-  rect.y = (int)(h * 3 / 10);
-  if (env->current_level == 0 || env->current_level == 1) {
+    rect.w = (int)(w * BUTTON_WIDTH);
+    rect.h = (int)(w * BUTTON_HEIGHT);
+    rect.y = (int)(h * 3 / 10);
+    if (env->current_level == 0 || env->current_level == 1) {
+      // restart button
+      rect.x = (int)(w * 2 / 8);
+      SDL_RenderCopy(ren, env->restart_game_over_button, NULL, &rect);
+      // exit button
+      rect.x = (int)(w * 5 / 8);
+      SDL_RenderCopy(ren, env->quit_button, NULL, &rect);
+      // next level button
+      rect.w = (int)(w * (1.5 * BUTTON_WIDTH));
+      rect.x = (int)(w * 3.25 / 8);
+      SDL_RenderCopy(ren, env->next_level_button, NULL, &rect);
+    } else {
+      // restart button
+      rect.x = (int)(w * 1 / 8);
+      SDL_RenderCopy(ren, env->restart_game_over_button, NULL, &rect);
+      // exit button
+      rect.x = (int)(w * 6 / 8);
+      SDL_RenderCopy(ren, env->quit_button, NULL, &rect);
+      rect.w = (int)(w / 6);
+      // previous level button
+      rect.x = (int)(w * 2.5 / 8);
+      SDL_RenderCopy(ren, env->previous_level_button, NULL, &rect);
+      // next button
+      rect.x = (int)(w * 4.25 / 8);
+      SDL_RenderCopy(ren, env->next_level_button, NULL, &rect);
+    }
+  }else{
+    SDL_RenderCopy(ren, env->game_over_screen_vert, NULL, NULL);
+    rect.w = (int)(w * 1/4);
+    rect.h = (int)(h * 1/12);
+    rect.y = (int)(h * 8/20);
     // restart button
-    rect.x = (int)(w * 2 / 8);
+    rect.x = (int)(w * 7/36);
     SDL_RenderCopy(ren, env->restart_game_over_button, NULL, &rect);
     // exit button
-    rect.x = (int)(w * 5 / 8);
+    rect.x = (int)(w * 10/18);
     SDL_RenderCopy(ren, env->quit_button, NULL, &rect);
-    // next level button
-    rect.w = (int)(w * (1.5 * BUTTON_WIDTH));
-    rect.x = (int)(w * 3.25 / 8);
-    SDL_RenderCopy(ren, env->next_level_button, NULL, &rect);
-  } else {
-    // restart button
-    rect.x = (int)(w * 1 / 8);
-    SDL_RenderCopy(ren, env->restart_game_over_button, NULL, &rect);
-    // exit button
-    rect.x = (int)(w * 6 / 8);
-    SDL_RenderCopy(ren, env->quit_button, NULL, &rect);
-    rect.w = (int)(w / 6);
-    // previous level button
-    rect.x = (int)(w * 2.5 / 8);
-    SDL_RenderCopy(ren, env->previous_level_button, NULL, &rect);
-    // next button
-    rect.x = (int)(w * 4.25 / 8);
-    SDL_RenderCopy(ren, env->next_level_button, NULL, &rect);
+    rect.w = (int)(w * 1/3);
+    rect.y = (int)(h *1/4);
+    if (env->current_level == 0 || env->current_level == 1) {
+      // next level button
+      rect.x = (int)(w * 1/3);
+      SDL_RenderCopy(ren, env->next_level_button, NULL, &rect);
+    } else {
+      // previous level button
+      rect.x = (int)(w * 1/9);
+      SDL_RenderCopy(ren, env->previous_level_button, NULL, &rect);
+      // next button
+      rect.x = (int)(w * 10/18);
+      SDL_RenderCopy(ren, env->next_level_button, NULL, &rect);
+    }
   }
+
 }
 
 void render_end(SDL_Window *win, SDL_Renderer *ren, Env *env) {
@@ -594,21 +650,38 @@ void render_end(SDL_Window *win, SDL_Renderer *ren, Env *env) {
 
   /* render background texture */
   SDL_SetRenderDrawColor(ren, 255, 255, 255, SDL_ALPHA_OPAQUE); /* white */
-  SDL_RenderCopy(ren, env->end_screen, NULL, NULL);             /* stretch it */
-
-  rect.w = (int)(w * BUTTON_WIDTH);
-  rect.h = (int)(w * BUTTON_HEIGHT);
-  rect.y = (int)(h * 3 / 10);
-  // restart button
-  rect.x = (int)(w * 2 / 8);
-  SDL_RenderCopy(ren, env->restart_game_over_button, NULL, &rect);
-  // exit button
-  rect.x = (int)(w * 5.5 / 8);
-  SDL_RenderCopy(ren, env->quit_button, NULL, &rect);
-  // previous level button
-  rect.w = (int)(w * 2 * BUTTON_WIDTH);
-  rect.x = (int)(w * 3.25 / 8);
-  SDL_RenderCopy(ren, env->previous_level_button, NULL, &rect);
+  if (w > h){
+    SDL_RenderCopy(ren, env->end_screen, NULL, NULL);
+    rect.w = (int)(w * BUTTON_WIDTH);
+    rect.h = (int)(w * BUTTON_HEIGHT);
+    rect.y = (int)(h * 3 / 10);
+    // restart button
+    rect.x = (int)(w * 2 / 8);
+    SDL_RenderCopy(ren, env->restart_game_over_button, NULL, &rect);
+    // exit button
+    rect.x = (int)(w * 5.5 / 8);
+    SDL_RenderCopy(ren, env->quit_button, NULL, &rect);
+    // previous level button
+    rect.w = (int)(w * 2 * BUTTON_WIDTH);
+    rect.x = (int)(w * 3.25 / 8);
+    SDL_RenderCopy(ren, env->previous_level_button, NULL, &rect);
+  }else{
+    SDL_RenderCopy(ren, env->end_screen_vert, NULL, NULL);
+    rect.w = (int)(w * 1/4);
+    rect.h = (int)(h * 1/12);
+    rect.y = (int)(h * 7/20);
+    // restart button
+    rect.x = (int)(w * 7/36);
+    SDL_RenderCopy(ren, env->restart_game_over_button, NULL, &rect);
+    // exit button
+    rect.x = (int)(w * 10/18);
+    SDL_RenderCopy(ren, env->quit_button, NULL, &rect);
+    rect.w = (int)(w * 1/3);
+    rect.y = (int)(h *1/4);
+    // previous level button
+    rect.x = (int)(w * 1/3);
+    SDL_RenderCopy(ren, env->previous_level_button, NULL, &rect);
+  }         
 }
 
 bool process(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
@@ -637,21 +710,38 @@ bool process_home(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
     SDL_GetMouseState(&mouse.x, &mouse.y);
     // check if mouse is pressing one of the buttons
     // start game
-    if (mouse.x < w * 1 / 10 + w * BUTTON_WIDTH && mouse.x > w * 1 / 10 &&
-        mouse.y < h * 4 / 5 + w * BUTTON_HEIGHT && mouse.y > h * 4 / 5) {
-      env->current_screen = GAME;
-      env->previous_screen = HOME;
-      return false;
-    } else if (mouse.x < w * 3 / 10 + w * BUTTON_WIDTH &&
-               mouse.x > w * 3 / 10 &&
-               mouse.y < h * 4 / 5 + w * BUTTON_HEIGHT && mouse.y > h * 4 / 5) {
-      env->current_screen = HELP;
-      env->previous_screen = HOME;
-      return false;
-    } else if (mouse.x < w * 7.5 / 10 + w * BUTTON_WIDTH &&
-               mouse.x > (w * 7.5 / 10) &&
-               mouse.y < h * 4 / 5 + w * BUTTON_HEIGHT && mouse.y > h * 4 / 5) {
-      return true;
+    if (w > h){
+      if (mouse.x < w * 1 / 10 + w * BUTTON_WIDTH && mouse.x > w * 1 / 10 &&
+          mouse.y < h * 4 / 5 + w * BUTTON_HEIGHT && mouse.y > h * 4 / 5) {
+        env->current_screen = GAME;
+        env->previous_screen = HOME;
+        return false;
+      } else if (mouse.x < w * 3 / 10 + w * BUTTON_WIDTH &&
+                mouse.x > w * 3 / 10 &&
+                mouse.y < h * 4 / 5 + w * BUTTON_HEIGHT && mouse.y > h * 4 / 5) {
+        env->current_screen = HELP;
+        env->previous_screen = HOME;
+        return false;
+      } else if (mouse.x < w * 7.5 / 10 + w * BUTTON_WIDTH &&
+                mouse.x > (w * 7.5 / 10) &&
+                mouse.y < h * 4 / 5 + w * BUTTON_HEIGHT && mouse.y > h * 4 / 5) {
+        return true;
+      }
+    }else{
+      if (mouse.x < w*1/3+w*1/12 && mouse.x > w * 1/12 &&
+          mouse.y < h*1/12+h*9/12 && mouse.y > h * 9/12) {
+        env->current_screen = GAME;
+        env->previous_screen = HOME;
+        return false;
+      }else if (mouse.x < w*1/3+w*1/12 && mouse.x > w * 1/12 &&
+          mouse.y < h*1/12+h*9/12+1.5*h * 1/12 && mouse.y > h * 9/12+1.5*h * 1/12) {
+        env->current_screen = HELP;
+        env->previous_screen = HOME;
+        return false;
+      }else if (mouse.x < w*1/3+w*7/12 && mouse.x > w * 7/12 &&
+          mouse.y < h*1/12+h*9/12+1.5*h * 1/12 && mouse.y > h * 9/12+1.5*h * 1/12) {
+        return true;
+      } 
     }
   }
   return false;
@@ -821,21 +911,25 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
     SDL_Point mouse;
     SDL_GetMouseState(&mouse.x, &mouse.y);
     if (env->current_level == 0 || env->current_level == 1) {
-      if (mouse.x > w * 2 / 8 && mouse.x < w * 2 / 8 + w * BUTTON_WIDTH &&
-          mouse.y > h * 3 / 10 && mouse.y < h * 3 / 10 + w * BUTTON_HEIGHT) {
+      //player presses restart button
+      if ((w > h && (mouse.x > w * 2 / 8 && mouse.x < w * 2 / 8 + w * BUTTON_WIDTH &&
+          mouse.y > h * 3 / 10 && mouse.y < h * 3 / 10 + w * BUTTON_HEIGHT)) || (w <= h && (mouse.x > w*7/36 && mouse.x < w*7/36+w*1/4 &&
+          mouse.y > h * 8/20 && mouse.y < h * 8/20+h*1/12))) {
         game_restart(env->g);
         env->current_screen = GAME;
         return false;
-      } else if (mouse.x > w * 3.25 / 8 &&
+      } 
+      //player presses next level button
+      else if ((w > h && (mouse.x > w * 3.25 / 8 &&
                  mouse.x < w * 3.25 / 8 + w * (1.5 * BUTTON_WIDTH) &&
                  mouse.y > h * 3 / 10 &&
-                 mouse.y < h * 3 / 10 + w * BUTTON_HEIGHT) {
+                 mouse.y < h * 3 / 10 + w * BUTTON_HEIGHT)) || (w <= h && (mouse.x > w*1/3 && mouse.x < w*2/3 &&
+          mouse.y > h * 1/4 && mouse.y < h * 1/4+ h*1/12))) {
         game_delete(env->g);
         if (env->current_level == 1) {
           env->games = dlist_next(env->games);
         }
         env->current_level++;
-
         char *level = dlist_data(env->games);
         #ifdef __ANDROID__
         const char * dir = SDL_AndroidGetInternalStoragePath();
@@ -856,21 +950,29 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
         }
         env->current_screen = GAME;
         return false;
-      } else if (mouse.x > w * 5 / 8 &&
+      } 
+      //player presses quit button
+      else if ((w > h && (mouse.x > w * 5 / 8 &&
                  mouse.x < w * 5 / 8 + w * BUTTON_WIDTH &&
                  mouse.y > h * 3 / 10 &&
-                 mouse.y < h * 3 / 10 + w * BUTTON_HEIGHT) {
+                 mouse.y < h * 3 / 10 + w * BUTTON_HEIGHT)) || (w <= h && (mouse.x > w*10/18 && mouse.x < w*10/18+w*1/4 &&
+          mouse.y > h * 8/20 && mouse.y < h * 8/20+h*1/12))) {
         return true;
       }
     } else {
-      if (mouse.x > w * 1 / 8 && mouse.x < w * 1 / 8 + w * BUTTON_WIDTH &&
-          mouse.y > h * 3 / 10 && mouse.y < h * 3 / 10 + w * BUTTON_HEIGHT) {
+      //player presses restart button
+      if ((w > h && (mouse.x > w * 1 / 8 && mouse.x < w * 1 / 8 + w * BUTTON_WIDTH &&
+          mouse.y > h * 3 / 10 && mouse.y < h * 3 / 10 + w * BUTTON_HEIGHT))  || (w <= h && (mouse.x > w*7/36 && mouse.x < w*7/36+w*1/4 &&
+          mouse.y > h * 8/20 && mouse.y < h * 8/20+h*1/12))) {
         game_restart(env->g);
         env->current_screen = GAME;
         return false;
-      } else if (mouse.x > w * 2.5 / 8 && mouse.x < w * 2.5 / 8 + w * 1 / 6 &&
+      } 
+      //player presses previous level button
+      else if ((w > h && (mouse.x > w * 2.5 / 8 && mouse.x < w * 2.5 / 8 + w * 1 / 6 &&
                  mouse.y > h * 3 / 10 &&
-                 mouse.y < h * 3 / 10 + w * BUTTON_HEIGHT) {
+                 mouse.y < h * 3 / 10 + w * BUTTON_HEIGHT)) || (w <= h && (mouse.x > w*1/9 && mouse.x < w*1/9 + w*1/3 &&
+          mouse.y > h * 1/4 && mouse.y < h * 1/4+ h*1/12))) {
         game_delete(env->g);
         env->games = dlist_prev(env->games);
         env->current_level--;
@@ -888,9 +990,12 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
         create_tents_text(win, ren, env);
         env->current_screen = GAME;
         return false;
-      } else if (mouse.x > w * 4.25 / 8 && mouse.x < w * 4.25 / 8 + w * 1 / 6 &&
+      } 
+      //player presses next level button
+      else if ((w > h && (mouse.x > w * 4.25 / 8 && mouse.x < w * 4.25 / 8 + w * 1 / 6 &&
                  mouse.y > h * 3 / 10 &&
-                 mouse.y < h * 3 / 10 + w * BUTTON_HEIGHT) {
+                 mouse.y < h * 3 / 10 + w * BUTTON_HEIGHT))  || (w <= h && (mouse.x > w*10/18 && mouse.x < w*10/18 + w*1/3 &&
+          mouse.y > h * 1/4 && mouse.y < h * 1/4+ h*1/12))) {
         game_delete(env->g);
         env->games = dlist_next(env->games);
         env->current_level++;
@@ -914,10 +1019,13 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
         }
         env->current_screen = GAME;
         return false;
-      } else if (mouse.x > w * 6 / 8 &&
+      } 
+      //player presses quit button
+      else if ((w > h && (mouse.x > w * 6 / 8 &&
                  mouse.x < w * 5.75 / 8 + w * BUTTON_WIDTH &&
                  mouse.y > h * 3 / 10 &&
-                 mouse.y < h * 3 / 10 + w * BUTTON_HEIGHT) {
+                 mouse.y < h * 3 / 10 + w * BUTTON_HEIGHT))  || (w <= h && (mouse.x > w*10/18 && mouse.x < w*10/18+w*1/4 &&
+          mouse.y > h * 8/20 && mouse.y < h * 8/20+h*1/12))) {
         return true;
       }
     }
@@ -932,16 +1040,20 @@ bool process_end(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
     SDL_Point mouse;
     SDL_GetMouseState(&mouse.x, &mouse.y);
     // check if mouse is pressing one of the buttons
-    // undo the last move
-    if (mouse.x > w * 2 / 8 && mouse.x < w * 2 / 8 + w * BUTTON_WIDTH &&
-        mouse.y > h * 3 / 10 && mouse.y < h * 3 / 10 + w * BUTTON_HEIGHT) {
+    //player presses restart button
+    if ((w > h && (mouse.x > w * 2 / 8 && mouse.x < w * 2 / 8 + w * BUTTON_WIDTH &&
+        mouse.y > h * 3 / 10 && mouse.y < h * 3 / 10 + w * BUTTON_HEIGHT))  || (w <= h && (mouse.x > w*7/36 && mouse.x < w*7/36+w*1/4 &&
+          mouse.y > h * 7/20 && mouse.y < h * 7/20+h*1/12))) {
       game_restart(env->g);
       env->current_screen = GAME;
       return false;
-    } else if (mouse.x > w * 3.25 / 8 &&
+    } 
+    //player presses previous level button
+    else if ((w > h && (mouse.x > w * 3.25 / 8 &&
                mouse.x < w * 3.25 / 8 + w * 2 * BUTTON_WIDTH &&
                mouse.y > h * 3 / 10 &&
-               mouse.y < h * 3 / 10 + w * BUTTON_HEIGHT) {
+               mouse.y < h * 3 / 10 + w * BUTTON_HEIGHT))  || (w <= h && (mouse.x > w*1/3 && mouse.x < w*2/3 &&
+          mouse.y > h * 1/4 && mouse.y < h * 1/4+ h*1/12))) {
       game_delete(env->g);
       env->games = dlist_prev(env->games);
       env->current_level--;
@@ -959,10 +1071,13 @@ bool process_end(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
       create_tents_text(win, ren, env);
       env->current_screen = GAME;
       return false;
-    } else if (mouse.x > w * 5.5 / 8 &&
+    }
+    //player presses quit button
+     else if ((w > h && (mouse.x > w * 5.5 / 8 &&
                mouse.x < w * 5.5 / 8 + w * BUTTON_WIDTH &&
                mouse.y > h * 3 / 10 &&
-               mouse.y < h * 3 / 10 + w * BUTTON_HEIGHT) {
+               mouse.y < h * 3 / 10 + w * BUTTON_HEIGHT))  || (w <= h && (mouse.x > w*10/18 && mouse.x < w*10/18+w*1/4 &&
+          mouse.y > h * 7/20 && mouse.y < h * 7/20+h*1/12))) {
       return true;
     }
   }
@@ -973,6 +1088,7 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   /*Clean all the textures of the game */
 
   SDL_DestroyTexture(env->home_screen);
+  SDL_DestroyTexture(env->home_screen_vert);
   SDL_DestroyTexture(env->help_button);
   SDL_DestroyTexture(env->play_button);
   SDL_DestroyTexture(env->exit_button);
@@ -981,6 +1097,7 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   SDL_DestroyTexture(env->back_button);
 
   SDL_DestroyTexture(env->game_screen);
+  SDL_DestroyTexture(env->game_screen_vert);
   SDL_DestroyTexture(env->tree);
   SDL_DestroyTexture(env->water);
   SDL_DestroyTexture(env->raft);
@@ -1004,7 +1121,9 @@ void clean(SDL_Window *win, SDL_Renderer *ren, Env *env) {
   SDL_DestroyTexture(env->diagadj_text);
 
   SDL_DestroyTexture(env->game_over_screen);
+  SDL_DestroyTexture(env->game_over_screen_vert);
   SDL_DestroyTexture(env->end_screen);
+  SDL_DestroyTexture(env->end_screen_vert);
   SDL_DestroyTexture(env->next_level_button);
   SDL_DestroyTexture(env->previous_level_button);
   SDL_DestroyTexture(env->restart_game_over_button);
