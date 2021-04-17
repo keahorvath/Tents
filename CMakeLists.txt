@@ -49,20 +49,7 @@ target_link_libraries(game_test_marbeites game)
 target_link_libraries(game_test_alleymarie game)
 
 ## copy useful data files in build dir
-#images
-foreach(file "images" "images/end_screen.jpg" "images/game_over_screen.jpg" "images/game_screen.jpg" "images/help_screen.png" "images/home_screen.png" "images/tree.png" "images/water.png" "images/happy_trump.jpg" "images/angry_trump.jpg" "images/losing_water.png")
-  file(COPY ${file} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-endforeach(file)
-#games
-foreach(file "games" "games/level1.tnt" "games/level2.tnt" "games/level3.tnt" "games/level4.tnt" "games/level5.tnt" "games/level6.tnt" "games/level7.tnt" "games/level8.tnt" "games/level9.tnt" "games/level10.tnt")
-  file(COPY ${file} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-endforeach(file)
-#buttons
-foreach(file "buttons" "buttons/back_button.png" "buttons/exit.png" "buttons/play.png" "buttons/help.png" "buttons/restart.png" "buttons/redo.png" "buttons/undo.png" "buttons/solve.png" "buttons/home_button.png" "buttons/help_button_j.png" "buttons/next_level.png" "buttons/previous_level.png" "buttons/restart_game_over.png" "buttons/quit_button.png")
-  file(COPY ${file} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-endforeach(file)
-#fonts
-foreach(file "Walkway_Bold.ttf" "Roboto-Regular.ttf")
+foreach(file "images" "games" "buttons" "Walkway_Bold.ttf" "Roboto-Regular.ttf")
   file(COPY ${file} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endforeach(file)
 

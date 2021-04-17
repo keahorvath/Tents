@@ -15,28 +15,28 @@
 
 #define MAX_GAME_SIZE 20
 /* home screen */
-#define HOME_SCREEN "home_screen.png"
-#define HELP_BUTTON "help.png"
-#define PLAY_BUTTON "play.png"
-#define EXIT_BUTTON "exit.png"
+#define HOME_SCREEN "images/home_screen.png"
+#define HELP_BUTTON "buttons/help.png"
+#define PLAY_BUTTON "buttons/play.png"
+#define EXIT_BUTTON "buttons/exit.png"
 
 /*help screen */
-#define HELP_SCREEN "help_screen.png"
-#define BACK_BUTTON "back_button.png"
+#define HELP_SCREEN "images/help_screen.png"
+#define BACK_BUTTON "buttons/back_button.png"
 
 /* game screen */
-#define GAME_SCREEN "game_screen.jpg"
-#define PALM_TREE "tree.png"
-#define WATER "water.png"
-#define RAFT "happy_trump.jpg"
-#define L_WATER "losing_water.png"
-#define L_RAFT "angry_trump.jpg"
-#define HOME_BUTTON "home_button.png"
-#define HELP_BUTTON_J "help_button_j.png"
-#define UNDO "undo.png"
-#define REDO "redo.png"
-#define RESTART "restart.png"
-#define SOLVE "solve.png"
+#define GAME_SCREEN "images/game_screen.jpg"
+#define PALM_TREE "images/tree.png"
+#define WATER "images/water.png"
+#define RAFT "images/happy_trump.jpg"
+#define L_WATER "images/losing_water.png"
+#define L_RAFT "images/angry_trump.jpg"
+#define HOME_BUTTON "buttons/home_button.png"
+#define HELP_BUTTON_J "buttons/help_button_j.png"
+#define UNDO "buttons/undo.png"
+#define REDO "buttons/redo.png"
+#define RESTART "buttons/restart.png"
+#define SOLVE "buttons/solve.png"
 #define FONT "Walkway_Bold.ttf"
 #define FONT_LEVEL "Roboto-Regular.ttf"
 
@@ -50,12 +50,12 @@
 #define LEFT_FROM_GRID_RATIO 0.1
 
 /* game_over and end screens */
-#define END_SCREEN "end_screen.jpg"
-#define GAME_OVER_SCREEN "game_over_screen.jpg"
-#define NEXT_LEVEL "next_level.png"
-#define PREVIOUS_LEVEL "previous_level.png"
-#define RESTART_GAMEOVER "restart_game_over.png"
-#define QUIT_GAMEOVER "quit_button.png"
+#define END_SCREEN "images/end_screen.jpg"
+#define GAME_OVER_SCREEN "images/game_over_screen.jpg"
+#define NEXT_LEVEL "buttons/next_level.png"
+#define PREVIOUS_LEVEL "buttons/previous_level.png"
+#define RESTART_GAMEOVER "buttons/restart_game_over.png"
+#define QUIT_GAMEOVER "buttons/quit_button.png"
 
 #define BUTTON_WIDTH 1 / 8    // button width according to window width
 #define BUTTON_HEIGHT 1 / 16  // button height according to window width
@@ -271,16 +271,16 @@ Env *init(SDL_Window *win, SDL_Renderer *ren, int argc, char *argv[]) {
   TTF_CloseFont(font);
 
   env->games = dlist_create_empty();
-  env->games = dlist_prepend(env->games, "level10.tnt");
-  env->games = dlist_prepend(env->games, "level9.tnt");
-  env->games = dlist_prepend(env->games, "level8.tnt");
-  env->games = dlist_prepend(env->games, "level7.tnt");
-  env->games = dlist_prepend(env->games, "level6.tnt");
-  env->games = dlist_prepend(env->games, "level5.tnt");
-  env->games = dlist_prepend(env->games, "level4.tnt");
-  env->games = dlist_prepend(env->games, "level3.tnt");
-  env->games = dlist_prepend(env->games, "level2.tnt");
-  env->games = dlist_prepend(env->games, "level1.tnt");
+  env->games = dlist_prepend(env->games, "games/level10.tnt");
+  env->games = dlist_prepend(env->games, "games/level9.tnt");
+  env->games = dlist_prepend(env->games, "games/level8.tnt");
+  env->games = dlist_prepend(env->games, "games/level7.tnt");
+  env->games = dlist_prepend(env->games, "games/level6.tnt");
+  env->games = dlist_prepend(env->games, "games/level5.tnt");
+  env->games = dlist_prepend(env->games, "games/level4.tnt");
+  env->games = dlist_prepend(env->games, "games/level3.tnt");
+  env->games = dlist_prepend(env->games, "games/level2.tnt");
+  env->games = dlist_prepend(env->games, "games/level1.tnt");
   return env;
 }
 
