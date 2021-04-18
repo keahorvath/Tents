@@ -835,58 +835,58 @@ bool process_home(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
 bool process_help(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
-  #ifdef __ANDROID__
-    if (e->type == SDL_FINGERDOWN) {
-      SDL_Point mouse;
-      SDL_GetMouseState(&mouse.x, &mouse.y);
-      if (w > h) {
-        // check if mouse is pressing one of the buttons
-        // start game
-        if (e->tfinger.x * w < w * 2 / 3 + w * BUTTON_WIDTH && e->tfinger.x * w > w * 2 / 3 &&
-            e->tfinger.y * h < h * 4 / 5 + w * BUTTON_HEIGHT && e->tfinger.y * h > h * 4 / 5) {
-          env->current_screen = env->previous_screen;
-          env->previous_screen = HELP;
-          return false;
-        }
-      } else {
-        // check if mouse is pressing one of the buttons
-        // start game
-        if (e->tfinger.x * w < w * 2 / 3 && e->tfinger.x* w > w * 1 / 3 &&
-            e->tfinger.y * h < h - 1.2 * w * 1 / 6 + w * 1 / 6 &&
-            e->tfinger.y * h > h - 1.2 * w * 1 / 6) {
-          env->current_screen = env->previous_screen;
-          env->previous_screen = HELP;
-          return false;
-        }
+#ifdef __ANDROID__
+  if (e->type == SDL_FINGERDOWN) {
+    if (w > h) {
+      // check if mouse is pressing one of the buttons
+      // start game
+      if (e->tfinger.x * w < w * 2 / 3 + w * BUTTON_WIDTH &&
+          e->tfinger.x * w > w * 2 / 3 &&
+          e->tfinger.y * h < h * 4 / 5 + w * BUTTON_HEIGHT &&
+          e->tfinger.y * h > h * 4 / 5) {
+        env->current_screen = env->previous_screen;
+        env->previous_screen = HELP;
+        return false;
+      }
+    } else {
+      // check if mouse is pressing one of the buttons
+      // start game
+      if (e->tfinger.x * w < w * 2 / 3 && e->tfinger.x * w > w * 1 / 3 &&
+          e->tfinger.y * h < h - 1.2 * w * 1 / 6 + w * 1 / 6 &&
+          e->tfinger.y * h > h - 1.2 * w * 1 / 6) {
+        env->current_screen = env->previous_screen;
+        env->previous_screen = HELP;
+        return false;
       }
     }
-  #else
-    if (e->type == SDL_MOUSEBUTTONDOWN) {
-      SDL_Point mouse;
-      SDL_GetMouseState(&mouse.x, &mouse.y);
-      if (w > h) {
-        // check if mouse is pressing one of the buttons
-        // start game
-        if (mouse.x < w * 2 / 3 + w * BUTTON_WIDTH && mouse.x > w * 2 / 3 &&
-            mouse.y < h * 4 / 5 + w * BUTTON_HEIGHT && mouse.y > h * 4 / 5) {
-          env->current_screen = env->previous_screen;
-          env->previous_screen = HELP;
-          return false;
-        }
-      } else {
-        // check if mouse is pressing one of the buttons
-        // start game
-        if (mouse.x < w * 2 / 3 && mouse.x > w * 1 / 3 &&
-            mouse.y < h - 1.2 * w * 1 / 6 + w * 1 / 6 &&
-            mouse.y > h - 1.2 * w * 1 / 6) {
-          env->current_screen = env->previous_screen;
-          env->previous_screen = HELP;
-          return false;
-        }
+  }
+#else
+  if (e->type == SDL_MOUSEBUTTONDOWN) {
+    SDL_Point mouse;
+    SDL_GetMouseState(&mouse.x, &mouse.y);
+    if (w > h) {
+      // check if mouse is pressing one of the buttons
+      // start game
+      if (mouse.x < w * 2 / 3 + w * BUTTON_WIDTH && mouse.x > w * 2 / 3 &&
+          mouse.y < h * 4 / 5 + w * BUTTON_HEIGHT && mouse.y > h * 4 / 5) {
+        env->current_screen = env->previous_screen;
+        env->previous_screen = HELP;
+        return false;
+      }
+    } else {
+      // check if mouse is pressing one of the buttons
+      // start game
+      if (mouse.x < w * 2 / 3 && mouse.x > w * 1 / 3 &&
+          mouse.y < h - 1.2 * w * 1 / 6 + w * 1 / 6 &&
+          mouse.y > h - 1.2 * w * 1 / 6) {
+        env->current_screen = env->previous_screen;
+        env->previous_screen = HELP;
+        return false;
       }
     }
-  #endif
-    return false;
+  }
+#endif
+  return false;
 }
 
 bool process_game(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
@@ -1177,7 +1177,7 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
         }
         env->current_level++;
         char *level = dlist_data(env->games);
-        const char * dir = SDL_AndroidGetInternalStoragePath();
+        const char *dir = SDL_AndroidGetInternalStoragePath();
         char filename[1024];
         sprintf(filename, "%s/%s", dir, level);
         copy_asset(level, filename);
@@ -1231,7 +1231,7 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
         env->games = dlist_prev(env->games);
         env->current_level--;
         char *level = dlist_data(env->games);
-        const char * dir = SDL_AndroidGetInternalStoragePath();
+        const char *dir = SDL_AndroidGetInternalStoragePath();
         char filename[1024];
         sprintf(filename, "%s/%s", dir, level);
         copy_asset(level, filename);
@@ -1254,7 +1254,7 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
         env->games = dlist_next(env->games);
         env->current_level++;
         char *level = dlist_data(env->games);
-        const char * dir = SDL_AndroidGetInternalStoragePath();
+        const char *dir = SDL_AndroidGetInternalStoragePath();
         char filename[1024];
         sprintf(filename, "%s/%s", dir, level);
         copy_asset(level, filename);
@@ -1404,7 +1404,7 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
       }
     }
   }
-  #endif
+#endif
   return false;
 }
 

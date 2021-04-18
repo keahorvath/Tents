@@ -22,7 +22,6 @@ struct game_s {
   queue *redo_hist;
 };
 
-
 struct move {
   square s;
   uint i;
