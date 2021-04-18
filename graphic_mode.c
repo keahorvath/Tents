@@ -1209,7 +1209,10 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
         sprintf(filename, "%s/%s", dir, level);
         copy_asset(level, filename);
         env->g = game_load(filename);
-        
+        create_level_text(win, ren, env);
+        create_tents_text(win, ren, env);
+        env->current_screen = GAME;
+        return false;
       }
       // player presses next level button
       else if ((w > h && (e->tfinger.x * w > w * 4.25 / 8 &&
@@ -1229,10 +1232,16 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
         sprintf(filename, "%s/%s", dir, level);
         copy_asset(level, filename);
         env->g = game_load(filename);
+        create_level_text(win, ren, env);
+        create_tents_text(win, ren, env);
+        if (game_nb_cols(env->g) > env->max_game_cols_reached) {
+          env->max_game_cols_reached = game_nb_cols(env->g);
+        }
         if (game_nb_rows(env->g) > env->max_game_rows_reached) {
           env->max_game_rows_reached = game_nb_rows(env->g);
         }
         env->current_screen = GAME;
+        return false;
         return false;
       }
       // player presses quit button
