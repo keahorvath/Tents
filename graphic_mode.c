@@ -842,8 +842,8 @@ bool process_help(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
       if (w > h) {
         // check if mouse is pressing one of the buttons
         // start game
-        if (tfinger.x < w * 2 / 3 + w * BUTTON_WIDTH && tfinger.x > w * 2 / 3 &&
-            tfinger.y < h * 4 / 5 + w * BUTTON_HEIGHT && tfinger.y > h * 4 / 5) {
+        if (e->tfinger.x * w < w * 2 / 3 + w * BUTTON_WIDTH && e->tfinger.x * w > w * 2 / 3 &&
+            e->tfinger.y * h < h * 4 / 5 + w * BUTTON_HEIGHT && e->tfinger.y * h > h * 4 / 5) {
           env->current_screen = env->previous_screen;
           env->previous_screen = HELP;
           return false;
@@ -851,9 +851,9 @@ bool process_help(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
       } else {
         // check if mouse is pressing one of the buttons
         // start game
-        if (tfinger.x < w * 2 / 3 && tfinger.x > w * 1 / 3 &&
-            tfinger.y < h - 1.2 * w * 1 / 6 + w * 1 / 6 &&
-            tfinger.y > h - 1.2 * w * 1 / 6) {
+        if (e->tfinger.x * w < w * 2 / 3 && e->tfinger.x* w > w * 1 / 3 &&
+            e->tfinger.y * h < h - 1.2 * w * 1 / 6 + w * 1 / 6 &&
+            e->tfinger.y * h > h - 1.2 * w * 1 / 6) {
           env->current_screen = env->previous_screen;
           env->previous_screen = HELP;
           return false;
