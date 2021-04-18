@@ -817,7 +817,7 @@ bool process_home(SDL_Window *win, SDL_Renderer *ren, Env *env, SDL_Event *e) {
       }else if (mouse.x < w*1/3+w*7/12 && mouse.x > w * 7/12 &&
           mouse.y < h*1/12+h*9/12+1.5*h * 1/12 && mouse.y > h * 9/12+1.5*h * 1/12) {
         return true;
-      } 
+      }
     }
   }
 #endif
@@ -1097,6 +1097,131 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
                        SDL_Event *e) {
   int w, h;
   SDL_GetWindowSize(win, &w, &h);
+  #ifdef __ANDROID__
+  if (e->type == SDL_FINGERDOWN) {
+    SDL_Point mouse;
+    SDL_GetMouseState(&e->tfinger.x * w, &e->tfinger.y * h);
+    if (env->current_level == 0 || env->current_level == 1) {
+      //player presses restart button
+      if ((w > h && (e->tfinger.x * w > w * 2 / 8 && e->tfinger.x * w < w * 2 / 8 + w * BUTTON_WIDTH &&
+          e->tfinger.y * h > h * 3 / 10 && e->tfinger.y * h < h * 3 / 10 + w * BUTTON_HEIGHT)) || (w <= h && (e->tfinger.x * w > w*7/36 && e->tfinger.x * w < w*7/36+w*1/4 &&
+          e->tfinger.y * h > h * 8/20 && e->tfinger.y * h < h * 8/20+h*1/12))) {
+        game_restart(env->g);
+        env->current_screen = GAME;
+        return false;
+      } 
+      //player presses next level button
+      else if ((w > h && (e->tfinger.x * w > w * 3.25 / 8 &&
+                 e->tfinger.x * w < w * 3.25 / 8 + w * (1.5 * BUTTON_WIDTH) &&
+                 e->tfinger.y * h > h * 3 / 10 &&
+                 e->tfinger.y * h < h * 3 / 10 + w * BUTTON_HEIGHT)) || (w <= h && (e->tfinger.x * w > w*1/3 && e->tfinger.x * w < w*2/3 &&
+          e->tfinger.y * h > h * 1/4 && e->tfinger.y * h < h * 1/4+ h*1/12))) {
+        game_delete(env->g);
+        if (env->current_level == 1) {
+          env->games = dlist_next(env->games);
+        }
+        env->current_level++;
+        char *level = dlist_data(env->games);
+        #ifdef __ANDROID__
+        const char * dir = SDL_AndroidGetInternalStoragePath();
+        char filename[1024];
+        sprintf(filename, "%s/%s", dir, level);
+        copy_asset(level, filename);
+        env->g = game_load(filename);
+        #else
+        env->g = game_load(level);
+        #endif
+        create_level_text(win, ren, env);
+        create_tents_text(win, ren, env);
+        if (game_nb_cols(env->g) > env->max_game_cols_reached) {
+          env->max_game_cols_reached = game_nb_cols(env->g);
+        }
+        if (game_nb_rows(env->g) > env->max_game_rows_reached) {
+          env->max_game_rows_reached = game_nb_rows(env->g);
+        }
+        env->current_screen = GAME;
+        return false;
+      } 
+      //player presses quit button
+      else if ((w > h && (e->tfinger.x * w > w * 5 / 8 &&
+                 e->tfinger.x * w < w * 5 / 8 + w * BUTTON_WIDTH &&
+                 e->tfinger.y * h > h * 3 / 10 &&
+                 e->tfinger.y * h < h * 3 / 10 + w * BUTTON_HEIGHT)) || (w <= h && (e->tfinger.x * w > w*10/18 && e->tfinger.x * w < w*10/18+w*1/4 &&
+          e->tfinger.y * h > h * 8/20 && e->tfinger.y * h < h * 8/20+h*1/12))) {
+        return true;
+      }
+    } else {
+      //player presses restart button
+      if ((w > h && (e->tfinger.x * w > w * 1 / 8 && e->tfinger.x * w < w * 1 / 8 + w * BUTTON_WIDTH &&
+          e->tfinger.y * h > h * 3 / 10 && e->tfinger.y * h < h * 3 / 10 + w * BUTTON_HEIGHT))  || (w <= h && (e->tfinger.x * w > w*7/36 && e->tfinger.x * w < w*7/36+w*1/4 &&
+          e->tfinger.y * h > h * 8/20 && e->tfinger.y * h < h * 8/20+h*1/12))) {
+        game_restart(env->g);
+        env->current_screen = GAME;
+        return false;
+      } 
+      //player presses previous level button
+      else if ((w > h && (e->tfinger.x * w > w * 2.5 / 8 && e->tfinger.x * w < w * 2.5 / 8 + w * 1 / 6 &&
+                 e->tfinger.y * h > h * 3 / 10 &&
+                 e->tfinger.y * h < h * 3 / 10 + w * BUTTON_HEIGHT)) || (w <= h && (e->tfinger.x * w > w*1/9 && e->tfinger.x * w < w*1/9 + w*1/3 &&
+          e->tfinger.y * h > h * 1/4 && e->tfinger.y * h < h * 1/4+ h*1/12))) {
+        game_delete(env->g);
+        env->games = dlist_prev(env->games);
+        env->current_level--;
+        char *level = dlist_data(env->games);
+        #ifdef __ANDROID__
+        const char * dir = SDL_AndroidGetInternalStoragePath();
+        char filename[1024];
+        sprintf(filename, "%s/%s", dir, level);
+        copy_asset(level, filename);
+        env->g = game_load(filename);
+        #else
+        env->g = game_load(level);
+        #endif
+        create_level_text(win, ren, env);
+        create_tents_text(win, ren, env);
+        env->current_screen = GAME;
+        return false;
+      } 
+      //player presses next level button
+      else if ((w > h && (e->tfinger.x * w > w * 4.25 / 8 && e->tfinger.x * w < w * 4.25 / 8 + w * 1 / 6 &&
+                 e->tfinger.y * h > h * 3 / 10 &&
+                 e->tfinger.y * h < h * 3 / 10 + w * BUTTON_HEIGHT))  || (w <= h && (e->tfinger.x * w > w*10/18 && e->tfinger.x * w < w*10/18 + w*1/3 &&
+          e->tfinger.y * h > h * 1/4 && e->tfinger.y * h < h * 1/4+ h*1/12))) {
+        game_delete(env->g);
+        env->games = dlist_next(env->games);
+        env->current_level++;
+        char *level = dlist_data(env->games);
+        #ifdef __ANDROID__
+        const char * dir = SDL_AndroidGetInternalStoragePath();
+        char filename[1024];
+        sprintf(filename, "%s/%s", dir, level);
+        copy_asset(level, filename);
+        env->g = game_load(filename);
+        #else
+        env->g = game_load(level);
+        #endif
+        create_level_text(win, ren, env);
+        create_tents_text(win, ren, env);
+        if (game_nb_cols(env->g) > env->max_game_cols_reached) {
+          env->max_game_cols_reached = game_nb_cols(env->g);
+        }
+        if (game_nb_rows(env->g) > env->max_game_rows_reached) {
+          env->max_game_rows_reached = game_nb_rows(env->g);
+        }
+        env->current_screen = GAME;
+        return false;
+      } 
+      //player presses quit button
+      else if ((w > h && (e->tfinger.x * w > w * 6 / 8 &&
+                 e->tfinger.x * w < w * 5.75 / 8 + w * BUTTON_WIDTH &&
+                 e->tfinger.y * h > h * 3 / 10 &&
+                 e->tfinger.y * h < h * 3 / 10 + w * BUTTON_HEIGHT))  || (w <= h && (e->tfinger.x * w > w*10/18 && e->tfinger.x * w < w*10/18+w*1/4 &&
+          e->tfinger.y * h > h * 8/20 && e->tfinger.y * h < h * 8/20+h*1/12))) {
+        return true;
+      }
+    }
+  }
+  #else
   if (e->type == SDL_MOUSEBUTTONDOWN) {
     SDL_Point mouse;
     SDL_GetMouseState(&mouse.x, &mouse.y);
