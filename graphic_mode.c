@@ -1209,6 +1209,7 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
         sprintf(filename, "%s/%s", dir, level);
         copy_asset(level, filename);
         env->g = game_load(filename);
+        
       }
       // player presses next level button
       else if ((w > h && (e->tfinger.x * w > w * 4.25 / 8 &&
