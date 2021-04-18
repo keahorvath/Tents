@@ -1120,7 +1120,10 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
   SDL_GetWindowSize(win, &w, &h);
 #ifdef __ANDROID__
   if (e->type == SDL_FINGERDOWN) {
+<<<<<<< HEAD
     SDL_Point mouse;
+=======
+>>>>>>> refs/remotes/origin/master
     if (env->current_level == 0 || env->current_level == 1) {
       // player presses restart button
       if ((w > h && (e->tfinger.x * w > w * 2 / 8 &&
@@ -1151,15 +1154,22 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
         }
         env->current_level++;
         char *level = dlist_data(env->games);
+<<<<<<< HEAD
 #ifdef __ANDROID__
         const char *dir = SDL_AndroidGetInternalStoragePath();
+=======
+        const char * dir = SDL_AndroidGetInternalStoragePath();
+>>>>>>> refs/remotes/origin/master
         char filename[1024];
         sprintf(filename, "%s/%s", dir, level);
         copy_asset(level, filename);
         env->g = game_load(filename);
+<<<<<<< HEAD
 #else
         env->g = game_load(level);
 #endif
+=======
+>>>>>>> refs/remotes/origin/master
         create_level_text(win, ren, env);
         create_tents_text(win, ren, env);
         if (game_nb_cols(env->g) > env->max_game_cols_reached) {
@@ -1209,15 +1219,22 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
         env->games = dlist_prev(env->games);
         env->current_level--;
         char *level = dlist_data(env->games);
+<<<<<<< HEAD
 #ifdef __ANDROID__
         const char *dir = SDL_AndroidGetInternalStoragePath();
+=======
+        const char * dir = SDL_AndroidGetInternalStoragePath();
+>>>>>>> refs/remotes/origin/master
         char filename[1024];
         sprintf(filename, "%s/%s", dir, level);
         copy_asset(level, filename);
         env->g = game_load(filename);
+<<<<<<< HEAD
 #else
         env->g = game_load(level);
 #endif
+=======
+>>>>>>> refs/remotes/origin/master
         create_level_text(win, ren, env);
         create_tents_text(win, ren, env);
         env->current_screen = GAME;
@@ -1236,15 +1253,22 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
         env->games = dlist_next(env->games);
         env->current_level++;
         char *level = dlist_data(env->games);
+<<<<<<< HEAD
 #ifdef __ANDROID__
         const char *dir = SDL_AndroidGetInternalStoragePath();
+=======
+        const char * dir = SDL_AndroidGetInternalStoragePath();
+>>>>>>> refs/remotes/origin/master
         char filename[1024];
         sprintf(filename, "%s/%s", dir, level);
         copy_asset(level, filename);
         env->g = game_load(filename);
+<<<<<<< HEAD
 #else
         env->g = game_load(level);
 #endif
+=======
+>>>>>>> refs/remotes/origin/master
         create_level_text(win, ren, env);
         create_tents_text(win, ren, env);
         if (game_nb_cols(env->g) > env->max_game_cols_reached) {
@@ -1300,6 +1324,7 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
         }
         env->current_level++;
         char *level = dlist_data(env->games);
+<<<<<<< HEAD
 #ifdef __ANDROID__
         const char *dir = SDL_AndroidGetInternalStoragePath();
         char filename[1024];
@@ -1309,6 +1334,9 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
 #else
         env->g = game_load(level);
 #endif
+=======
+        env->g = game_load(level);
+>>>>>>> refs/remotes/origin/master
         create_level_text(win, ren, env);
         create_tents_text(win, ren, env);
         if (game_nb_cols(env->g) > env->max_game_cols_reached) {
@@ -1355,6 +1383,7 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
         env->games = dlist_prev(env->games);
         env->current_level--;
         char *level = dlist_data(env->games);
+<<<<<<< HEAD
 #ifdef __ANDROID__
         const char *dir = SDL_AndroidGetInternalStoragePath();
         char filename[1024];
@@ -1364,6 +1393,9 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
 #else
         env->g = game_load(level);
 #endif
+=======
+        env->g = game_load(level);
+>>>>>>> refs/remotes/origin/master
         create_level_text(win, ren, env);
         create_tents_text(win, ren, env);
         env->current_screen = GAME;
@@ -1381,6 +1413,7 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
         env->games = dlist_next(env->games);
         env->current_level++;
         char *level = dlist_data(env->games);
+<<<<<<< HEAD
 #ifdef __ANDROID__
         const char *dir = SDL_AndroidGetInternalStoragePath();
         char filename[1024];
@@ -1390,6 +1423,9 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
 #else
         env->g = game_load(level);
 #endif
+=======
+        env->g = game_load(level);
+>>>>>>> refs/remotes/origin/master
         create_level_text(win, ren, env);
         create_tents_text(win, ren, env);
         if (game_nb_cols(env->g) > env->max_game_cols_reached) {
@@ -1413,7 +1449,11 @@ bool process_game_over(SDL_Window *win, SDL_Renderer *ren, Env *env,
       }
     }
   }
+<<<<<<< HEAD
 #endif
+=======
+  #endif
+>>>>>>> refs/remotes/origin/master
   return false;
 }
 
