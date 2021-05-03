@@ -844,3 +844,50 @@ uint nb_possible_tent_placements_col(cgame g, uint j) {
   }
   return nb;
 }
+
+
+game game_random(uint nb_rows, uint nb_cols, bool wrapping, bool diagadj, uint nb_trees, bool with_solution) {
+  game g = game_new_empty_ext(nb_rows, nb_cols, wrapping, diagadj);
+  int num_tree = 0;
+  while (num_tree < nb_trees) {
+    uint i;
+    uint j;
+    uint itree, jtree;
+    int direction, di, dj;
+    bool pseudo_valid = false;
+    do {
+      pseudo_valid = true;
+      i = rand() % nb_rows;
+      j = rand() % nb_cols;
+      direction = rand() % 4;
+      int dx[] = {0, 0, 1, -1};
+      int dy[] = {1, -1, 0, 0};
+      di = dx[direction];
+      dj = dy[direction];
+      itree = i + di;
+      jtree = j + dj;
+      if (wrapping) {
+        itree = (itree + nb_rows) % nb_rows;
+        jtree = (jtree + nb_cols) % nb_cols;
+      }
+      pseudo_valid = pseudo_valid && (itree >= 0 && itree < nb_rows);
+      pseudo_valid = pseudo_valid && (jtree >= 0 && jtree < nb_cols);
+      pseudo_valid = pseudo_valid && game_get_square(g, i, j) == EMPTY;
+      pseudo_valid = pseudo_valid && game_get_square(g, itree, jtree) == EMPTY;
+    } while (!pseudo_valid);
+    game_set_square(g, i, j, TENT);
+    game_set_expected_nb_tents_row(g, i, game_get_expected_nb_tents_row(g, i) + 1);
+    game_set_expected_nb_tents_col(g, j, game_get_expected_nb_tents_col(g, j) + 1);
+    game_set_square(g, itree, jtree, TREE);
+    if (game_is_over(g)) {
+      num_tree++;
+    } else {
+      game_set_square(g, i, j, EMPTY);
+      game_set_expected_nb_tents_row(g, i, game_get_expected_nb_tents_row(g, i) - 1);
+      game_set_expected_nb_tents_col(g, j, game_get_expected_nb_tents_col(g, j) - 1);
+      game_set_square(g, itree, jtree, EMPTY);
+    }
+  }
+  if (!with_solution) game_restart(g);
+  return g;
+}

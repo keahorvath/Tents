@@ -52,6 +52,20 @@ bool game_solve(game g);
 uint game_nb_solutions(game g);
 
 /**
+ * @brief Generates a random game with the given attributes.
+ * @details The function will try to generate a game with @p nb_rows rows and @p
+ * nb_cols columns, and @p nb_trees trees.
+ * @param nb_rows the number of rows of the expected game.
+ * @param nb_cols the number of columns of the expected game.
+ * @param diagadj game option.
+ * @param wrapping game option.
+ * @param nb_trees the number of trees in the expected game.
+ * @param with_solution controls wether the returned game contains the solution
+ * or not.
+ * @return the new generated game
+ */
+game game_random(uint nb_rows, uint nb_cols, bool wrapping, bool diagadj, uint nb_trees, bool with_solution);
+/**
  * @}
  */
 
