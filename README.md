@@ -1,100 +1,14 @@
-# TESTS
+# Jeu "Tents"
+Jeu réalisé en collaboration avec Amira Mastouri, Alexandre Leymarie et Marvin Beites dans le cadre de l'UE Projet Technologique lors de ma deuxième année de licence (2020 - 2021).
 
-## **Alex Leymarie**
+## Au préalable
+Afin que le programme fonctionne, il faut d'abord installer la library SDL sur votre machine.
 
-    game_print
-    game_default
-    game_default_solution
-    game_new
-    game_new_empty
-    game_copy
+## Lancement du jeu
+Afin de lancer le jeu (sur Linux), placez-vous dans le dossier build et réalisez les instructions suivantes: 
 
-## **Kea Horvath**
-
-    game_play_move
-    game_check_move
-    game_is_over
-    game_fill_grass_row
-    game_fill_grass_col
-    game_restart
-    game_new_ext
-    game_new_empty_ext
-    game_load
-    game_save
-
-## **Marvin Beites**
-
-    game_get_expected_nb_tents_row
-    game_get_expected_nb_tents_col
-    game_get_expected_nb_tents_all
-    game_get_current_nb_tents_row
-    game_get_current_nb_tents_col
-    game_get_current_nb_tents_all
-    game_nb_rows
-    game_nb_cols
-    game_is_wrapping
-    game_is_diagadj
-
-## **Amira Mastouri**
-
-    game_equal
-    game_delete
-    game_set_square
-    game_get_square
-    game_set_expected_nb_tents_row
-    game_set_expected_nb_tents_col
-    game_undo
-    game_redo
-
-
-# FONCTIONS DE GAME.C
-
-## **Alex Leymarie**
-
-    game_new
-    game_new_empty
-    game_copy
-    game_equal
-    game_delete
-    game_new_ext
-    game_new_empty_ext
-    save et load dans game_text
-
-## **Kea Horvath**
-
-    game_play_move
-    game_check_move
-    game_fill_grass_row
-    game_fill_grass_col
-    game_restart
-    modifications des fonctions déjà existantes pour v2
-    make_array_of_all_adjacent_cells
-    make_array_of_ortho_adjacent_cells
-    test_pointer
-    test_i_value
-    test_j_value
-
-## **Marvin Beites**
-
-    game_get_expected_nb_tents_row
-    game_get_expected_nb_tents_col
-    game_get_expected_nb_tents_all
-    game_get_current_nb_tents_row
-    game_get_current_nb_tents_col
-    game_get_current_nb_tents_all
-    game_nb_rows
-    game_nb_cols
-    game_is_wrapping
-    game_is_diagadj
-    game_save
-
-## **Amira Mastouri**
-
-    game_set_square
-    game_get_square
-    game_set_expected_nb_tents_row
-    game_set_expected_nb_tents_col
-    game_is_over
-    game_undo
-    game_redo
-    game_load
+  ```sh
+  cmake ..
+  make
+  ./game_sdl
+  ```
